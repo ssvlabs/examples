@@ -1,0 +1,22 @@
+# Node.js dependencies
+node_modules/
+dist/
+build/
+*.log
+*.lock
+
+# Editor & OS-specific
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+
+*.swo
+*.swp
+
+coverage/
+.c8_output

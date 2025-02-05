@@ -1,0 +1,7 @@
+{
+    "all": true,
+    "include": ["{build,src}/**/*.{js,ts}"],
+    "exclude": ["{build,src}/**/test/**/*.{js,ts}", "{src}/**/*.d.ts"],
+    "reporter": ["text", "html"],
+    "tempDirectory": ".c8_output"
+  }
