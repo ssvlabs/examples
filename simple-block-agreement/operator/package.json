@@ -11,7 +11,8 @@
     "lint:fix": "eslint . --fix",
     "test": "npm run lint && npm run format:check",
     "format:check": "prettier --check 'src/**/*.{ts,js}'",
-    "format:write": "prettier --write 'src/**/*.{ts,js}'"
+    "format:write": "prettier --write 'src/**/*.{ts,js}'",
+    "start": "npm run build && node ./build/index.js"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
