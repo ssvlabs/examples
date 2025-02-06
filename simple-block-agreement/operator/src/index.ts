@@ -9,9 +9,7 @@ const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS || ''
 const EVENT_NAME = process.env.EVENT_NAME || ''
 
 // ABI: Minimal ABI required to listen for events (Replace with your contract's ABI)
-const CONTRACT_ABI = [
-  'event StrategyCreated(uint256 indexed strategyId, address indexed owner, uint32 fee)',
-]
+const CONTRACT_ABI = ['event StrategyCreated(uint256 indexed strategyId, address indexed owner, uint32 fee)']
 
 // Setup Provider
 const provider = new ethers.JsonRpcProvider(ALCHEMY_RPC_URL)
