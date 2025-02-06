@@ -36,7 +36,7 @@ describe('Single Process Implementation', () => {
         // Check no agreement has been reached yet
         for (const participantID of singleProcess['states'].keys()) {
             expect(singleProcess['states'].get(participantID)!.lastDecidedSlot).toBe(0);
-            expect(singleProcess['states'].get(participantID)!.lastDecidedHash).toBe(0);
+            expect(singleProcess['states'].get(participantID)!.lastDecidedHash).toBe("");
         }
 
         // Handle new block
