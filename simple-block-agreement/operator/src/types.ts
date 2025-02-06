@@ -1,7 +1,7 @@
 
 // ======================== BApp Chain Types ========================
 
-export type token = number;
+export type token = string;
 export type amount = number;
 export type percentage = number;
 
