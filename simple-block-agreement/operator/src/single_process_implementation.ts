@@ -1,12 +1,8 @@
 import { ParticipantState } from "./protocol";
-import { ParticipantFetcher, CryptoService } from './protocol_interfaces';
+import { ParticipantFetcher, Network, CryptoService } from './protocol_interfaces';
 import { Participant, SignedVote } from './types';
 
-interface Network {
-    broadcast(signedVote: SignedVote): Promise<void>;
-}
-
-class SingleProcessImplementation {
+export class SingleProcessImplementation {
     // Participants
     private privateKeys: Map<number, Uint8Array>;
     private states: Map<number, ParticipantState>;

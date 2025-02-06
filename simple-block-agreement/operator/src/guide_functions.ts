@@ -2,7 +2,7 @@
 import { address, amount, bAppAddress, percentage, strategyID, token } from "./types";
 
 // API from bApps Platform
-interface bAppsPlatformAPI {
+export interface bAppsPlatformAPI {
     GetbAppTokens(bApp: bAppAddress): Promise<Map<token, number>>;
     GetStrategies(): Promise<strategyID[]>;
     GetStrategyOwnerAccount(strategy: strategyID): Promise<address>;
@@ -14,17 +14,24 @@ interface bAppsPlatformAPI {
 }
 
 // API from Ethereum Node
-interface EthereumNodeAPI {
+export interface EthereumNodeAPI {
     GetValidatorBalance(pubKey: string): Promise<{ balance: number, isActive: boolean }>;
 }
 
 // API from SSV Node
-interface SSVNodeAPI {
+export interface SSVNodeAPI {
     GetValidatorsPubKeys(account: address): Promise<address[]>;
 }
 
+// Guide functions interface
+interface GuideFunctions {
+    fetchObligatedBalances(bApp: bAppAddress): Promise<Map<token, Map<strategyID, amount>>>;
+    fetchValidatorBalances(bApp: bAppAddress): Promise<Map<strategyID, amount>>;
+    fetchRisks(bApp: bAppAddress): Promise<Map<token, Map<strategyID, number>>>;
+}
+
 // BAppDataFetcher takes on the bApp platform, an Ethereum node, and an SSV node APIs and fetches relevant data
-export class BAppDataFetcher {
+export class BAppDataFetcher implements GuideFunctions {
     private bAppsPlatformAPI: bAppsPlatformAPI;
     private ethereumNodeAPI: EthereumNodeAPI;
     private ssvNodeAPI: SSVNodeAPI;
@@ -98,8 +105,9 @@ export class BAppDataFetcher {
         const delegators = await this.bAppsPlatformAPI.GetDelegatorsToAccount(account);
 
         // add the delegated balances
-        for (const [delegator, percentage] of Object.entries(delegators)) {
-            total += (await this.getOwnedValidatorBalance(delegator)) * percentage;
+        for (const [delegator, percentage] of delegators) {
+            const delegatorBalance = await this.getOwnedValidatorBalance(delegator)
+            total += delegatorBalance * percentage;
         }
 
         return total;
