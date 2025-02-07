@@ -1,55 +1,37 @@
-import { HarmonicWeightCalculator } from '../weight_calculator'
-import { token, strategyID, amount } from '../types'
+import { BApp, Strategy } from "../app_interface"
+import { HarmonicWeightCalculator } from "../weight_calculator"
+import { TestingBApp } from "./testingutils/app"
 
 describe('HarmonicWeightCalculator', () => {
-  let calculator: HarmonicWeightCalculator
-  let beta: Map<token, number>
-  let tokenSignificance: Map<token, number>
-  let validatorBalanceSignificance: number
 
-  beforeEach(() => {
-    beta = new Map<token, number>([['SSV', 2]])
-    tokenSignificance = new Map<token, number>([['SSV', 2 / 3]])
-    validatorBalanceSignificance = 1 / 3
-    calculator = new HarmonicWeightCalculator(beta, tokenSignificance, validatorBalanceSignificance)
-  })
+  beforeEach(() => {})
 
   it('SSV token and validator balance with 2 strategies', () => {
-    // const strategyTokenWeight = new Map<strategyID, Map<token, number>>([
-    //   [1, new Map<token, number>([['SSV', 0.2]])],
-    //   [2, new Map<token, number>([['SSV', 0.4]])],
-    // ])
-    // const strategyValidatorBalanceWeights = new Map<strategyID, number>([
-    //   [1, 0.5],
-    //   [2, 0.7],
-    //   [3, 0.6],
-    // ])
 
-    const obligatedBalances = new Map<token, Map<strategyID, amount>>([
-      [
-        'SSV',
-        new Map<strategyID, amount>([
-          [1, 50],
-          [2, 20],
-        ]),
-      ],
-    ])
-    const validatorBalances = new Map<strategyID, amount>([
-      [1, 32],
-      [2, 96],
-    ])
-    const risks = new Map<token, Map<strategyID, number>>([
-      [
-        'SSV',
-        new Map<strategyID, number>([
-          [1, 1.5],
-          [2, 1.0],
-        ]),
-      ],
-    ])
+    const bApp: BApp = TestingBApp
 
-    const participantsWeights = calculator.calculateParticipantsWeight(obligatedBalances, validatorBalances, risks)
-    expect(participantsWeights.get(1)).toBeCloseTo(0.387, 2)
-    expect(participantsWeights.get(2)).toBeCloseTo(0.613, 2)
+    const strategies: Strategy[] = [
+        {
+            id: 1,
+            owner: 'owner1',
+            privateKey: new Uint8Array([1, 2, 3, 4]),
+            token: [{ token: 'SSV', amount: 100, obligationPercentage: 0.5, risk: 1.5 }],
+            validatorBalance: 32,
+        },
+        {
+            id: 2,
+            owner: 'owner2',
+            privateKey: new Uint8Array([5, 6, 7, 8]),
+            token: [{ token: 'SSV', amount: 200, obligationPercentage: 0.1, risk: 1.0 }],
+            validatorBalance: 96,
+        },
+    ]
+
+    var calculator = new HarmonicWeightCalculator()
+
+    const weights = calculator.calculateParticipantsWeight(bApp, strategies)
+
+    expect(weights.get(1)).toBeCloseTo(0.387, 2)
+    expect(weights.get(2)).toBeCloseTo(0.613, 2)
   })
 })
