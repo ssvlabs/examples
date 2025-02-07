@@ -29,6 +29,11 @@ privateKeysMap.set(
   hexToUint8Array('228ffcb12deb17c72d7348415909290db647153c6b255c0b76628496d136b875'),
 )
 
+privateKeysMap.set(
+  '0xaa184b86b4cdb747f4a3bf6e6fcd5e27c1d92c5c',
+  hexToUint8Array('b21fb4ab30ecb815f0b836f75e8e27816494a80da81ce95be67028e916f48a90'),
+)
+
 type ValidatorBalance = {
   owner: string
   amount: number
