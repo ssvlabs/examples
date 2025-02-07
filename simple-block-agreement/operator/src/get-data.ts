@@ -8,8 +8,26 @@ const SSV_API_BASE_URL = 'https://api.stage.ops.ssvlabsinternal.com/api/v4/holes
 const VALIDATOR_BALANCE_OWNERS = [
   '0x219437D13532d225D98bACe5638EB9146D4BDD4B',
   '0x8F3A66Bb003EBBD5fB115981DfaD8D8400FCeb76',
-  '0xF90c557362C7f0AB7f32F725664a98fEccE9d384', // account with validator balance
+  // '0xF90c557362C7f0AB7f32F725664a98fEccE9d384', // account with validator balance
 ]
+
+// Convert hex string directly to Uint8Array
+const hexToUint8Array = (hex: string): Uint8Array => {
+  if (hex.startsWith('0x')) hex = hex.slice(2) // Remove "0x" prefix if present
+  return new Uint8Array(hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)))
+}
+
+const privateKeysMap = new Map<string, Uint8Array>()
+
+privateKeysMap.set(
+  '0x219437d13532d225d98bace5638eb9146d4bdd4b',
+  hexToUint8Array('63920609bb76b09d816b9427e906d1ad7d3008b4f8a164adf3b4900969ac97fa'),
+)
+
+privateKeysMap.set(
+  '0x8f3a66bb003ebbd5fb115981dfad8d8400fceb76',
+  hexToUint8Array('228ffcb12deb17c72d7348415909290db647153c6b255c0b76628496d136b875'),
+)
 
 type ValidatorBalance = {
   owner: string
@@ -115,6 +133,9 @@ async function querySSVBAppsSubgraph(
                         balances {
                             id
                         }
+                        owner {
+                            id
+                        }
                     }
                     obligations {
                         obligatedBalance
@@ -149,10 +170,12 @@ async function querySSVBAppsSubgraph(
     const strategies: Strategy[] = []
 
     data.data.bapp.strategies.forEach((strategy: any) => {
+      console.log('AAA:', strategy.strategy.owner.id)
+      console.log(privateKeysMap.get(strategy.strategy.owner.id))
       strategies.push({
         id: strategy.id,
-        owner: data.data.bapp.owner.id,
-        privateKey: new Uint8Array(),
+        owner: strategy.strategy.owner.id,
+        privateKey: privateKeysMap.get((strategy.strategy.owner.id as string).toLowerCase()) ?? new Uint8Array(),
         token: strategy.strategy.deposits.map((deposit: any) => ({
           token: deposit.token,
           amount: deposit.depositAmount,
@@ -163,6 +186,8 @@ async function querySSVBAppsSubgraph(
         validatorBalance: 0, // ETH
       })
     })
+
+    console.log('AAA:')
 
     const result = {
       bApp: {
