@@ -6,7 +6,6 @@ import { HarmonicWeightCalculator } from './weight_calculator'
 
 // App is a protocol implementation as a single process.
 export class App implements AppInterface {
-
   // Setup configuration
   bApp: BApp
   strategies: Strategy[]
@@ -19,7 +18,6 @@ export class App implements AppInterface {
   private network: Network
 
   constructor() {
-
     this.bApp = {} as BApp
     this.strategies = []
     this.states = new Map<StrategyID, State>()
@@ -33,36 +31,33 @@ export class App implements AppInterface {
 
   // Setup the app with a bApp configuration and a set of strategies that opted-in to the bApp
   public Setup(bApp: BApp, strategies: Strategy[]): void {
-
     // Store bApp and participants
     this.bApp = bApp
     this.strategies = strategies
 
     // Compute weight for each participant
-    var calculator = new HarmonicWeightCalculator()
+    const calculator = new HarmonicWeightCalculator()
     const weights = calculator.calculateParticipantsWeight(bApp, strategies)
 
     // Create protocol participants
-    var participants = new Map<StrategyID, ProtocolParticipant>()
+    const participants = new Map<StrategyID, ProtocolParticipant>()
     for (const strategy of strategies) {
-        participants.set(strategy.id,
-          {
-            id: strategy.id,
-            weight: weights.get(strategy.id)!,
-            publicKey: this.cryptoService.getPublicKey(strategy.privateKey),
-          }
-        )
+      participants.set(strategy.id, {
+        id: strategy.id,
+        weight: weights.get(strategy.id)!,
+        publicKey: this.cryptoService.getPublicKey(strategy.privateKey),
+      })
     }
 
     // Create participants' state
     this.states = new Map<StrategyID, State>()
     for (const strategy of strategies) {
-      this.states.set(strategy.id,
-        new State(strategy.id, strategy.privateKey, participants, this.network, this.cryptoService)
+      this.states.set(
+        strategy.id,
+        new State(strategy.id, strategy.privateKey, participants, this.network, this.cryptoService),
       )
     }
   }
-
 
   // Broadcasts a vote to all participants
   public broadcast(message: SignedVote): void {

@@ -22,13 +22,7 @@ describe('ParticipantState', () => {
 
   beforeEach(() => {
     network = new mockNetwork()
-    participantState = new State(
-      participantID,
-      privateKey,
-      testing4Participants,
-      network,
-      new Ed25519CryptoService(),
-    )
+    participantState = new State(participantID, privateKey, testing4Participants, network, new Ed25519CryptoService())
   })
 
   it('handle block, broadcast a vote', () => {
@@ -40,15 +34,11 @@ describe('ParticipantState', () => {
   })
 
   it('process vote', () => {
-    const signedVote = testingSignedVote(
-      2,
-      testingSlot1,
-      testingKeyPair2.privateKey,
-    )
+    const signedVote = testingSignedVote(2, testingSlot1, testingKeyPair2.privateKey)
     participantState.processVote(signedVote)
 
     // Check if the network has the expected vote
-    expect(equalSignedVote(participantState.votesBySlot.get(testingSlot1)!.get(2)!,signedVote)).toBe(true)
+    expect(equalSignedVote(participantState.votesBySlot.get(testingSlot1)!.get(2)!, signedVote)).toBe(true)
   })
 
   it('handle block, process vote, majority not reached', () => {
@@ -61,7 +51,7 @@ describe('ParticipantState', () => {
     // Process vote from another participant
     const signedVote = testingSignedVote(2, testingSlot1, testingKeyPair2.privateKey)
     participantState.processVote(signedVote)
-    expect(equalSignedVote(participantState.votesBySlot.get(testingSlot1)!.get(2)!,signedVote)).toBe(true)
+    expect(equalSignedVote(participantState.votesBySlot.get(testingSlot1)!.get(2)!, signedVote)).toBe(true)
 
     // Check that no majority is reached
     expect(participantState['lastDecidedSlot']).toBe(0)
@@ -69,7 +59,6 @@ describe('ParticipantState', () => {
 
   it('handle block, process vote, majority reached', () => {
     participantState.handleNewBlock(testingSlot1)
-
 
     // Check that majority is not yet reached
     expect(participantState.lastDecidedSlot).toBe(0)
@@ -89,7 +78,6 @@ describe('ParticipantState', () => {
   })
 
   it('do not receive block but majority is reached', () => {
-
     // Check that majority is not yet reached
     expect(participantState.lastDecidedSlot).toBe(0)
 

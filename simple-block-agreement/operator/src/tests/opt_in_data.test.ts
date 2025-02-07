@@ -40,7 +40,7 @@ describe('Opt-In Data Functions', () => {
     const invalidSignature = data.signature.split('').reverse().join('')
     const invalidOptInData = {
       pubkey: data.pubkey,
-      signature: invalidSignature
+      signature: invalidSignature,
     }
 
     // Verify the invalid opt-in data

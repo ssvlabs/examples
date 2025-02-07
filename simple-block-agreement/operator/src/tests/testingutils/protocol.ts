@@ -31,11 +31,7 @@ export const testing5Participants: Map<StrategyID, ProtocolParticipant> = new Ma
 ])
 
 // SignedVote
-export function testingSignedVote(
-  participantID: StrategyID,
-  slot: Slot,
-  privKey: Uint8Array,
-): SignedVote {
+export function testingSignedVote(participantID: StrategyID, slot: Slot, privKey: Uint8Array): SignedVote {
   const vote: Vote = { slot }
   const cryptoService = new Ed25519CryptoService()
   const signature = cryptoService.sign(vote, privKey)
@@ -53,9 +49,7 @@ export class mockNetwork implements Network {
 
 export function equalSignedVote(a: SignedVote, b: SignedVote): boolean {
   return (
-    a.participantID === b.participantID &&
-    isEqualUint8Array(a.signature, b.signature) &&
-    a.vote.slot === b.vote.slot
+    a.participantID === b.participantID && isEqualUint8Array(a.signature, b.signature) && a.vote.slot === b.vote.slot
   )
 }
 
