@@ -38,26 +38,24 @@ export class HarmonicWeightCalculator implements WeightCalculator {
     for (const bAppToken of this.bApp.token) {
       this.logToken(bAppToken.token, '🪙  Calculating token weights')
 
-      // Normalization factor
-      const normalizationFactor = this.calculateNormalizationFactor(bAppToken)
-
-      this.logToken(bAppToken.token, `📊  Normalization constant: ${normalizationFactor}`)
-
       // Total amount obligated to bApp
-      const totalBAppAmount = this.calculateTotalBAppAmount(bAppToken.token)
-
+      var totalBAppAmount = this.calculateTotalBAppAmount(bAppToken.token)
+      if (totalBAppAmount === 0) {
+        totalBAppAmount = 1
+      }
       this.logToken(bAppToken.token, `🗂️  Total amount obligated to bApp: ${totalBAppAmount}`)
 
+      // Calculate weights for each strategy
+      var weightSum: number = 0
       for (const strategy of this.strategies) {
-        // Calculate normalized weight for each strategy
         const strategyToken = getStrategyToken(strategy, bAppToken.token)
-        const weight = this.CalculateNormalizedWeightFormula(
+        const weight = this.CalculateWeightFormula(
           strategy.id,
           strategyToken,
           bAppToken,
           totalBAppAmount,
-          normalizationFactor,
         )
+        weightSum += weight
 
         // Store weight
         if (!tokenWeights.has(strategy.id)) {
@@ -65,24 +63,23 @@ export class HarmonicWeightCalculator implements WeightCalculator {
         }
         tokenWeights.get(strategy.id)!.set(bAppToken.token, weight)
       }
+
+      if (weightSum === 0) {
+        weightSum = 1
+      }
+      // Normalize weights
+      var normWeightsLog = `📊  Normalized weights: \n`
+      for (const strategy of this.strategies) {
+        const weight = tokenWeights.get(strategy.id)!.get(bAppToken.token)!
+        const normalizedWeight = (weight / weightSum)
+        tokenWeights.get(strategy.id)!.set(bAppToken.token, normalizedWeight)
+
+        normWeightsLog += `   - strategy ${strategy.id}: ${(100*normalizedWeight).toFixed(2)}%\n`
+      }
+      this.logToken(bAppToken.token, normWeightsLog)
     }
 
     return tokenWeights
-  }
-
-  // Calculate the normalization factor for a token
-  private calculateNormalizationFactor(bAppToken: BAppToken): number {
-    // Total amount obligated to bApp
-    const totalBAppAmount = this.calculateTotalBAppAmount(bAppToken.token)
-
-    let total = 0
-    for (const strategy of this.strategies) {
-      // Add strategy's weight
-      const strategyToken = getStrategyToken(strategy, bAppToken.token)
-      total += this.CalculateWeightFormula(strategy.id, strategyToken, bAppToken, totalBAppAmount)
-    }
-
-    return 1 / total
   }
 
   // Calculate the total amount obligated to the bApp for a token
@@ -99,7 +96,7 @@ export class HarmonicWeightCalculator implements WeightCalculator {
     return total
   }
 
-  // Calculate the unnormalized weight for a token for a strategy as in the formula
+  // Calculate the weight for a token for a strategy as in the formula
   private CalculateWeightFormula(
     strategyID: StrategyID,
     strategyToken: StrategyToken,
@@ -110,23 +107,8 @@ export class HarmonicWeightCalculator implements WeightCalculator {
     const obligationParticipation = obligation / totalBAppAmount
     const risk = strategyToken.risk
     const beta = bAppToken.sharedRiskLevel
-    return obligationParticipation * Math.exp(-beta * Math.max(1, risk))
-  }
 
-  // Calculate the weight for a token for a strategy as in the formula
-  private CalculateNormalizedWeightFormula(
-    strategyID: StrategyID,
-    strategyToken: StrategyToken,
-    bAppToken: BAppToken,
-    totalBAppAmount: number,
-    normalizationFactor: number,
-  ): number {
-    const obligation = strategyToken.obligationPercentage * strategyToken.amount
-    const obligationParticipation = obligation / totalBAppAmount
-    const risk = strategyToken.risk
-    const beta = bAppToken.sharedRiskLevel
-
-    const weight = normalizationFactor * obligationParticipation * Math.exp(-beta * Math.max(1, risk))
+    const weight = obligationParticipation * Math.exp(-beta * Math.max(1, risk))
 
     this.logTokenStrategy(
       bAppToken.token,
@@ -139,8 +121,7 @@ export class HarmonicWeightCalculator implements WeightCalculator {
   - Obligation participation (obligated balance / total bApp amount): ${obligationParticipation}
   - Risk: ${risk}
   - Beta: ${beta}
-  - Normalization factor: ${normalizationFactor}
-  - Weight (normalization factor * obligation participation * exp(-beta * max(1, risk))): ${weight}`,
+  - Weight (obligation participation * exp(-beta * max(1, risk))): ${weight}`,
     )
 
     return weight
@@ -153,7 +134,10 @@ export class HarmonicWeightCalculator implements WeightCalculator {
     const validatorBalanceWeights = new Map<StrategyID, number>()
 
     // Total validator balance for bApp
-    const totalValidatorBalance = this.calculateTotalValidatorBalance()
+    var totalValidatorBalance = this.calculateTotalValidatorBalance()
+    if (totalValidatorBalance === 0) {
+      totalValidatorBalance = 1
+    }
 
     this.logVB(`🗂️  Total VB amount in bApp: ${totalValidatorBalance}`)
 
@@ -167,7 +151,7 @@ export class HarmonicWeightCalculator implements WeightCalculator {
         `🧮 Calculating normalized weight:
   - Validator Balance: ${strategy.validatorBalance}
   - Total VB amount in bApp: ${totalValidatorBalance}
-  - Weight (validator balance / total amount): ${weight}`,
+  - Weight (validator balance / total amount): ${(100*weight).toFixed(2)}%`,
       )
     }
 
@@ -191,60 +175,57 @@ export class HarmonicWeightCalculator implements WeightCalculator {
   ): Map<StrategyID, number> {
     const finalWeights = new Map<StrategyID, number>()
 
-    // Normalization factor for final weight
-    const normalizationFactor = this.calculateFinalWeightNormalizationFactor(tokenWeights, validatorBalanceWeights)
-
-    this.logFinalWeight(`📊  Normalization constant: ${normalizationFactor}`)
-
+    var weightSum: number = 0
     for (const strategy of tokenWeights.keys()) {
       // Calculate final weight for strategy
       const tokenWeight = tokenWeights.get(strategy)!
       const validatorBalanceWeight = validatorBalanceWeights.get(strategy)!
 
-      finalWeights.set(
-        strategy,
-        this.calculateNormalizedHarmonicWeight(strategy, tokenWeight, validatorBalanceWeight, normalizationFactor),
-      )
+      const harmonicWeight = this.calculateHarmonicWeight(strategy, tokenWeight, validatorBalanceWeight)
+
+      finalWeights.set(strategy, harmonicWeight)
+
+      weightSum += harmonicWeight
     }
+
+    if (weightSum === 0) {
+      weightSum = 1
+    }
+
+    // Normalize weights
+    var normWeightsLog = `📊  Normalized final weights: \n`
+    for (const strategy of tokenWeights.keys()) {
+      const weight = finalWeights.get(strategy)!
+      const normalizedWeight = weight / weightSum
+      finalWeights.set(strategy, normalizedWeight)
+
+      normWeightsLog += `   - strategy ${strategy}: ${(100*normalizedWeight).toFixed(2)}%\n`
+    }
+    this.logFinalWeight(normWeightsLog)
 
     return finalWeights
   }
 
-  // Calculate the normalization factor for the final weight
-  private calculateFinalWeightNormalizationFactor(
-    tokenWeights: Map<StrategyID, Map<Token, number>>,
-    validatorBalanceWeights: Map<StrategyID, number>,
-  ): number {
-    let total = 0
-    for (const strategy of tokenWeights.keys()) {
-      // Sum harmonic weight for each strategy
-      const tokenWeight = tokenWeights.get(strategy)!
-      const validatorBalanceWeight = validatorBalanceWeights.get(strategy)!
-
-      total += this.calculateHarmonicWeight(tokenWeight, validatorBalanceWeight)
-    }
-
-    return 1 / total
-  }
-
   // Calculate the harmonic weight considering each token's (and validator balance) significance
-  private calculateHarmonicWeight(tokenWeights: Map<Token, number>, validatorBalanceWeight: number): number {
-    let harmonicMean = 0
-    for (const token of tokenWeights.keys()) {
-      const bAppToken = getBAppToken(this.bApp, token)
-      harmonicMean += bAppToken.significance / tokenWeights.get(token)!
-    }
-    harmonicMean += this.bApp.validatorBalanceSignificance / validatorBalanceWeight
-
-    return 1 / harmonicMean
-  }
-  // Calculate the harmonic weight considering each token's (and validator balance) significance
-  private calculateNormalizedHarmonicWeight(
+  private calculateHarmonicWeight(
     strategyID: StrategyID,
     tokenWeights: Map<Token, number>,
     validatorBalanceWeight: number,
-    normalizationFactor: number,
   ): number {
+
+    // Edge case: weigth is 0 for a token (or validator balance)
+    for (const [token, weight] of tokenWeights) {
+      const bAppToken = getBAppToken(this.bApp, token)
+      if (bAppToken.significance != 0 && weight == 0) {
+        this.logFinalWeightStrategy(strategyID, `⚠️  Token ${token} has significance but strategy's weight is 0. Final weight will be 0.`)
+        return 0
+      }
+    }
+    if (this.bApp.validatorBalanceSignificance != 0 && validatorBalanceWeight == 0) {
+      this.logFinalWeightStrategy(strategyID, `⚠️  Validator balance has significance but strategy's weight is 0. Final weight will be 0.`)
+      return 0
+    }
+
     let log: string = '🧮 Calculating normalized final weight:\n'
 
     let harmonicMean = 0
@@ -263,10 +244,8 @@ export class HarmonicWeightCalculator implements WeightCalculator {
     - Weight: ${validatorBalanceWeight}
     - Significance / Weight = ${this.bApp.validatorBalanceSignificance / validatorBalanceWeight}\n`
 
-    log += `  - Normalization factor: ${normalizationFactor}.\n`
-
-    harmonicMean = normalizationFactor * (1 / harmonicMean)
-    log += `  - Harmonic mean = (normalization factor * 1/(sum_t significance_t / weight_t)): ${harmonicMean}\n`
+    harmonicMean = 1 / harmonicMean
+    log += `  - Harmonic mean = (1/(sum_t significance_t / weight_t)): ${harmonicMean}\n`
 
     this.logFinalWeightStrategy(strategyID, log)
 
