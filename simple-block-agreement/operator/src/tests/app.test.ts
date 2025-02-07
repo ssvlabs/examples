@@ -4,13 +4,10 @@ import {
   testingKeyPair2,
   testingKeyPair3,
   testingKeyPair4,
-  testingKeyPair5,
   testingSlot1,
-  testingSlot2,
   testingSignedVote,
   equalSignedVote,
 } from './testingutils/protocol'
-import { Ed25519CryptoService } from '../protocol_interfaces'
 import { Testing4Strategies, TestingBApp } from './testingutils/app'
 import { SignedVote } from '../protocol_types'
 import { StrategyID } from '../app_interface'
@@ -23,7 +20,6 @@ describe('App', () => {
   })
 
   it('should handle a new block and broadcast votes', async () => {
-
     app.Setup(TestingBApp, Testing4Strategies)
 
     // Check that majority is not reached yet

@@ -56,7 +56,6 @@ export class State {
 
   // Processes a vote by storing it and checking if majority is reached for slot
   public processVote(signedVote: SignedVote): void {
-
     // Log vote
     const color = this.getColorForID(signedVote.participantID)
     this.log(
@@ -66,7 +65,7 @@ export class State {
     // Store vote
     const slot = signedVote.vote.slot
     if (!this.votesBySlot.has(slot)) {
-        this.votesBySlot.set(slot, new Map<StrategyID, SignedVote>())
+      this.votesBySlot.set(slot, new Map<StrategyID, SignedVote>())
     }
     this.votesBySlot.get(slot)!.set(signedVote.participantID, signedVote)
 
@@ -79,42 +78,40 @@ export class State {
         this.log(`❌ Majority not yet reached for slot: ${slot}`)
       }
     } else {
-        console.log(`⛓️ Vote is for old slot ${slot}. Current highest decided slot is ${this.lastDecidedSlot}`)
+      console.log(`⛓️ Vote is for old slot ${slot}. Current highest decided slot is ${this.lastDecidedSlot}`)
     }
   }
 
   // Checks if a set of votes has majority
   private hasMajority(signedVotes: Map<StrategyID, SignedVote>): boolean {
-
     // If no votes, return false
     if (signedVotes.size === 0) {
       return false
     }
 
     // Log searching for majority
-    const slot = signedVotes.values().next()!.value!.vote.slot;
+    const slot = signedVotes.values().next()!.value!.vote.slot
     this.log(`📄 Checking majority for slot ${slot}`)
 
     // If votes are invalid, return false
     if (!this.areValidVotes(signedVotes)) {
-        this.log(`❌ Invalid votes`)
-        return false
+      this.log(`❌ Invalid votes`)
+      return false
     }
 
     // Sum the weights of the participants who voted
     let collectionWeight = 0
-    var decompositionLog = ""
-    for (const [participantID,_] of signedVotes) {
+    let decompositionLog = ''
+    for (const [participantID] of signedVotes) {
+      // Add weight
+      const participantWeight = this.participants.get(participantID)!.weight
+      collectionWeight += participantWeight
 
-        // Add weight
-        const participantWeight = this.participants.get(participantID)!.weight
-        collectionWeight += participantWeight
-
-        // Add to log
-        if (decompositionLog.length > 0) {
-            decompositionLog += ` + `
-        }
-        decompositionLog += `${participantWeight} (from ${this.getColorForID(participantID)}P${participantID}${this.colorReset()})`
+      // Add to log
+      if (decompositionLog.length > 0) {
+        decompositionLog += ` + `
+      }
+      decompositionLog += `${participantWeight} (from ${this.getColorForID(participantID)}P${participantID}${this.colorReset()})`
     }
 
     // Log the total weight and decomposition
@@ -126,7 +123,6 @@ export class State {
 
   // Checks if a set of votes are valid (participants exist, no duplicate vote, valid signature)
   private areValidVotes(signedVotes: Map<StrategyID, SignedVote>): boolean {
-
     for (const [participantID, signedVote] of signedVotes) {
       // If participant is not in the list, return false
       const participant = this.participants.get(participantID)
@@ -135,7 +131,7 @@ export class State {
       }
 
       // If signature is invalid, return false
-      if (!(this.cryptoService.verify(signedVote.vote, signedVote.signature, participant.publicKey))) {
+      if (!this.cryptoService.verify(signedVote.vote, signedVote.signature, participant.publicKey)) {
         return false
       }
     }
