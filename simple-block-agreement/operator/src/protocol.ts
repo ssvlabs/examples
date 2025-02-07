@@ -59,7 +59,9 @@ export class State {
     // Log vote
     const color = this.getColorForID(signedVote.participantID)
     this.log(
-      `🗳️ Received vote from ${color}participant ${signedVote.participantID}${this.colorReset()} with slot ${signedVote.vote.slot}`,
+      `🗳️ Received vote from ${color}participant ${signedVote.participantID}${this.colorReset()} with slot ${
+        signedVote.vote.slot
+      }`,
     )
 
     // Store vote
@@ -111,7 +113,9 @@ export class State {
       if (decompositionLog.length > 0) {
         decompositionLog += ` + `
       }
-      decompositionLog += `${participantWeight} (from ${this.getColorForID(participantID)}P${participantID}${this.colorReset()})`
+      decompositionLog += `${participantWeight} (from ${this.getColorForID(
+        participantID,
+      )}P${participantID}${this.colorReset()})`
     }
 
     // Log the total weight and decomposition
