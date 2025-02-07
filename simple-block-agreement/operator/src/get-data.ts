@@ -112,10 +112,10 @@ export interface SSVValidator {
   isPublicKeyValid: boolean
   isSharesValid: boolean
   operators: string[]
-  createdAt: string // ISO 8601 timestamp
-  updatedAt: string // ISO 8601 timestamp
-  status: string // Could be "Inactive" or other statuses
-  validatorInfo: ValidatorInfo // Can be missing or null
+  createdAt: string
+  updatedAt: string
+  status: string
+  validatorInfo: ValidatorInfo
 }
 
 async function queryValidatorBalances(owners: string[]): Promise<ValidatorBalance[]> {

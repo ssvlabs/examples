@@ -34,6 +34,8 @@
 // another account (0xE014ad0eecd8053282eA37704F296Ae1F25bA12F) delegates to this owner 60%: https://holesky.etherscan.io/tx/0x62c9105228d7abe8dff8c3df05fa4d1eaea4fc3cdc0c0a51c910a291bdc2fd1f
 // opt in to bApp w/ SSV token and data 0xdc47786918f4462de09fe6d02537f216e80c9844dfd2eff66a15b89cf73c6ce7: https://holesky.etherscan.io/tx/0xcfc79574d195ce9acafab2f7f22b5b56e92110f6aea8a41188ae8ece380f6d9a
 // strategy token [SSV Devnet (0x68A8DDD7a59A900E0657e9f8bbE02B70c947f25F)]
+// approve Main contract to move SSV tokens: https://holesky.etherscan.io/tx/0x7c943d1452b42e079640f39bd33cdd8d03332ccc2227b5bc35c405d745e926c2
+// deposit owner 20 SSV: https://holesky.etherscan.io/tx/0xb4e209615fc72c08b18d3676f87f9df32c13c432289a03d33130ded520e6feca
 
 // STRATEGY 13
 // create strategy: https://holesky.etherscan.io/tx/0xc074872cd01c934b6cffca960ead46d8e772a37c9e06f4ad66ace62cc1377406
@@ -41,6 +43,8 @@
 // owner delegates 100% balance to himself: https://holesky.etherscan.io/tx/0x71e169eedbf178c9c24c2f8ef50040af3d0bd853fc2cba90af585892e62eb1c7
 // opt in to bApp w/ SSV token and data 0x02e86e4e71811735582785d4d161a2a0e85c77d40e9b200b63d940b7e9f78e6e: https://holesky.etherscan.io/tx/0x9917d7d0cf4fac3730b2aac12bfa233818e76612d307147314a901554e7e22b2
 // strategy token [SSV Devnet (0x68A8DDD7a59A900E0657e9f8bbE02B70c947f25F)]
+// approve Main Contract to move SSV tokens: https://holesky.etherscan.io/tx/0x90319748259140ee2fff0b4bcbb4125932c2219596f0fbc679fe4295fb27c38d
+// deposit owner 10 SSV: https://holesky.etherscan.io/tx/0x758d761e4b51b55b4ad1ab39d11dc48e35d3fbcde5b8345f77e7c7c849516f69
 
 export type StrategyID = number // Represents an identifier of a strategy
 export type Token = string // Represents a token address
