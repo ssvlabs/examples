@@ -9,5 +9,10 @@ export default [
   {languageOptions: { globals: globals.browser }},
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
+  {
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off"  // Disable the rule
+    }
+  },
   {ignores: ["node_modules", "build", "dist", "coverage", "**/build", "**/coverage", "jest.config.js", "**/jest.config.js"]},
 ];

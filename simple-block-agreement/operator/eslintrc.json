@@ -1,3 +1,7 @@
 {
-    "extends": "../../.eslint.config.mjs"
+    "extends": "../../.eslint.config.mjs",
+    "rules": {
+        "no-unused-expressions": "off",
+        "@typescript-eslint/no-explicit-any": "off"
+    }
 }

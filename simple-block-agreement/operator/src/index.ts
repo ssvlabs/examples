@@ -1,37 +1,20 @@
-import { ethers } from 'ethers'
 import dotenv from 'dotenv'
+import { App } from './app'
+import { getData } from './get-data'
 
 dotenv.config()
 
-// Load environment variables
-const ALCHEMY_RPC_URL = process.env.ALCHEMY_RPC_URL || ''
-const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS || ''
-const EVENT_NAME = process.env.EVENT_NAME || ''
-
-// ABI: Minimal ABI required to listen for events (Replace with your contract's ABI)
-const CONTRACT_ABI = ['event StrategyCreated(uint256 indexed strategyId, address indexed owner, uint32 fee)']
-
-// Setup Provider
-const provider = new ethers.JsonRpcProvider(ALCHEMY_RPC_URL)
-
-// Setup Contract
-const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider)
-
 // Listen for events
-const listenForEvents = async () => {
-  console.log(provider)
-  console.log(JSON.stringify(contract))
-  console.log(`🔍 Listening for ${EVENT_NAME} events on ${CONTRACT_ADDRESS}...`)
+const main = async () => {
+  const SSV_SIGNIFICANCE = 2
+  const VALIDATOR_BALANCE_SIGNIFICANCE = 1
+  const BAPP_ADDRESS = '0x89EF15BC1E7495e3dDdc0013C0d2B049d487b2fD'
 
-  contract.on(EVENT_NAME, (from, to, value, event) => {
-    console.log('reading event')
-    console.log(`📢 Event received: ${EVENT_NAME}`)
-    console.log(`From: ${from}`)
-    console.log(`To: ${to}`)
-    console.log(`Value: ${value.toString()}`)
-    console.log(`Transaction Hash: ${event.transactionHash}`)
-  })
+  const app = new App()
+  const { bApp, strategies, slot } = await getData(SSV_SIGNIFICANCE, VALIDATOR_BALANCE_SIGNIFICANCE, BAPP_ADDRESS)
+  app.Setup(bApp, strategies)
+  app.StartAgreement(slot)
 }
 
 // Start listening
-listenForEvents().catch(console.error)
+main().catch(console.error)
