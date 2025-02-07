@@ -17,6 +17,9 @@ where $c_{\text{final}}$ is a normalization constant computed as
 
 $$c_{\text{final}} = \left( \sum_{\text{strategy}} \frac{1}{\frac{2/3}{W_{\text{strategy, A}}} + \frac{1/3}{W_{\text{strategy, B}}}} \right)^{-1}$$
 
+
+The weight calculator can be found in [weight_calculator.ts](./../operator/src/weight_calculator.ts).
+
 ## Opt-in Data
 
 A strategy opting into the bApp must set the `data` field to the UTF-8 encoded JSON object:
@@ -35,4 +38,6 @@ where:
 - `SHA512` is the SHA-512 hash function.
 - `BAPP_ADDRESS` is the address of the bApp.
 - `PRIVKEY` if the strategy's ED25519 private key.
+
+The implementation of the `data` field can be found in [app.ts](./../operator/src/opt_in_data.ts).
 
