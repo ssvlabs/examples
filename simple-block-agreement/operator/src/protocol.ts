@@ -59,7 +59,8 @@ export class State {
   public processVote(signedVote: SignedVote): void {
     // Log vote
     const color = getColorForStrategy(signedVote.participantID)
-    logStrategy(this.id,
+    logStrategy(
+      this.id,
       `🗳️ Received vote from ${color}participant ${signedVote.participantID}${colorReset()} with slot ${
         signedVote.vote.slot
       }`,

@@ -1,5 +1,17 @@
 import { BApp, BAppToken, Strategy, StrategyID, StrategyToken, Token } from './app_interface'
-import { BLUE, GREEN, logFinalWeight, logFinalWeightStrategy, logToken, logTokenStrategy, logVB, logVBStrategy, RESET, TokenSymbol, YELLOW } from './logging'
+import {
+  BLUE,
+  GREEN,
+  logFinalWeight,
+  logFinalWeightStrategy,
+  logToken,
+  logTokenStrategy,
+  logVB,
+  logVBStrategy,
+  RESET,
+  TokenSymbol,
+  YELLOW,
+} from './logging'
 import { getBAppToken, getStrategyToken } from './util'
 
 // ==================== Weight Formula ====================
@@ -29,8 +41,8 @@ export function exponentialWeightFormula(
     bAppToken.token,
     strategyID,
     `🧮 Calculating weight (exponential formula):
-  - Obligation percentage: ${(100*strategyToken.obligationPercentage).toFixed(2)}%
-  - Balance: ${strategyToken.amount}
+  - Obligation percentage: ${(100 * strategyToken.obligationPercentage).toFixed(2)}%
+  - Balance: ${strategyToken.amount} SSV
   -> Obligated balance (obligation percentage * balance): ${obligation}
 
   - Total bApp amount: ${totalBAppAmount}
@@ -62,7 +74,7 @@ export function polynomialWeightFormula(
     bAppToken.token,
     strategyID,
     `🧮 Calculating weight (polynomial formula):
-  - Obligation percentage: ${(100*strategyToken.obligationPercentage).toFixed(2)}%
+  - Obligation percentage: ${(100 * strategyToken.obligationPercentage).toFixed(2)}%
   - Balance: ${strategyToken.amount}
   -> Obligated balance (obligation percentage * balance): ${obligation}
 

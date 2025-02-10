@@ -10,7 +10,7 @@ import {
   harmonicCombinationFunction,
   polynomialWeightFormula,
 } from './weight_calculator'
-import { ethers } from "ethers";
+import { ethers } from 'ethers'
 
 // App is a protocol implementation as a single process.
 export class App implements AppInterface {
@@ -88,7 +88,6 @@ export class App implements AppInterface {
 
   // Starts an agreement round on a slot number
   StartAgreement(slot: number): void {
-
     console.log(`🚀  ${YELLOW}Starting agreement for slot ${slot}${RESET}`)
 
     for (const state of this.states.values()) {
@@ -111,11 +110,12 @@ function sanitizeStrategies(strategies: Strategy[]): Strategy[] {
 }
 
 function weiToToken(weiAmount: number, decimals: number): number {
-  return Number(ethers.formatUnits(weiAmount, decimals));
+  return Number(ethers.formatUnits(weiAmount, decimals))
 }
 
 function tokenDecimals(token: string): number {
-  return 18;
+  if (token === '0x68A8DDD7a59A900E0657e9f8bbE02B70c947f25F') return 18
+  return 18
 }
 
 function sanitizeStrategyID(strategyID: number | string): number {
