@@ -17,3 +17,8 @@ export function getBAppToken(bApp: BApp, token: Token): BAppToken {
   }
   throw new Error(`Token ${token} not found in bApp ${bApp.address}`)
 }
+
+export const hexToUint8Array = (hex: string): Uint8Array => {
+  if (hex.startsWith('0x')) hex = hex.slice(2)
+  return new Uint8Array(hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)))
+}
