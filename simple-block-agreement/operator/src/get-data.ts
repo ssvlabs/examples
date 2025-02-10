@@ -170,13 +170,11 @@ async function querySSVBAppsSubgraph(
     const bodyText = await response.body.text()
     const data = JSON.parse(bodyText)
 
-    console.log('📊 SSV bApps Subgraph Data:', JSON.stringify(data))
+    // console.log('📊 SSV bApps Subgraph Data:', JSON.stringify(data))
 
     const strategies: Strategy[] = []
 
     data.data.bapp.strategies.forEach((strategy: any) => {
-      console.log('AAA:', strategy.strategy.owner.id)
-      console.log(privateKeysMap.get(strategy.strategy.owner.id))
       strategies.push({
         id: strategy.id,
         owner: strategy.strategy.owner.id,
@@ -192,8 +190,6 @@ async function querySSVBAppsSubgraph(
       })
     })
 
-    console.log('AAA:')
-
     const result = {
       bApp: {
         address: bAppAddress,
@@ -207,7 +203,7 @@ async function querySSVBAppsSubgraph(
       strategies,
     }
 
-    console.log('🔹 BApp and Strategies:', JSON.stringify(result, null, 2))
+    // console.log('🔹 BApp and Strategies:', JSON.stringify(result, null, 2))
 
     return result
   } catch (error) {
@@ -251,7 +247,7 @@ async function queryDelegations(bAppAddress: string): Promise<Delegation[]> {
     const bodyText = await response.body.text()
     const data = JSON.parse(bodyText)
 
-    console.log('📊 SSV bApps Subgraph Data:', JSON.stringify(data))
+    // console.log('📊 SSV bApps Subgraph Data:', JSON.stringify(data))
 
     const delegations: Delegation[] = []
 
@@ -265,7 +261,7 @@ async function queryDelegations(bAppAddress: string): Promise<Delegation[]> {
       })
     })
 
-    console.log('🔹 Delegations:', JSON.stringify(delegations, null, 2))
+    // console.log('🔹 Delegations:', JSON.stringify(delegations, null, 2))
 
     return delegations
   } catch (error) {
@@ -317,7 +313,7 @@ export async function getData(
   const { bApp, strategies } = await querySSVBAppsSubgraph(bAppAddress, ssvSignificance, validatorBalanceSignificance)
   const delegations = await queryDelegations(bAppAddress)
   const result = await queryValidatorBalances(VALIDATOR_BALANCE_OWNERS)
-  console.log('🔹 Validator Balances:', JSON.stringify(result, null, 2))
+  // console.log('🔹 Validator Balances:', JSON.stringify(result, null, 2))
   delegations.forEach((delegation) => {
     const strategy = strategies.find((strategy) => strategy.owner === delegation.owner)
     if (strategy) {
@@ -330,5 +326,3 @@ export async function getData(
     slot: slot ?? 0,
   }
 }
-
-getData(2, 3, '0x89EF15BC1E7495e3dDdc0013C0d2B049d487b2fD').catch(console.error)
