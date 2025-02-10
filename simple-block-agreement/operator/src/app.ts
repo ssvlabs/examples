@@ -1,4 +1,5 @@
 import { AppInterface, BApp, Strategy, StrategyID } from './app_interface'
+import { RESET, YELLOW } from './logging'
 import { State } from './protocol'
 import { Network, CryptoService, Ed25519CryptoService } from './protocol_interfaces'
 import { ProtocolParticipant, SignedVote } from './protocol_types'
@@ -9,6 +10,7 @@ import {
   harmonicCombinationFunction,
   polynomialWeightFormula,
 } from './weight_calculator'
+import { ethers } from "ethers";
 
 // App is a protocol implementation as a single process.
 export class App implements AppInterface {
@@ -45,6 +47,8 @@ export class App implements AppInterface {
     // Store bApp and participants
     this.bApp = bApp
     this.strategies = sanitizeStrategies(strategies)
+
+    console.log(`🚀  ${YELLOW}Starting weight calculations for ${this.strategies.length} strategies${RESET}`)
 
     // Set weight and combination functions
     const weightFunction = useExponentialWeight ? exponentialWeightFormula : polynomialWeightFormula
@@ -84,17 +88,34 @@ export class App implements AppInterface {
 
   // Starts an agreement round on a slot number
   StartAgreement(slot: number): void {
+
+    console.log(`🚀  ${YELLOW}Starting agreement for slot ${slot}${RESET}`)
+
     for (const state of this.states.values()) {
       state.handleNewBlock(slot)
     }
   }
 }
 
+// ========================= Input sanitization =========================
+
 function sanitizeStrategies(strategies: Strategy[]): Strategy[] {
   for (const strategy of strategies) {
     strategy.id = sanitizeStrategyID(strategy.id)
+    for (const token of strategy.token) {
+      token.obligationPercentage /= 10000
+      token.amount = weiToToken(token.amount, tokenDecimals(token.token))
+    }
   }
   return strategies
+}
+
+function weiToToken(weiAmount: number, decimals: number): number {
+  return Number(ethers.formatUnits(weiAmount, decimals));
+}
+
+function tokenDecimals(token: string): number {
+  return 18;
 }
 
 function sanitizeStrategyID(strategyID: number | string): number {

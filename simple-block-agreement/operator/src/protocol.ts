@@ -1,6 +1,7 @@
 import { ProtocolParticipant, Vote, SignedVote, Slot } from './protocol_types'
 import { CryptoService, Network } from './protocol_interfaces'
 import { StrategyID } from './app_interface'
+import { colorReset, getColorForStrategy, logStrategy } from './logging'
 
 // Participant State
 export class State {
@@ -39,7 +40,7 @@ export class State {
 
   // Handles a new Ethereum block by creating a vote and broadcasting it
   public handleNewBlock(slot: Slot): void {
-    this.log(`📦 Handling new block with slot ${slot}.`)
+    logStrategy(this.id, `📦 Handling new block with slot ${slot}.`)
 
     const vote: Vote = { slot }
     const signature = this.cryptoService.sign(vote, this.privateKey)
@@ -50,16 +51,16 @@ export class State {
       vote: vote,
     }
 
-    this.log(`📤 Broadcasting vote`)
+    logStrategy(this.id, `📤 Broadcasting vote`)
     this.network.broadcast(signedVote)
   }
 
   // Processes a vote by storing it and checking if majority is reached for slot
   public processVote(signedVote: SignedVote): void {
     // Log vote
-    const color = this.getColorForID(signedVote.participantID)
-    this.log(
-      `🗳️ Received vote from ${color}participant ${signedVote.participantID}${this.colorReset()} with slot ${
+    const color = getColorForStrategy(signedVote.participantID)
+    logStrategy(this.id,
+      `🗳️ Received vote from ${color}participant ${signedVote.participantID}${colorReset()} with slot ${
         signedVote.vote.slot
       }`,
     )
@@ -74,10 +75,10 @@ export class State {
     // If slot is greater than last decided slot, search for majority
     if (slot > this.lastDecidedSlot) {
       if (this.hasMajority(this.votesBySlot.get(slot)!)) {
-        this.log(`✅ Majority found for slot: ${slot}. Updating last decided slot.`)
+        logStrategy(this.id, `✅ Majority found for slot: ${slot}. Updating last decided slot.`)
         this.lastDecidedSlot = slot
       } else {
-        this.log(`❌ Majority not yet reached for slot: ${slot}`)
+        logStrategy(this.id, `❌ Majority not yet reached for slot: ${slot}`)
       }
     } else {
       console.log(`⛓️ Vote is for old slot ${slot}. Current highest decided slot is ${this.lastDecidedSlot}`)
@@ -93,11 +94,11 @@ export class State {
 
     // Log searching for majority
     const slot = signedVotes.values().next()!.value!.vote.slot
-    this.log(`📄 Checking majority for slot ${slot}`)
+    logStrategy(this.id, `📄 Checking majority for slot ${slot}`)
 
     // If votes are invalid, return false
     if (!this.areValidVotes(signedVotes)) {
-      this.log(`❌ Invalid votes`)
+      logStrategy(this.id, `❌ Invalid votes`)
       return false
     }
 
@@ -113,13 +114,13 @@ export class State {
       if (decompositionLog.length > 0) {
         decompositionLog += ` + `
       }
-      decompositionLog += `${(100 * participantWeight).toFixed(2)}% (from ${this.getColorForID(
+      decompositionLog += `${(100 * participantWeight).toFixed(2)}% (from ${getColorForStrategy(
         participantID,
-      )}P${participantID}${this.colorReset()})`
+      )}P${participantID}${colorReset()})`
     }
 
     // Log the total weight and decomposition
-    this.log(`🔢 Total weight: ${(100 * collectionWeight).toFixed(2)}%. Decomposition: ${decompositionLog}`)
+    logStrategy(this.id, `🔢 Total weight: ${(100 * collectionWeight).toFixed(2)}%. Decomposition: ${decompositionLog}`)
 
     // Returns true if weight is above 66%
     return collectionWeight >= 0.66
@@ -141,22 +142,5 @@ export class State {
     }
 
     return true
-  }
-
-  // Logger function with colored Participant ID
-  private log(message: string): void {
-    const color = this.getColorForID(this.id)
-    console.log(`${color}[Participant ${this.id}] ${this.colorReset()} ${message}`)
-  }
-
-  // Auxiliary function for logging to get a specific color based on the participant ID
-  private getColorForID(id: number): string {
-    const colors = ['\x1b[31m', '\x1b[32m', '\x1b[33m', '\x1b[34m', '\x1b[35m', '\x1b[36m']
-    return colors[id % colors.length]
-  }
-
-  // Auxiliary function for logging to reset color
-  private colorReset(): string {
-    return '\x1b[0m'
   }
 }

@@ -17,6 +17,7 @@
   "dependencies": {
     "@noble/curves": "^1.8.1",
     "@noble/hashes": "^1.7.1",
+    "ethers": "^6.13.5",
     "undici": "^7.3.0"
   },
   "devDependencies": {
