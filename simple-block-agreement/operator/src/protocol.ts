@@ -113,13 +113,13 @@ export class State {
       if (decompositionLog.length > 0) {
         decompositionLog += ` + `
       }
-      decompositionLog += `${(100*participantWeight).toFixed(2)}% (from ${this.getColorForID(
+      decompositionLog += `${(100 * participantWeight).toFixed(2)}% (from ${this.getColorForID(
         participantID,
       )}P${participantID}${this.colorReset()})`
     }
 
     // Log the total weight and decomposition
-    this.log(`🔢 Total weight: ${(100*collectionWeight).toFixed(2)}%. Decomposition: ${decompositionLog}`)
+    this.log(`🔢 Total weight: ${(100 * collectionWeight).toFixed(2)}%. Decomposition: ${decompositionLog}`)
 
     // Returns true if weight is above 66%
     return collectionWeight >= 0.66

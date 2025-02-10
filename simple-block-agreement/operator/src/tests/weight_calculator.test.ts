@@ -1,5 +1,11 @@
 import { BApp, Strategy } from '../app_interface'
-import { arithmeticCombinationFunction, calculateParticipantsWeight, exponentialWeightFormula, harmonicCombinationFunction, polynomialWeightFormula } from '../weight_calculator'
+import {
+  arithmeticCombinationFunction,
+  calculateParticipantsWeight,
+  exponentialWeightFormula,
+  harmonicCombinationFunction,
+  polynomialWeightFormula,
+} from '../weight_calculator'
 import { TestingBApp } from './testingutils/app'
 describe('HarmonicWeightCalculator', () => {
   let bApp: BApp
@@ -34,7 +40,12 @@ describe('HarmonicWeightCalculator', () => {
   })
 
   it('SSV token and validator balance with 2 strategies - polynomial weight and arithmetic combination', () => {
-    const weights = calculateParticipantsWeight(bApp, strategies, polynomialWeightFormula, arithmeticCombinationFunction)
+    const weights = calculateParticipantsWeight(
+      bApp,
+      strategies,
+      polynomialWeightFormula,
+      arithmeticCombinationFunction,
+    )
 
     expect(weights.get(1)).toBeCloseTo(0.4342, 2)
     expect(weights.get(2)).toBeCloseTo(0.5658, 2)
