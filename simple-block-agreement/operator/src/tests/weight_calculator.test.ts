@@ -1,14 +1,14 @@
 import { BApp, Strategy } from '../app_interface'
-import { HarmonicWeightCalculator } from '../weight_calculator'
+import { arithmeticCombinationFunction, calculateParticipantsWeight, exponentialWeightFormula, harmonicCombinationFunction, polynomialWeightFormula } from '../weight_calculator'
 import { TestingBApp } from './testingutils/app'
-
 describe('HarmonicWeightCalculator', () => {
-  beforeEach(() => {})
+  let bApp: BApp
+  let strategies: Strategy[]
 
-  it('SSV token and validator balance with 2 strategies', () => {
-    const bApp: BApp = TestingBApp
+  beforeEach(() => {
+    bApp = TestingBApp
 
-    const strategies: Strategy[] = [
+    strategies = [
       {
         id: 1,
         owner: 'owner1',
@@ -24,12 +24,19 @@ describe('HarmonicWeightCalculator', () => {
         validatorBalance: 96,
       },
     ]
+  })
 
-    const calculator = new HarmonicWeightCalculator()
-
-    const weights = calculator.calculateParticipantsWeight(bApp, strategies)
+  it('SSV token and validator balance with 2 strategies - exponential weight and harmonic combination', () => {
+    const weights = calculateParticipantsWeight(bApp, strategies, exponentialWeightFormula, harmonicCombinationFunction)
 
     expect(weights.get(1)).toBeCloseTo(0.387, 2)
     expect(weights.get(2)).toBeCloseTo(0.613, 2)
+  })
+
+  it('SSV token and validator balance with 2 strategies - polynomial weight and arithmetic combination', () => {
+    const weights = calculateParticipantsWeight(bApp, strategies, polynomialWeightFormula, arithmeticCombinationFunction)
+
+    expect(weights.get(1)).toBeCloseTo(0.4342, 2)
+    expect(weights.get(2)).toBeCloseTo(0.5658, 2)
   })
 })

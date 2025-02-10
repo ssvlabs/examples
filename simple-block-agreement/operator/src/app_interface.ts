@@ -99,7 +99,9 @@ export type BApp = {
 
 export interface AppInterface {
   // Setup the app with a bApp configuration and a set of strategies that opted-in to the bApp
-  Setup(bApp: BApp, strategies: Strategy[]): void
+  // Also, define if the exponential weight will be used (otherwise polynomial)
+  // and if the harmonic combination function will be used (otherwise arithmetic)
+  Setup(bApp: BApp, strategies: Strategy[], useExponentialWeight: boolean, useHarmonicCombinationFunction: boolean): void
 
   // Starts an agreement round on a slot number
   StartAgreement(slot: number): void

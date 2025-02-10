@@ -20,7 +20,7 @@ describe('App', () => {
   })
 
   it('should handle a new block and broadcast votes', async () => {
-    app.Setup(TestingBApp, Testing4Strategies)
+    app.Setup(TestingBApp, Testing4Strategies, true, true)
 
     // Check that majority is not reached yet
     for (const participantID of app['states'].keys()) {

@@ -8,7 +8,7 @@ const main = async () => {
 
   const app = new App()
   const { bApp, strategies, slot } = await getData(SSV_SIGNIFICANCE, VALIDATOR_BALANCE_SIGNIFICANCE, BAPP_ADDRESS)
-  app.Setup(bApp, strategies)
+  app.Setup(bApp, strategies, false, false)
   app.StartAgreement(slot)
 }
 

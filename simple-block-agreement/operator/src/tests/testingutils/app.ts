@@ -4,8 +4,8 @@ import { testingKeyPair1, testingKeyPair2, testingKeyPair3, testingKeyPair4 } fr
 // BApp
 export const TestingBApp: BApp = {
   address: 'SimpleBlockAgreement',
-  token: [{ token: 'SSV', sharedRiskLevel: 2, significance: 2 / 3 }],
-  validatorBalanceSignificance: 1 / 3,
+  token: [{ token: 'SSV', sharedRiskLevel: 2, significance: 2 }],
+  validatorBalanceSignificance: 1,
 }
 
 // Strategies
