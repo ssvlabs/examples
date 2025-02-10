@@ -5,6 +5,7 @@ import { hexToUint8Array } from './util'
 const BEACONCHAIN_API = 'https://beaconcha.in/api/v1/block/latest'
 const THE_GRAPH_API = 'https://api.studio.thegraph.com/query/53804/ssv-bapps-subgraph/version/latest'
 const SSV_API_BASE_URL = 'https://api.stage.ops.ssvlabsinternal.com/api/v4/holesky/validators/explorer'
+// const SSV_API_BASE_URL = 'https://api.stage.ops.ssvlabsinternal.com/api/v4/holesky/clusters/owner/0xB0343BB9fc6Fe61438E5772200FB41807c84ffC0?page=1&perPage=10'
 
 const VALIDATOR_BALANCE_OWNERS = [
   '0x219437D13532d225D98bACe5638EB9146D4BDD4B',
@@ -310,7 +311,7 @@ export async function getData(
   delegations.forEach((delegation) => {
     const strategy = strategies.find((strategy) => strategy.owner === delegation.owner)
     if (strategy) {
-      strategy.validatorBalance = validatorBalances.find((balance) => balance.owner === strategy.owner)?.amount ?? 0
+      strategy.validatorBalance = validatorBalances.find((balance) => balance.owner === strategy.owner)?.amount ?? 32
     }
   })
   return {
