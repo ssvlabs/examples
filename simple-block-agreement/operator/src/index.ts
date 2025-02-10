@@ -1,8 +1,5 @@
-import dotenv from 'dotenv'
 import { App } from './app'
 import { getData } from './get-data'
-
-dotenv.config()
 
 // Listen for events
 const main = async () => {
