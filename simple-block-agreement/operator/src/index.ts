@@ -1,7 +1,6 @@
 import { App } from './app'
 import { getData } from './get-data'
 
-// Listen for events
 const main = async () => {
   const SSV_SIGNIFICANCE = 2
   const VALIDATOR_BALANCE_SIGNIFICANCE = 1
@@ -13,5 +12,4 @@ const main = async () => {
   app.StartAgreement(slot)
 }
 
-// Start listening
 main().catch(console.error)

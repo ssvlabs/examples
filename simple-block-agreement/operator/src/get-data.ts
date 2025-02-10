@@ -11,6 +11,21 @@ const VALIDATOR_BALANCE_OWNERS = [
   '0x8F3A66Bb003EBBD5fB115981DfaD8D8400FCeb76',
 ]
 
+const privateKeysMap = new Map<string, Uint8Array>([
+  [
+    '0x219437d13532d225d98bace5638eb9146d4bdd4b',
+    hexToUint8Array('63920609bb76b09d816b9427e906d1ad7d3008b4f8a164adf3b4900969ac97fa'),
+  ],
+  [
+    '0x8f3a66bb003ebbd5fb115981dfad8d8400fceb76',
+    hexToUint8Array('228ffcb12deb17c72d7348415909290db647153c6b255c0b76628496d136b875'),
+  ],
+  [
+    '0xaa184b86b4cdb747f4a3bf6e6fcd5e27c1d92c5c',
+    hexToUint8Array('b21fb4ab30ecb815f0b836f75e8e27816494a80da81ce95be67028e916f48a90'),
+  ],
+])
+
 type ValidatorBalance = {
   owner: string
   amount: number
@@ -78,12 +93,14 @@ interface SubgraphResponse {
   strategies: Strategy[]
 }
 
-async function queryLatestSlotAndBlock(): Promise<number | undefined> {
+async function queryLatestSlotAndBlock(): Promise<number> {
   try {
     const { body } = await request(BEACONCHAIN_API)
 
     const bodyText = await body.text()
     const response = JSON.parse(bodyText)
+
+    if (!response?.data) throw new Error('Invalid response structure from Beaconchain API')
 
     const latestEpoch = response.data.epoch
     const latestSlot = response.data.slot
@@ -105,22 +122,6 @@ async function querySSVBAppsSubgraph(
   ssvSignificance: number,
   validatorBalanceSignificance: number,
 ): Promise<SubgraphResponse> {
-  const privateKeysMap = new Map<string, Uint8Array>()
-
-  privateKeysMap.set(
-    '0x219437d13532d225d98bace5638eb9146d4bdd4b',
-    hexToUint8Array('63920609bb76b09d816b9427e906d1ad7d3008b4f8a164adf3b4900969ac97fa'),
-  )
-
-  privateKeysMap.set(
-    '0x8f3a66bb003ebbd5fb115981dfad8d8400fceb76',
-    hexToUint8Array('228ffcb12deb17c72d7348415909290db647153c6b255c0b76628496d136b875'),
-  )
-
-  privateKeysMap.set(
-    '0xaa184b86b4cdb747f4a3bf6e6fcd5e27c1d92c5c',
-    hexToUint8Array('b21fb4ab30ecb815f0b836f75e8e27816494a80da81ce95be67028e916f48a90'),
-  )
   try {
     const query = {
       query: `
@@ -168,6 +169,8 @@ async function querySSVBAppsSubgraph(
     const bodyText = await response.body.text()
     const data = JSON.parse(bodyText)
 
+    if (!data?.data?.bapp) throw new Error('No BApp data returned from The Graph')
+
     // console.log('📊 SSV bApps Subgraph Data:', JSON.stringify(data))
 
     const strategies: Strategy[] = []
@@ -188,7 +191,7 @@ async function querySSVBAppsSubgraph(
       })
     })
 
-    const result = {
+    return {
       bApp: {
         address: bAppAddress,
         token: data.data.bapp.bAppTokens.map((token: any) => ({
@@ -200,10 +203,6 @@ async function querySSVBAppsSubgraph(
       },
       strategies,
     }
-
-    // console.log('🔹 BApp and Strategies:', JSON.stringify(result, null, 2))
-
-    return result
   } catch (error) {
     console.error('❌ Error querying The Graph:', error)
     return {
@@ -271,6 +270,7 @@ async function queryDelegations(bAppAddress: string): Promise<Delegation[]> {
 async function queryValidatorBalances(owners: string[]): Promise<ValidatorBalance[]> {
   try {
     const { body } = await request(SSV_API_BASE_URL)
+
     const bodyText = await body.text()
     const data = JSON.parse(bodyText)
 
@@ -288,9 +288,6 @@ async function queryValidatorBalances(owners: string[]): Promise<ValidatorBalanc
         amount: totalBalance,
       })
     })
-
-    // console.log('🔹 Validator Balances:', JSON.stringify(result, null, 2))
-
     return result
   } catch (error) {
     console.error('❌ Error querying SSV API:', error)
@@ -305,8 +302,11 @@ export async function getData(
 ): Promise<ReturnData> {
   const slot = await queryLatestSlotAndBlock()
   const { bApp, strategies } = await querySSVBAppsSubgraph(bAppAddress, ssvSignificance, validatorBalanceSignificance)
+  // console.log('🔹 BApp:', JSON.stringify(bApp, null, 2))
+  // console.log('🔹 Strategies:', JSON.stringify(strategies, null, 2))
   const delegations = await queryDelegations(bAppAddress)
   const validatorBalances = await queryValidatorBalances(VALIDATOR_BALANCE_OWNERS)
+  // console.log('🔹 Validator Balances:', JSON.stringify(validatorBalances, null, 2))
   delegations.forEach((delegation) => {
     const strategy = strategies.find((strategy) => strategy.owner === delegation.owner)
     if (strategy) {
