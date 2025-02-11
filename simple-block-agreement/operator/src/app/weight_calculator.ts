@@ -5,12 +5,13 @@ import {
   GREEN,
   logFinalWeightStrategy,
   logNormalizedFinalWeights,
+  logStrategyTokenWeights,
   logToken,
   logTokenStrategy,
+  logValidatorBalanceTable,
   logVB,
   logVBStrategy,
   RESET,
-  YELLOW,
 } from './logging'
 import { getBAppToken, getStrategyToken } from './util'
 
@@ -299,15 +300,12 @@ function calculateTokenWeights(
       weightSum = 1
     }
     // Normalize weights
-    let normWeightsLog = `📊  Normalized weights: \n`
     for (const strategy of strategies) {
       const weight = tokenWeights.get(strategy.id)!.get(bAppToken.address)!
       const normalizedWeight = weight / weightSum
       tokenWeights.get(strategy.id)!.set(bAppToken.address, normalizedWeight)
-
-      normWeightsLog += `   - strategy ${strategy.id}: ${YELLOW}${(100 * normalizedWeight).toFixed(2)}%${RESET}\n`
     }
-    logToken(bAppToken.address, normWeightsLog)
+    logStrategyTokenWeights(bAppToken.address.toLowerCase(), tokenWeights)
   }
 
   return tokenWeights
@@ -356,6 +354,8 @@ function calculateValidatorBalanceWeights(strategies: Strategy[]): Map<StrategyI
   - Weight (validator balance / total amount): ${GREEN}${(100 * weight).toFixed(2)}%${RESET}`,
     )
   }
+
+  logValidatorBalanceTable(strategies)
 
   return validatorBalanceWeights
 }

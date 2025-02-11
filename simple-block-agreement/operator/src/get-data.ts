@@ -6,7 +6,7 @@ import { config } from './config'
 
 import type { BApp, Strategy } from './app/app_interface'
 import type { BAppToken, Owner, ResponseData } from './types/ssv-graphql'
-import { logBAppSummary, logTokenWeightSummary, logValidatorBalanceTable } from './app/logging'
+import { logBAppSummary, logTokenWeightSummary } from './app/logging'
 
 dotenv.config()
 
@@ -139,6 +139,8 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
       validatorBalanceSignificance: config.validatorBalanceSignificance,
     }
 
+    logBAppSummary(bApp, strategies)
+
     bApp.tokens.forEach((token) => {
       logTokenWeightSummary(token.address, token.sharedRiskLevel, strategies)
     })
@@ -159,16 +161,8 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
 export async function getData(bAppAddress: string): Promise<ReturnData> {
   const slot = await queryLatestSlot()
   const { bApp, strategies } = await querySubgraph(bAppAddress)
-
-  if (bApp.tokens.length > 0) {
-    bApp.tokens[0].significance = config.tokens[1].significance
-  }
-
   //console.log('🔹 BApp:', JSON.stringify(bApp, null, 2))
   //console.log('🔹 Strategies:', JSON.stringify(strategies, null, 2))
-
-  logBAppSummary(bApp, strategies)
-  logValidatorBalanceTable(strategies)
 
   return { bApp, strategies, slot }
 }

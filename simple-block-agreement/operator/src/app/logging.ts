@@ -97,9 +97,8 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
       { name: 'Obligated Balance', alignment: 'right', color: 'yellow' },
       { name: 'Risk', alignment: 'right', color: 'magenta' },
       { name: 'Weight', alignment: 'right', color: 'red' },
-      { name: 'Normalized Weight', alignment: 'right', color: 'yellow' },
     ],
-    title: `💲 Token Weight Summary for ${tokenSymbol}`,
+    title: `💲 BApp Token Weight Summary for ${tokenSymbol}`,
   })
 
   const totalObligatedBalance = strategies.reduce((acc, s) => {
@@ -107,22 +106,11 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
     return acc + (strategyToken ? strategyToken.amount * strategyToken.obligationPercentage : 0)
   }, 0)
 
-  let totalWeight = 0
   strategies.forEach((strategy) => {
     const strategyToken = strategy.tokens.find((t: StrategyToken) => t.address === tokenAddress)
     if (!strategyToken) return
 
-    const obligatedBalance = strategyToken.amount * strategyToken.obligationPercentage
-    const obligationParticipation = totalObligatedBalance > 0 ? obligatedBalance / totalObligatedBalance : 0
-    const weight = obligationParticipation / Math.max(1, strategyToken.risk) ** beta
-    totalWeight += weight
-  })
-
-  strategies.forEach((strategy) => {
-    const strategyToken = strategy.tokens.find((t: StrategyToken) => t.address === tokenAddress)
-    if (!strategyToken) return
-
-    const obligatedBalance = strategyToken.amount * strategyToken.obligationPercentage
+    const obligatedBalance = (strategyToken.amount * strategyToken.obligationPercentage) / 100
     const obligationParticipation = totalObligatedBalance > 0 ? obligatedBalance / totalObligatedBalance : 0
     const weight = obligationParticipation / Math.max(1, strategyToken.risk) ** beta
     const formatBalance = (balance: number) => (balance / 10 ** config.tokenMap[tokenAddress].decimals).toLocaleString()
@@ -134,11 +122,11 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
       'Obligated Balance': `${formatBalance(obligatedBalance)} ${tokenSymbol}`,
       Risk: `${strategyToken.risk.toFixed(2).toLocaleString()}%`,
       Weight: weight.toExponential(2),
-      'Normalized Weight': `${((100 * weight) / totalWeight).toFixed(2)}%`,
     })
   })
 
   tokenTable.printTable()
+  console.log('\n')
 }
 
 export function logNormalizedFinalWeights(finalWeights: Map<number, number>): void {
@@ -163,6 +151,47 @@ export function logNormalizedFinalWeights(finalWeights: Map<number, number>): vo
   }
 
   weightTable.printTable()
+  console.log('\n')
+}
+
+export function logStrategyTokenWeights(
+  tokenAddress: string,
+  tokenWeights: Map<StrategyID, Map<Address, number>>,
+): void {
+  const tokenEntry = Object.values(tokenMap).find((t) => t.address === tokenAddress)
+  if (!tokenEntry) {
+    console.error(`❌ Token ${tokenAddress} not found in tokenMap.`)
+    return
+  }
+
+  let totalWeight = 0
+  tokenWeights.forEach((strategyTokens) => {
+    if (strategyTokens.has(tokenAddress)) {
+      totalWeight += strategyTokens.get(tokenAddress)!
+    }
+  })
+
+  const tokenWeightTable = new Table({
+    columns: [
+      { name: 'Strategy', alignment: 'center', color: 'blue' },
+      { name: 'Weight (%)', alignment: 'right', color: 'yellow' },
+    ],
+    title: `\n📊 Normalized Weights for ${tokenMap[tokenAddress].symbol}`,
+  })
+
+  for (const [strategy, strategyTokens] of tokenWeights.entries()) {
+    if (!strategyTokens.has(tokenAddress)) continue // Skip strategies without this token
+
+    const rawWeight = strategyTokens.get(tokenAddress)!
+    const normalizedWeight = totalWeight > 0 ? (rawWeight / totalWeight) * 100 : 0
+
+    tokenWeightTable.addRow({
+      Strategy: strategy,
+      'Weight (%)': `${normalizedWeight.toFixed(2)}%`,
+    })
+  }
+
+  tokenWeightTable.printTable()
   console.log('\n')
 }
 
