@@ -21,6 +21,7 @@ type ConfigToken = {
   address: string
   symbol: string
   decimals: number
+  significance: number
 }
 
 export const tokenMap: Record<string, ConfigToken> = Object.fromEntries(

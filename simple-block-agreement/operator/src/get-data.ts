@@ -5,7 +5,7 @@ import { request } from 'undici'
 import { config } from './config'
 
 import type { BApp, Strategy } from './app/app_interface'
-import type { Owner, ResponseData } from './types/ssv-graphql'
+import type { BAppToken, Owner, ResponseData } from './types/ssv-graphql'
 import { logBAppSummary, logTokenWeightSummary, logValidatorBalanceTable } from './app/logging'
 
 dotenv.config()
@@ -122,8 +122,8 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
         return {
           address: deposit.token,
           amount: Number(deposit.depositAmount),
-          obligationPercentage: obligation ? Number(obligation.percentage) : 0,
-          risk: balance ? Number(balance.riskValue) : 0,
+          obligationPercentage: obligation ? Number(obligation.percentage) / 100 : 0,
+          risk: balance ? Number(balance.riskValue) / 100 : 0,
         }
       }),
       validatorBalance: getValidatorBalance(strategy.strategy.owner),
@@ -131,20 +131,17 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
 
     const bApp: BApp = {
       address: bAppAddress,
-      tokens: data.data.bapp.bAppTokens.map((token: any) => ({
+      tokens: data.data.bapp.bAppTokens.map((token: BAppToken) => ({
         address: token.token,
-        sharedRiskLevel: token.sharedRiskLevel,
-        significance: 0,
+        sharedRiskLevel: Number(token.sharedRiskLevel),
+        significance: config.tokenMap[token.token.toLowerCase()].significance,
       })),
-      validatorBalanceSignificance: 0,
+      validatorBalanceSignificance: config.validatorBalanceSignificance,
     }
 
     bApp.tokens.forEach((token) => {
       logTokenWeightSummary(token.address, token.sharedRiskLevel, strategies)
     })
-
-    // console.log('🔹 BApp:', JSON.stringify(bApp, null, 2))
-    // console.log('🔹 Strategies:', JSON.stringify(strategies, null, 2))
 
     return {
       bApp,
@@ -163,7 +160,6 @@ export async function getData(bAppAddress: string): Promise<ReturnData> {
   const slot = await queryLatestSlot()
   const { bApp, strategies } = await querySubgraph(bAppAddress)
 
-  bApp.validatorBalanceSignificance = config.validatorBalanceSignificance
   if (bApp.tokens.length > 0) {
     bApp.tokens[0].significance = config.tokens[1].significance
   }

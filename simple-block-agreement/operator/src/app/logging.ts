@@ -71,7 +71,6 @@ export function logValidatorBalanceTable(strategies: Strategy[]): void {
     })
   })
 
-  // Add total validator balance row
   validatorTable.addRow(
     {
       Strategy: 'TOTAL',
@@ -102,27 +101,26 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
     title: `💲 Token Weight Summary for ${tokenSymbol}`,
   })
 
-  // Calculate total obligated balance for this token
   const totalObligatedBalance = strategies.reduce((acc, s) => {
     const strategyToken = s.tokens.find((t: StrategyToken) => t.address === tokenAddress)
-    return acc + (strategyToken ? strategyToken.amount * (strategyToken.obligationPercentage / 100) : 0)
+    return acc + (strategyToken ? strategyToken.amount * strategyToken.obligationPercentage : 0)
   }, 0)
 
   strategies.forEach((strategy) => {
     const strategyToken = strategy.tokens.find((t: StrategyToken) => t.address === tokenAddress)
     if (!strategyToken) return
 
-    const obligatedBalance = strategyToken.amount * (strategyToken.obligationPercentage / 10000)
+    const obligatedBalance = strategyToken.amount * strategyToken.obligationPercentage
     const obligationParticipation = totalObligatedBalance > 0 ? obligatedBalance / totalObligatedBalance : 0
     const weight = obligationParticipation / Math.max(1, strategyToken.risk) ** beta
     const formatBalance = (balance: number) => (balance / 10 ** config.tokenMap[tokenAddress].decimals).toLocaleString()
 
     tokenTable.addRow({
       Strategy: strategy.id,
-      'Obligation (%)': `${(strategyToken.obligationPercentage / 100).toFixed(2)}%`,
+      'Obligation (%)': `${strategyToken.obligationPercentage.toFixed(2)}%`,
       Balance: `${formatBalance(strategyToken.amount)} ${tokenSymbol}`,
       'Obligated Balance': `${formatBalance(obligatedBalance)} ${tokenSymbol}`,
-      Risk: (strategyToken.risk / 100).toFixed(2).toLocaleString(),
+      Risk: `${strategyToken.risk.toFixed(2).toLocaleString()}%`,
       Weight: weight.toExponential(2),
     })
   })
