@@ -161,10 +161,6 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
 export async function getData(bAppAddress: string): Promise<ReturnData> {
   const slot = await queryLatestSlot()
   const { bApp, strategies } = await querySubgraph(bAppAddress)
-  //console.log('🔹 BApp:', JSON.stringify(bApp, null, 2))
-  //console.log('🔹 Strategies:', JSON.stringify(strategies, null, 2))
 
   return { bApp, strategies, slot }
 }
-
-// getData('0x89EF15BC1E7495e3dDdc0013C0d2B049d487b2fD').catch(console.error)
