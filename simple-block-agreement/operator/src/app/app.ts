@@ -103,6 +103,7 @@ function sanitizeStrategies(strategies: Strategy[]): Strategy[] {
     strategy.id = sanitizeStrategyID(strategy.id)
     for (const token of strategy.tokens) {
       token.obligationPercentage /= 10000
+      token.risk /= 10000
       token.amount = weiToToken(BigInt(token.amount), tokenDecimals(token.address))
     }
   }
