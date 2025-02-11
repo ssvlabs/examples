@@ -202,7 +202,7 @@ export function arithmeticCombinationFunction(
 
 function SignificanceSum(bApp: BApp): number {
   let sum = 0
-  for (const token of bApp.token) {
+  for (const token of bApp.tokens) {
     sum += token.significance
   }
   sum += bApp.validatorBalanceSignificance
@@ -275,7 +275,7 @@ function calculateTokenWeights(
 ): Map<StrategyID, Map<Token, number>> {
   const tokenWeights = new Map<StrategyID, Map<Token, number>>()
 
-  for (const bAppToken of bApp.token) {
+  for (const bAppToken of bApp.tokens) {
     logToken(bAppToken.token, '🪙  Calculating token weights')
 
     // Total amount obligated to bApp

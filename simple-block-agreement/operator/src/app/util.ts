@@ -1,7 +1,7 @@
 import { BApp, BAppToken, Strategy, StrategyToken, Token } from './app_interface'
 
 export function getStrategyToken(strategy: Strategy, token: Token): StrategyToken {
-  for (const strategyToken of strategy.token) {
+  for (const strategyToken of strategy.tokens) {
     if (strategyToken.token === token) {
       return strategyToken
     }
@@ -10,7 +10,7 @@ export function getStrategyToken(strategy: Strategy, token: Token): StrategyToke
 }
 
 export function getBAppToken(bApp: BApp, token: Token): BAppToken {
-  for (const bAppToken of bApp.token) {
+  for (const bAppToken of bApp.tokens) {
     if (bAppToken.token === token) {
       return bAppToken
     }

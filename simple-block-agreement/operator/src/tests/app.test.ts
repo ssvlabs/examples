@@ -1,4 +1,4 @@
-import { App } from '../app'
+import { App } from '../app/app'
 import {
   testingKeyPair1,
   testingKeyPair2,
@@ -9,8 +9,8 @@ import {
   equalSignedVote,
 } from './testingutils/protocol'
 import { Testing4Strategies, TestingBApp } from './testingutils/app'
-import { SignedVote } from '../protocol_types'
-import { StrategyID } from '../app_interface'
+import { SignedVote } from '../app/protocol_types'
+import { StrategyID } from '../app/app_interface'
 
 describe('App', () => {
   let app: App

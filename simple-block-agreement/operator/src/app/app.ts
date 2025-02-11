@@ -101,16 +101,16 @@ export class App implements AppInterface {
 function sanitizeStrategies(strategies: Strategy[]): Strategy[] {
   for (const strategy of strategies) {
     strategy.id = sanitizeStrategyID(strategy.id)
-    for (const token of strategy.token) {
+    for (const token of strategy.tokens) {
       token.obligationPercentage /= 10000
-      token.amount = weiToToken(token.amount, tokenDecimals(token.token))
+      token.amount = weiToToken(BigInt(token.amount), tokenDecimals(token.token))
     }
   }
   return strategies
 }
 
-function weiToToken(weiAmount: number, decimals: number): number {
-  return Number(ethers.formatUnits(weiAmount, decimals))
+function weiToToken(weiAmount: bigint | string, decimals: number): number {
+  return Number(ethers.formatUnits(BigInt(weiAmount), decimals))
 }
 
 function tokenDecimals(token: string): number {

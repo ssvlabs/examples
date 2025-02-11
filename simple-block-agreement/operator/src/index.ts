@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 
-import { App } from './app'
+import { App } from './app/app'
 import { getData } from './get-data'
 
 dotenv.config()

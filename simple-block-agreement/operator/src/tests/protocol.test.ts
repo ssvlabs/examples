@@ -1,6 +1,6 @@
-import { State } from '../protocol'
-import { Ed25519CryptoService } from '../protocol_interfaces'
-import { SignedVote } from '../protocol_types'
+import { State } from '../app/protocol'
+import { Ed25519CryptoService } from '../app/protocol_interfaces'
+import { SignedVote } from '../app/protocol_types'
 import {
   mockNetwork,
   testingKeyPair1,

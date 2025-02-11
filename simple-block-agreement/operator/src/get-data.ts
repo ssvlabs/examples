@@ -4,8 +4,9 @@ import { request } from 'undici'
 
 import { config } from './config'
 
-import type { BApp, Strategy } from './app_interface'
+import type { BApp, Strategy } from './app/app_interface'
 import type { Owner, ResponseData } from './types/ssv-graphql'
+import { logBAppSummary } from './app/logging'
 
 dotenv.config()
 
@@ -45,6 +46,7 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
                 strategies {
                     id
                     strategy {
+                        id
                         bApps {
                           obligations {
                             percentage
@@ -90,10 +92,7 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
     `,
     }
 
-    const THE_GRAPH_API = process.env.THE_GRAPH_API
-    if (!THE_GRAPH_API) throw new Error('THE_GRAPH_API is not defined in the environment variables')
-
-    const response = await request(THE_GRAPH_API, {
+    const response = await request(config.THE_GRAPH_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(query),
@@ -104,7 +103,7 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
 
     if (!data?.data?.bapp) throw new Error('No BApp data returned from The Graph')
 
-    console.log('📊 SSV bApps Subgraph Data:', JSON.stringify(data))
+    // console.log('📊 SSV bApps Subgraph Data:', JSON.stringify(data))
 
     const getValidatorBalance = (owner: Owner): number =>
       owner.delegators?.reduce(
@@ -114,10 +113,10 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
       ) ?? 0
 
     const strategies: Strategy[] = data.data.bapp.strategies.map((strategy) => ({
-      id: Number(strategy.id),
+      id: Number(strategy.strategy.id),
       owner: strategy.strategy.owner.id,
       privateKey: config.privateKeysMap.get(strategy.strategy.owner.id.toLowerCase()) ?? new Uint8Array(),
-      token: strategy.strategy.deposits.map((deposit) => {
+      tokens: strategy.strategy.deposits.map((deposit) => {
         const obligation = strategy.obligations.find((obligation) => obligation.token === deposit.token)
         const balance = strategy.strategy.balances.find((balance) => balance.token === deposit.token)
 
@@ -131,9 +130,9 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
       validatorBalance: getValidatorBalance(strategy.strategy.owner),
     }))
 
-    const bApp = {
+    const bApp: BApp = {
       address: bAppAddress,
-      token: data.data.bapp.bAppTokens.map((token: any) => ({
+      tokens: data.data.bapp.bAppTokens.map((token: any) => ({
         token: token.token,
         sharedRiskLevel: token.sharedRiskLevel,
         significance: 0,
@@ -141,8 +140,8 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
       validatorBalanceSignificance: 0,
     }
 
-    console.log('🔹 BApp:', JSON.stringify(bApp, null, 2))
-    console.log('🔹 Strategies:', JSON.stringify(strategies, null, 2))
+    // console.log('🔹 BApp:', JSON.stringify(bApp, null, 2))
+    // console.log('🔹 Strategies:', JSON.stringify(strategies, null, 2))
 
     return {
       bApp,
@@ -161,15 +160,16 @@ export async function getData(bAppAddress: string): Promise<ReturnData> {
   const slot = await queryLatestSlot()
   const { bApp, strategies } = await querySubgraph(bAppAddress)
 
-  const validatorBalanceSignificance = Number(process.env.VALIDATOR_BALANCE_SIGNIFICANCE) || 0
-  const ssvTokenSignificance = Number(process.env.SSV_TOKEN_SIGNIFICANCE) || 0
-
-  bApp.validatorBalanceSignificance = validatorBalanceSignificance
-  if (bApp.token.length > 0) {
-    bApp.token[0].significance = ssvTokenSignificance
+  bApp.validatorBalanceSignificance = config.validatorBalanceSignificance
+  if (bApp.tokens.length > 0) {
+    bApp.tokens[0].significance = config.tokens[1].significance
   }
 
+  //console.log('🔹 BApp:', JSON.stringify(bApp, null, 2))
+  //console.log('🔹 Strategies:', JSON.stringify(strategies, null, 2))
+
+  logBAppSummary(bApp, strategies)
   return { bApp, strategies, slot }
 }
 
-getData('0x89EF15BC1E7495e3dDdc0013C0d2B049d487b2fD').catch(console.error)
+// getData('0x89EF15BC1E7495e3dDdc0013C0d2B049d487b2fD').catch(console.error)

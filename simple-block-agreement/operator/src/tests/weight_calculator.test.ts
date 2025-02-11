@@ -1,11 +1,11 @@
-import { BApp, Strategy } from '../app_interface'
+import { BApp, Strategy } from '../app/app_interface'
 import {
   arithmeticCombinationFunction,
   calculateParticipantsWeight,
   exponentialWeightFormula,
   harmonicCombinationFunction,
   polynomialWeightFormula,
-} from '../weight_calculator'
+} from '../app/weight_calculator'
 import { TestingBApp } from './testingutils/app'
 describe('HarmonicWeightCalculator', () => {
   let bApp: BApp
@@ -19,14 +19,14 @@ describe('HarmonicWeightCalculator', () => {
         id: 1,
         owner: 'owner1',
         privateKey: new Uint8Array([1, 2, 3, 4]),
-        token: [{ token: 'SSV', amount: 100, obligationPercentage: 0.5, risk: 1.5 }],
+        tokens: [{ token: 'SSV', amount: 100, obligationPercentage: 0.5, risk: 1.5 }],
         validatorBalance: 32,
       },
       {
         id: 2,
         owner: 'owner2',
         privateKey: new Uint8Array([5, 6, 7, 8]),
-        token: [{ token: 'SSV', amount: 200, obligationPercentage: 0.1, risk: 1.0 }],
+        tokens: [{ token: 'SSV', amount: 200, obligationPercentage: 0.1, risk: 1.0 }],
         validatorBalance: 96,
       },
     ]

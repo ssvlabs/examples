@@ -36,6 +36,7 @@ export type Owner = {
 export type Strategy = {
   id: string
   strategy: {
+    id: string
     bApps: BApp[]
     deposits: Deposit[]
     balances: Balance[]

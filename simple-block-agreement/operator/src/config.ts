@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import dotenv from 'dotenv'
-import { hexToUint8Array } from './util'
+import { hexToUint8Array } from './app/util'
 
 dotenv.config()
 
@@ -17,6 +17,11 @@ privateKeysString.split(',').forEach((entry) => {
   }
 })
 
+// Create a token map (address -> symbol)
+export const tokenMap: Record<string, string> = Object.fromEntries(
+  bAppConfig.tokens.map((token: { address: string; symbol: string }) => [token.address.toLowerCase(), token.symbol]),
+)
+
 const env = {
   BAPP_ADDRESS: process.env.BAPP_ADDRESS || '',
   BEACONCHAIN_API: process.env.BEACONCHAIN_API || '',
@@ -28,6 +33,7 @@ const env = {
 
 export const config = {
   ...env,
+  tokenMap,
   tokens: bAppConfig.tokens,
   validatorBalanceSignificance: bAppConfig.validatorBalanceSignificance,
   privateKeysMap,

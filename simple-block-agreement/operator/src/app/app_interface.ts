@@ -83,7 +83,7 @@ export type Strategy = {
   id: StrategyID
   owner: string
   privateKey: Uint8Array
-  token: StrategyToken[] //todo should be tokens
+  tokens: StrategyToken[] //todo should be tokens
   validatorBalance: number // ETH
 }
 
@@ -93,7 +93,7 @@ export type Strategy = {
 // - the significance of the validator balance capital in the combination function
 export type BApp = {
   address: string
-  token: BAppToken[]
+  tokens: BAppToken[]
   validatorBalanceSignificance: number
 }
 
