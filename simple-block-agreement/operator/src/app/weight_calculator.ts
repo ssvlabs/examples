@@ -48,7 +48,6 @@ export function exponentialWeightFormula(
   - Total bApp amount: ${totalBAppAmount} ${config.tokenMap[strategyToken.token]}
   -> Obligation participation (obligated balance / total bApp amount): ${obligationParticipation}
   - Risk: ${risk}
-  - Beta: ${beta}
   -> Weight (obligation participation * exp(-beta * max(1, risk))): ${GREEN}${weight}${RESET}`,
   )
 
@@ -281,6 +280,7 @@ function calculateTokenWeights(
       totalBAppAmount = 1
     }
     logToken(bAppToken.token, `🗂️  Total amount obligated to bApp: ${totalBAppAmount}`)
+    logToken(bAppToken.token, `🗂️  Beta: ${bAppToken.sharedRiskLevel}`)
 
     // Calculate weights for each strategy
     let weightSum: number = 0

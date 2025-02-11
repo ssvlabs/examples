@@ -47,6 +47,44 @@ export function logBAppSummary(bApp: BApp, strategies: Strategy[]): void {
   summaryTable.printTable()
 }
 
+export function logValidatorBalanceTable(strategies: Strategy[]): void {
+  console.log('\n')
+
+  const validatorTable = new Table({
+    columns: [
+      { name: 'Strategy', alignment: 'center', color: 'blue' },
+      { name: 'Validator Balance', alignment: 'right', color: 'green' },
+      { name: 'Weight (%)', alignment: 'right', color: 'magenta' },
+    ],
+    title: '🔑 Validator Balance Distribution',
+  })
+
+  const totalValidatorBalance = strategies.reduce((acc, s) => acc + s.validatorBalance, 0)
+
+  strategies.forEach((strategy) => {
+    const weight = totalValidatorBalance > 0 ? (strategy.validatorBalance / totalValidatorBalance) * 100 : 0
+
+    validatorTable.addRow({
+      Strategy: strategy.id,
+      'Validator Balance': `${strategy.validatorBalance.toLocaleString()} ETH`,
+      'Weight (%)': `${weight.toFixed(2)}%`,
+    })
+  })
+
+  // Add total validator balance row
+  validatorTable.addRow(
+    {
+      Strategy: 'TOTAL',
+      'Validator Balance': `${totalValidatorBalance.toLocaleString()} ETH`,
+      'Weight (%)': '100.00%',
+    },
+    { color: 'yellow' },
+  )
+
+  validatorTable.printTable()
+  console.log('\n')
+}
+
 export function logToken(token: Token, message: string): void {
   const color = getColorForToken(token)
   const tokenSymbol = config.tokenMap[token.toLowerCase()] || token

@@ -6,7 +6,7 @@ import { config } from './config'
 
 import type { BApp, Strategy } from './app/app_interface'
 import type { Owner, ResponseData } from './types/ssv-graphql'
-import { logBAppSummary } from './app/logging'
+import { logBAppSummary, logValidatorBalanceTable } from './app/logging'
 
 dotenv.config()
 
@@ -169,6 +169,7 @@ export async function getData(bAppAddress: string): Promise<ReturnData> {
   //console.log('🔹 Strategies:', JSON.stringify(strategies, null, 2))
 
   logBAppSummary(bApp, strategies)
+  logValidatorBalanceTable(strategies)
   return { bApp, strategies, slot }
 }
 
