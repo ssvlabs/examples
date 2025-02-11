@@ -6,7 +6,7 @@ import { config } from './config'
 
 import type { BApp, Strategy } from './app/app_interface'
 import type { Owner, ResponseData } from './types/ssv-graphql'
-import { logBAppSummary, logValidatorBalanceTable } from './app/logging'
+import { logBAppSummary, logTokenWeightSummary, logValidatorBalanceTable } from './app/logging'
 
 dotenv.config()
 
@@ -140,6 +140,10 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
       validatorBalanceSignificance: 0,
     }
 
+    bApp.tokens.forEach((token) => {
+      logTokenWeightSummary(token.token, token.sharedRiskLevel, strategies)
+    })
+
     // console.log('🔹 BApp:', JSON.stringify(bApp, null, 2))
     // console.log('🔹 Strategies:', JSON.stringify(strategies, null, 2))
 
@@ -170,6 +174,7 @@ export async function getData(bAppAddress: string): Promise<ReturnData> {
 
   logBAppSummary(bApp, strategies)
   logValidatorBalanceTable(strategies)
+
   return { bApp, strategies, slot }
 }
 

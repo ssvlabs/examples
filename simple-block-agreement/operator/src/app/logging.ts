@@ -31,7 +31,7 @@ export function logBAppSummary(bApp: BApp, strategies: Strategy[]): void {
     bApp.tokens.length > 0
       ? bApp.tokens
           .map((t) => {
-            const symbol = tokenMap[t.token.toLowerCase()] || t.token
+            const symbol = tokenMap[t.token.toLowerCase()].symbol || t.token
             const totalAmount = getTokenTotalAmount(t.token)
             return `${symbol} (${totalAmount.toLocaleString()})`
           })
@@ -85,9 +85,54 @@ export function logValidatorBalanceTable(strategies: Strategy[]): void {
   console.log('\n')
 }
 
+export function logTokenWeightSummary(tokenAddress: string, beta: number, strategies: Strategy[]): void {
+  console.log('\n')
+
+  const tokenSymbol = tokenMap[tokenAddress.toLowerCase()].symbol || tokenAddress
+
+  const tokenTable = new Table({
+    columns: [
+      { name: 'Strategy', alignment: 'center', color: 'blue' },
+      { name: 'Obligation (%)', alignment: 'right', color: 'cyan' },
+      { name: 'Balance', alignment: 'right', color: 'green' },
+      { name: 'Obligated Balance', alignment: 'right', color: 'yellow' },
+      { name: 'Risk', alignment: 'right', color: 'magenta' },
+      { name: 'Weight', alignment: 'right', color: 'red' },
+    ],
+    title: `💲 Token Weight Summary for ${tokenSymbol}`,
+  })
+
+  // Calculate total obligated balance for this token
+  const totalObligatedBalance = strategies.reduce((acc, s) => {
+    const strategyToken = s.tokens.find((t: StrategyToken) => t.token === tokenAddress)
+    return acc + (strategyToken ? strategyToken.amount * (strategyToken.obligationPercentage / 100) : 0)
+  }, 0)
+
+  strategies.forEach((strategy) => {
+    const strategyToken = strategy.tokens.find((t: StrategyToken) => t.token === tokenAddress)
+    if (!strategyToken) return
+
+    const obligatedBalance = strategyToken.amount * (strategyToken.obligationPercentage / 10000)
+    const obligationParticipation = totalObligatedBalance > 0 ? obligatedBalance / totalObligatedBalance : 0
+    const weight = obligationParticipation / Math.max(1, strategyToken.risk) ** beta
+    const formatBalance = (balance: number) => (balance / 10 ** config.tokenMap[tokenAddress].decimals).toLocaleString()
+
+    tokenTable.addRow({
+      Strategy: strategy.id,
+      'Obligation (%)': `${(strategyToken.obligationPercentage / 100).toFixed(2)}%`,
+      Balance: `${formatBalance(strategyToken.amount)} ${tokenSymbol}`,
+      'Obligated Balance': `${formatBalance(obligatedBalance)} ${tokenSymbol}`,
+      Risk: strategyToken.risk.toLocaleString(),
+      Weight: weight.toExponential(2),
+    })
+  })
+
+  tokenTable.printTable()
+}
+
 export function logToken(token: Token, message: string): void {
   const color = getColorForToken(token)
-  const tokenSymbol = config.tokenMap[token.toLowerCase()] || token
+  const tokenSymbol = config.tokenMap[token.toLowerCase()].symbol || token
   console.log(`${color}[💲 Token ${tokenSymbol}]${colorReset()} ${message}`)
 }
 

@@ -17,9 +17,14 @@ privateKeysString.split(',').forEach((entry) => {
   }
 })
 
-// Create a token map (address -> symbol)
-export const tokenMap: Record<string, string> = Object.fromEntries(
-  bAppConfig.tokens.map((token: { address: string; symbol: string }) => [token.address.toLowerCase(), token.symbol]),
+type ConfigToken = {
+  address: string
+  symbol: string
+  decimals: number
+}
+
+export const tokenMap: Record<string, ConfigToken> = Object.fromEntries(
+  bAppConfig.tokens.map((token: ConfigToken) => [token.address.toLowerCase(), token]),
 )
 
 const env = {
