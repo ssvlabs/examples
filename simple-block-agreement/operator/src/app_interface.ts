@@ -83,7 +83,7 @@ export type Strategy = {
   id: StrategyID
   owner: string
   privateKey: Uint8Array
-  token: StrategyToken[]
+  token: StrategyToken[] //todo should be tokens
   validatorBalance: number // ETH
 }
 

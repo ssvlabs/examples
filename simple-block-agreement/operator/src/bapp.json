@@ -1,0 +1,26 @@
+{
+  "validatorBalanceSignificance": 2,
+    "tokens": [
+      {
+        "name": "Native ETH",
+        "symbol": "ETH",
+        "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "decimals": 18,
+        "significance": 1
+      },
+      {
+        "name": "USD Coin",
+        "symbol": "USDC",
+        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eb48",
+        "decimals": 6,
+        "significance": 1
+      },
+      {
+        "name": "SSV",
+        "symbol": "SSV",
+        "address": "0x68a8ddd7a59a900e0657e9f8bbe02b70c947f25f",
+        "decimals": 18,
+        "significance": 2
+      }
+    ]
+  }

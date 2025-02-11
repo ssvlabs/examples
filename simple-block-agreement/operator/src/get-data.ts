@@ -1,128 +1,42 @@
+import dotenv from 'dotenv'
+
 import { request } from 'undici'
-import { BApp, Strategy } from './app_interface'
-import { hexToUint8Array } from './util'
 
-const BEACONCHAIN_API = 'https://beaconcha.in/api/v1/block/latest'
-const THE_GRAPH_API = 'https://api.studio.thegraph.com/query/53804/ssv-bapps-subgraph/version/latest'
-const SSV_API_BASE_URL = 'https://api.stage.ops.ssvlabsinternal.com/api/v4/holesky/validators/explorer'
-// const SSV_API_BASE_URL = 'https://api.stage.ops.ssvlabsinternal.com/api/v4/holesky/clusters/owner/0xB0343BB9fc6Fe61438E5772200FB41807c84ffC0?page=1&perPage=10'
+import { config } from './config'
 
-const VALIDATOR_BALANCE_OWNERS = [
-  '0x219437D13532d225D98bACe5638EB9146D4BDD4B',
-  '0x8F3A66Bb003EBBD5fB115981DfaD8D8400FCeb76',
-]
+import type { BApp, Strategy } from './app_interface'
+import type { Owner, ResponseData } from './types/ssv-graphql'
 
-const privateKeysMap = new Map<string, Uint8Array>([
-  [
-    '0x219437d13532d225d98bace5638eb9146d4bdd4b',
-    hexToUint8Array('63920609bb76b09d816b9427e906d1ad7d3008b4f8a164adf3b4900969ac97fa'),
-  ],
-  [
-    '0x8f3a66bb003ebbd5fb115981dfad8d8400fceb76',
-    hexToUint8Array('228ffcb12deb17c72d7348415909290db647153c6b255c0b76628496d136b875'),
-  ],
-  [
-    '0xaa184b86b4cdb747f4a3bf6e6fcd5e27c1d92c5c',
-    hexToUint8Array('b21fb4ab30ecb815f0b836f75e8e27816494a80da81ce95be67028e916f48a90'),
-  ],
-])
+dotenv.config()
 
-type ValidatorBalance = {
-  owner: string
-  amount: number
-}
-
-interface ValidatorInfo {
-  index: number
-  effective_balance: number
-  status: string
-  activation_epoch: number
-}
-
-interface SSVValidator {
-  id: string
-  ownerAddress: string
-  network: string
-  version: string
-  cluster: string
-  publicKey: string
-  isValid: boolean
-  isLiquidated: boolean
-  isDeleted: boolean
-  isOperatorsValid: boolean
-  isPublicKeyValid: boolean
-  isSharesValid: boolean
-  operators: string[]
-  createdAt: string
-  updatedAt: string
-  status: string
-  validatorInfo: ValidatorInfo
-}
-
-interface DelegationOwner {
-  id: string
-  delegators: {
-    id: string
-    percentage: number
-  }[]
-}
-
-interface DelegationStrategy {
-  strategy: {
-    owner: DelegationOwner
-  }
-}
-
-interface ReturnData {
+type SubgraphResponse = {
   bApp: BApp
   strategies: Strategy[]
+}
+
+type ReturnData = SubgraphResponse & {
   slot: number
 }
 
-interface Delegator {
-  delegator: string
-  percentage: number
-}
-
-interface Delegation {
-  owner: string
-  delegator: Delegator[]
-}
-
-interface SubgraphResponse {
-  bApp: BApp
-  strategies: Strategy[]
-}
-
-async function queryLatestSlotAndBlock(): Promise<number> {
+async function queryLatestSlot(): Promise<number> {
   try {
-    const { body } = await request(BEACONCHAIN_API)
+    const beaconchainApi = process.env.BEACONCHAIN_API
+    if (!beaconchainApi) throw new Error('BEACONCHAIN_API is not defined in the environment variables')
+    const { body } = await request(beaconchainApi)
 
     const bodyText = await body.text()
     const response = JSON.parse(bodyText)
 
     if (!response?.data) throw new Error('Invalid response structure from Beaconchain API')
 
-    const latestEpoch = response.data.epoch
-    const latestSlot = response.data.slot
-    const latestBlock = response.data.exec_block_number
-
-    console.log(`🔹 Latest Epoch: ${latestEpoch}`)
-    console.log(`🔹 Latest Slot: ${latestSlot}`)
-    console.log(`🔹 Latest Block: ${latestBlock ?? 'No execution block found'}`)
-
-    return latestSlot
+    return response.data.slot
   } catch (error) {
     console.error('❌ Error fetching latest slot and block:', error)
-    throw new Error('❌ Error fetching latest slot and block')
+    return 0
   }
 }
 
-async function querySSVBAppsSubgraph(
-  bAppAddress: string,
-  ssvSignificance: number,
-  validatorBalanceSignificance: number,
-): Promise<SubgraphResponse> {
+async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
   try {
     const query = {
       query: `
@@ -131,15 +45,30 @@ async function querySSVBAppsSubgraph(
                 strategies {
                     id
                     strategy {
+                        bApps {
+                          obligations {
+                            percentage
+                          }
+                          id
+                        }
                         deposits {
                             depositAmount
                             token
                         }
                         balances {
                             id
+                            token
+                            riskValue
                         }
                         owner {
                             id
+                            delegators {
+                              delegator {
+                                id 
+                                validatorCount
+                              }
+                              percentage
+                            }
                         }
                     }
                     obligations {
@@ -161,6 +90,9 @@ async function querySSVBAppsSubgraph(
     `,
     }
 
+    const THE_GRAPH_API = process.env.THE_GRAPH_API
+    if (!THE_GRAPH_API) throw new Error('THE_GRAPH_API is not defined in the environment variables')
+
     const response = await request(THE_GRAPH_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -168,40 +100,52 @@ async function querySSVBAppsSubgraph(
     })
 
     const bodyText = await response.body.text()
-    const data = JSON.parse(bodyText)
+    const data: ResponseData = JSON.parse(bodyText)
 
     if (!data?.data?.bapp) throw new Error('No BApp data returned from The Graph')
 
-    // console.log('📊 SSV bApps Subgraph Data:', JSON.stringify(data))
+    console.log('📊 SSV bApps Subgraph Data:', JSON.stringify(data))
 
-    const strategies: Strategy[] = []
+    const getValidatorBalance = (owner: Owner): number =>
+      owner.delegators?.reduce(
+        (acc, delegation) =>
+          acc + (32 * Number(delegation.delegator.validatorCount) * Number(delegation.percentage)) / 100,
+        0,
+      ) ?? 0
 
-    data.data.bapp.strategies.forEach((strategy: any) => {
-      strategies.push({
-        id: strategy.id,
-        owner: strategy.strategy.owner.id,
-        privateKey: privateKeysMap.get((strategy.strategy.owner.id as string).toLowerCase()) ?? new Uint8Array(),
-        token: strategy.strategy.deposits.map((deposit: any) => ({
+    const strategies: Strategy[] = data.data.bapp.strategies.map((strategy) => ({
+      id: Number(strategy.id),
+      owner: strategy.strategy.owner.id,
+      privateKey: config.privateKeysMap.get(strategy.strategy.owner.id.toLowerCase()) ?? new Uint8Array(),
+      token: strategy.strategy.deposits.map((deposit) => {
+        const obligation = strategy.obligations.find((obligation) => obligation.token === deposit.token)
+        const balance = strategy.strategy.balances.find((balance) => balance.token === deposit.token)
+
+        return {
           token: deposit.token,
-          amount: deposit.depositAmount,
-          obligationPercentage:
-            strategy.obligations.find((obligation: any) => obligation.token === deposit.token)?.percentage ?? 0,
-          risk: 0,
-        })),
-        validatorBalance: 0,
-      })
-    })
+          amount: Number(deposit.depositAmount),
+          obligationPercentage: obligation ? Number(obligation.percentage) : 0,
+          risk: balance ? Number(balance.riskValue) : 0,
+        }
+      }),
+      validatorBalance: getValidatorBalance(strategy.strategy.owner),
+    }))
+
+    const bApp = {
+      address: bAppAddress,
+      token: data.data.bapp.bAppTokens.map((token: any) => ({
+        token: token.token,
+        sharedRiskLevel: token.sharedRiskLevel,
+        significance: 0,
+      })),
+      validatorBalanceSignificance: 0,
+    }
+
+    console.log('🔹 BApp:', JSON.stringify(bApp, null, 2))
+    console.log('🔹 Strategies:', JSON.stringify(strategies, null, 2))
 
     return {
-      bApp: {
-        address: bAppAddress,
-        token: data.data.bapp.bAppTokens.map((token: any) => ({
-          token: token.token,
-          sharedRiskLevel: token.sharedRiskLevel,
-          significance: ssvSignificance,
-        })),
-        validatorBalanceSignificance: validatorBalanceSignificance,
-      },
+      bApp,
       strategies,
     }
   } catch (error) {
@@ -213,110 +157,19 @@ async function querySSVBAppsSubgraph(
   }
 }
 
-async function queryDelegations(bAppAddress: string): Promise<Delegation[]> {
-  try {
-    const query = {
-      query: `
-        query MyQuery {
-            bapp(id: "${bAppAddress}") {
-                strategies {
-                strategy {
-                    owner {
-                    id
-                    delegators {
-                        delegator {
-                        id
-                        }
-                        percentage
-                    }
-                    }
-                }
-                }
-            }
-        }`,
-    }
+export async function getData(bAppAddress: string): Promise<ReturnData> {
+  const slot = await queryLatestSlot()
+  const { bApp, strategies } = await querySubgraph(bAppAddress)
 
-    const response = await request(THE_GRAPH_API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(query),
-    })
+  const validatorBalanceSignificance = Number(process.env.VALIDATOR_BALANCE_SIGNIFICANCE) || 0
+  const ssvTokenSignificance = Number(process.env.SSV_TOKEN_SIGNIFICANCE) || 0
 
-    const bodyText = await response.body.text()
-    const data = JSON.parse(bodyText)
-
-    // console.log('📊 SSV bApps Subgraph Data:', JSON.stringify(data))
-
-    const delegations: Delegation[] = []
-
-    data.data.bapp.strategies.forEach((strategy: DelegationStrategy) => {
-      delegations.push({
-        owner: strategy.strategy.owner.id,
-        delegator: strategy.strategy.owner.delegators.map((delegator: any) => ({
-          delegator: delegator.delegator.id,
-          percentage: delegator.percentage,
-        })),
-      })
-    })
-
-    // console.log('🔹 Delegations:', JSON.stringify(delegations, null, 2))
-
-    return delegations
-  } catch (error) {
-    console.error('❌ Error querying The Graph:', error)
-    return []
+  bApp.validatorBalanceSignificance = validatorBalanceSignificance
+  if (bApp.token.length > 0) {
+    bApp.token[0].significance = ssvTokenSignificance
   }
+
+  return { bApp, strategies, slot }
 }
 
-async function queryValidatorBalances(owners: string[]): Promise<ValidatorBalance[]> {
-  try {
-    const { body } = await request(SSV_API_BASE_URL)
-
-    const bodyText = await body.text()
-    const data = JSON.parse(bodyText)
-
-    const result: ValidatorBalance[] = []
-
-    owners.forEach((owner) => {
-      let totalBalance = 0
-      data.data.forEach((validator: SSVValidator) => {
-        if (validator.ownerAddress === owner && validator.validatorInfo.status === 'active_ongoing') {
-          totalBalance += validator.validatorInfo.effective_balance
-        }
-      })
-      result.push({
-        owner,
-        amount: totalBalance,
-      })
-    })
-    return result
-  } catch (error) {
-    console.error('❌ Error querying SSV API:', error)
-    return []
-  }
-}
-
-export async function getData(
-  ssvSignificance: number,
-  validatorBalanceSignificance: number,
-  bAppAddress: string,
-): Promise<ReturnData> {
-  const slot = await queryLatestSlotAndBlock()
-  const { bApp, strategies } = await querySSVBAppsSubgraph(bAppAddress, ssvSignificance, validatorBalanceSignificance)
-  // console.log('🔹 BApp:', JSON.stringify(bApp, null, 2))
-  // console.log('🔹 Strategies:', JSON.stringify(strategies, null, 2))
-  const delegations = await queryDelegations(bAppAddress)
-  const validatorBalances = await queryValidatorBalances(VALIDATOR_BALANCE_OWNERS)
-  // console.log('🔹 Validator Balances:', JSON.stringify(validatorBalances, null, 2))
-  delegations.forEach((delegation) => {
-    const strategy = strategies.find((strategy) => strategy.owner === delegation.owner)
-    if (strategy) {
-      strategy.validatorBalance = validatorBalances.find((balance) => balance.owner === strategy.owner)?.amount ?? 32
-    }
-  })
-  return {
-    bApp,
-    strategies,
-    slot: slot ?? 0,
-  }
-}
+getData('0x89EF15BC1E7495e3dDdc0013C0d2B049d487b2fD').catch(console.error)
