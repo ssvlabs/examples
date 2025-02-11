@@ -107,9 +107,7 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
     return acc + (strategyToken ? strategyToken.amount * strategyToken.obligationPercentage : 0)
   }, 0)
 
-
-  // Sum all weights
-  var totalWeight = 0
+  let totalWeight = 0
   strategies.forEach((strategy) => {
     const strategyToken = strategy.tokens.find((t: StrategyToken) => t.address === tokenAddress)
     if (!strategyToken) return
@@ -136,7 +134,7 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
       'Obligated Balance': `${formatBalance(obligatedBalance)} ${tokenSymbol}`,
       Risk: `${strategyToken.risk.toFixed(2).toLocaleString()}%`,
       Weight: weight.toExponential(2),
-      'Normalized Weight': `${(100*weight/totalWeight).toFixed(2)}%`,
+      'Normalized Weight': `${((100 * weight) / totalWeight).toFixed(2)}%`,
     })
   })
 
