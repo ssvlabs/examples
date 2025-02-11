@@ -97,6 +97,7 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
       { name: 'Obligated Balance', alignment: 'right', color: 'yellow' },
       { name: 'Risk', alignment: 'right', color: 'magenta' },
       { name: 'Weight', alignment: 'right', color: 'red' },
+      { name: 'Normalized Weight', alignment: 'right', color: 'yellow' },
     ],
     title: `💲 Token Weight Summary for ${tokenSymbol}`,
   })
@@ -105,6 +106,19 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
     const strategyToken = s.tokens.find((t: StrategyToken) => t.address === tokenAddress)
     return acc + (strategyToken ? strategyToken.amount * strategyToken.obligationPercentage : 0)
   }, 0)
+
+
+  // Sum all weights
+  var totalWeight = 0
+  strategies.forEach((strategy) => {
+    const strategyToken = strategy.tokens.find((t: StrategyToken) => t.address === tokenAddress)
+    if (!strategyToken) return
+
+    const obligatedBalance = strategyToken.amount * strategyToken.obligationPercentage
+    const obligationParticipation = totalObligatedBalance > 0 ? obligatedBalance / totalObligatedBalance : 0
+    const weight = obligationParticipation / Math.max(1, strategyToken.risk) ** beta
+    totalWeight += weight
+  })
 
   strategies.forEach((strategy) => {
     const strategyToken = strategy.tokens.find((t: StrategyToken) => t.address === tokenAddress)
@@ -122,6 +136,7 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
       'Obligated Balance': `${formatBalance(obligatedBalance)} ${tokenSymbol}`,
       Risk: `${strategyToken.risk.toFixed(2).toLocaleString()}%`,
       Weight: weight.toExponential(2),
+      'Normalized Weight': `${(100*weight/totalWeight).toFixed(2)}%`,
     })
   })
 
