@@ -249,13 +249,10 @@ function calculateFinalWeights(
     weightSum = 1
   }
 
-  // let normWeightsLog = `📊  Normalized final weights: \n`
   for (const strategy of tokenWeights.keys()) {
     const weight = finalWeights.get(strategy)!
     const normalizedWeight = weight / weightSum
     finalWeights.set(strategy, normalizedWeight)
-
-    // normWeightsLog += `   - strategy ${strategy}: ${YELLOW}${(100 * normalizedWeight).toFixed(2)}%${RESET}`
   }
 
   logNormalizedFinalWeights(finalWeights)
