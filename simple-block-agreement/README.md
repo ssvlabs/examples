@@ -16,7 +16,7 @@ This repository contains the core Based Applications Contracts, including UUPS u
 
 &nbsp;
 
-## :page_with_curl: _Instructions_
+## :page_with_curl: _Instructions for Operator_
 
 **1)** Fire up your favorite console & clone this repo somewhere:
 
@@ -24,8 +24,20 @@ __`❍ git clone https://github.com/ssvlabs/examples.git`__
 
 **2)** Enter the example folder:
 
-__`❍ cd simple-block-agreement`__
+__`❍ cd simple-block-agreement/operator/src`__
 
 **3)** Install dependencies:
 
 __`❍ npm install`__
+
+**4)** Setup the env:
+
+__`❍ cp .env.example .env`__
+
+**5)** Load the env:
+
+__`❍ cd .`__
+
+**6)** Run the operator:
+
+__`❍ npm run start`__

@@ -1,0 +1,254 @@
+import { config, tokenMap } from '../config'
+import { BApp, Strategy, StrategyID, StrategyToken, Address } from './app_interface'
+import { Table } from 'console-table-printer'
+
+export const RED = '\x1b[31m'
+export const GREEN = '\x1b[32m'
+export const YELLOW = '\x1b[33m'
+export const BLUE = '\x1b[34m'
+export const MAGENTA = '\x1b[35m'
+export const CYAN = '\x1b[36m'
+export const RESET = '\x1b[0m'
+export const colors = [RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN]
+
+export function logBAppSummary(bApp: BApp, strategies: Strategy[]): void {
+  const summaryTable = new Table({
+    columns: [
+      { name: 'Metric', alignment: 'left', color: 'cyan' },
+      { name: 'Value', alignment: 'right' },
+    ],
+    title: '📊 BApp Overview',
+  })
+
+  const totalValidatorBalance = strategies.reduce((acc, s) => acc + s.validatorBalance, 0)
+  const getTokenTotalAmount = (token: string) =>
+    strategies.reduce((acc, s) => {
+      const strategyToken = s.tokens.find((t: StrategyToken) => t.address === token)
+      return acc + (strategyToken ? (strategyToken.amount * strategyToken.obligationPercentage) / 10000 / 10 ** 18 : 0)
+    }, 0)
+
+  const tokenSummary =
+    bApp.tokens.length > 0
+      ? bApp.tokens
+          .map((t) => {
+            const symbol = tokenMap[t.address.toLowerCase()].symbol || t.address
+            const totalAmount = getTokenTotalAmount(t.address)
+            return `${symbol} (${totalAmount.toLocaleString()})`
+          })
+          .join(', ')
+      : 'None'
+
+  summaryTable.addRow({ Metric: 'Address', Value: bApp.address })
+  summaryTable.addRow({ Metric: 'Validator Balance Significance', Value: bApp.validatorBalanceSignificance })
+  summaryTable.addRow({ Metric: 'Tokens', Value: tokenSummary })
+  summaryTable.addRow({ Metric: 'Strategies', Value: strategies.length })
+  summaryTable.addRow({ Metric: 'Total Validator Balance', Value: `${totalValidatorBalance.toLocaleString()} ETH` })
+
+  summaryTable.printTable()
+}
+
+export function logValidatorBalanceTable(strategies: Strategy[]): void {
+  console.log('\n')
+
+  const validatorTable = new Table({
+    columns: [
+      { name: 'Strategy', alignment: 'center', color: 'blue' },
+      { name: 'Validator Balance', alignment: 'right', color: 'green' },
+      { name: 'Weight (%)', alignment: 'right', color: 'magenta' },
+    ],
+    title: '🔑 Validator Balance Distribution',
+  })
+
+  const totalValidatorBalance = strategies.reduce((acc, s) => acc + s.validatorBalance, 0)
+
+  strategies.forEach((strategy) => {
+    const weight = totalValidatorBalance > 0 ? (strategy.validatorBalance / totalValidatorBalance) * 100 : 0
+
+    validatorTable.addRow({
+      Strategy: strategy.id,
+      'Validator Balance': `${strategy.validatorBalance.toLocaleString()} ETH`,
+      'Weight (%)': `${weight.toFixed(2)}%`,
+    })
+  })
+
+  validatorTable.addRow(
+    {
+      Strategy: 'TOTAL',
+      'Validator Balance': `${totalValidatorBalance.toLocaleString()} ETH`,
+      'Weight (%)': '100.00%',
+    },
+    { color: 'yellow' },
+  )
+
+  validatorTable.printTable()
+  console.log('\n')
+}
+
+export function logTokenWeightSummary(tokenAddress: string, beta: number, strategies: Strategy[]): void {
+  console.log('\n')
+
+  const tokenSymbol = tokenMap[tokenAddress.toLowerCase()].symbol || tokenAddress
+
+  const tokenTable = new Table({
+    columns: [
+      { name: 'Strategy', alignment: 'center', color: 'blue' },
+      { name: 'Obligation (%)', alignment: 'right', color: 'cyan' },
+      { name: 'Balance', alignment: 'right', color: 'green' },
+      { name: 'Obligated Balance', alignment: 'right', color: 'yellow' },
+      { name: 'Risk', alignment: 'right', color: 'magenta' },
+      { name: 'Weight', alignment: 'right', color: 'red' },
+    ],
+    title: `💲 BApp Token Weight Summary for ${tokenSymbol}`,
+  })
+
+  const totalObligatedBalance = strategies.reduce((acc, s) => {
+    const strategyToken = s.tokens.find((t: StrategyToken) => t.address === tokenAddress)
+    return acc + (strategyToken ? strategyToken.amount * strategyToken.obligationPercentage : 0)
+  }, 0)
+
+  strategies.forEach((strategy) => {
+    const strategyToken = strategy.tokens.find((t: StrategyToken) => t.address === tokenAddress)
+    if (!strategyToken) return
+
+    const obligatedBalance = (strategyToken.amount * strategyToken.obligationPercentage) / 100
+    const obligationParticipation = totalObligatedBalance > 0 ? obligatedBalance / totalObligatedBalance : 0
+    const weight = obligationParticipation / Math.max(1, strategyToken.risk) ** beta
+    const formatBalance = (balance: number) => (balance / 10 ** config.tokenMap[tokenAddress].decimals).toLocaleString()
+
+    tokenTable.addRow({
+      Strategy: strategy.id,
+      'Obligation (%)': `${strategyToken.obligationPercentage.toFixed(2)}%`,
+      Balance: `${formatBalance(strategyToken.amount)} ${tokenSymbol}`,
+      'Obligated Balance': `${formatBalance(obligatedBalance)} ${tokenSymbol}`,
+      Risk: `${strategyToken.risk.toFixed(2).toLocaleString()}%`,
+      Weight: weight.toExponential(2),
+    })
+  })
+
+  tokenTable.printTable()
+  console.log('\n')
+}
+
+export function logNormalizedFinalWeights(finalWeights: Map<number, number>): void {
+  const weightSum = Array.from(finalWeights.values()).reduce((sum, w) => sum + w, 0)
+
+  const weightTable = new Table({
+    columns: [
+      { name: 'Strategy', alignment: 'center', color: 'blue' },
+      { name: 'Weight (%)', alignment: 'right', color: 'yellow' },
+    ],
+    title: '📊 Normalized Final Weights',
+  })
+
+  for (const [strategy, weight] of finalWeights.entries()) {
+    const normalizedWeight = (weight / weightSum) * 100
+    finalWeights.set(strategy, normalizedWeight / 100) // Store normalized weight back in the map
+
+    weightTable.addRow({
+      Strategy: strategy,
+      'Weight (%)': `${normalizedWeight.toFixed(2)}%`,
+    })
+  }
+
+  weightTable.printTable()
+  console.log('\n')
+}
+
+export function logStrategyTokenWeights(
+  tokenAddress: string,
+  tokenWeights: Map<StrategyID, Map<Address, number>>,
+): void {
+  const tokenEntry = Object.values(tokenMap).find((t) => t.address === tokenAddress)
+  if (!tokenEntry) {
+    console.error(`❌ Token ${tokenAddress} not found in tokenMap.`)
+    return
+  }
+
+  let totalWeight = 0
+  tokenWeights.forEach((strategyTokens) => {
+    if (strategyTokens.has(tokenAddress)) {
+      totalWeight += strategyTokens.get(tokenAddress)!
+    }
+  })
+
+  const tokenWeightTable = new Table({
+    columns: [
+      { name: 'Strategy', alignment: 'center', color: 'blue' },
+      { name: 'Weight (%)', alignment: 'right', color: 'yellow' },
+    ],
+    title: `\n📊 Normalized Weights for ${tokenMap[tokenAddress].symbol}`,
+  })
+
+  for (const [strategy, strategyTokens] of tokenWeights.entries()) {
+    if (!strategyTokens.has(tokenAddress)) continue // Skip strategies without this token
+
+    const rawWeight = strategyTokens.get(tokenAddress)!
+    const normalizedWeight = totalWeight > 0 ? (rawWeight / totalWeight) * 100 : 0
+
+    tokenWeightTable.addRow({
+      Strategy: strategy,
+      'Weight (%)': `${normalizedWeight.toFixed(2)}%`,
+    })
+  }
+
+  tokenWeightTable.printTable()
+  console.log('\n')
+}
+
+export function logToken(token: Address, message: string): void {
+  const color = getColorForToken(token)
+  const tokenSymbol = config.tokenMap[token].symbol || token
+  console.log(`${color}[💲 Token ${tokenSymbol}]${colorReset()} ${message}`)
+}
+
+export function logVB(message: string): void {
+  const color = getColorForValidatorBalance()
+  console.log(`${color}[🔑 Validator Balance]${colorReset()} ${message}`)
+}
+
+export function logFinalWeight(message: string): void {
+  const color = getColorForFinalWeight()
+  console.log(`${color}[⚖️ Final Weight]${colorReset()} ${message}`)
+}
+
+export function logTokenStrategy(token: Address, strategy: StrategyID, message: string): void {
+  logToken(token, `${getColorForStrategy(strategy)}[🧍‍♂️ strategy ${strategy}]${colorReset()} ${message}`)
+}
+
+export function logVBStrategy(strategy: StrategyID, message: string): void {
+  logVB(`${getColorForStrategy(strategy)}[🧍‍♂️ strategy ${strategy}]${colorReset()} ${message}`)
+}
+
+export function logFinalWeightStrategy(strategy: StrategyID, message: string): void {
+  logFinalWeight(`${getColorForStrategy(strategy)}[🧍‍♂️ strategy ${strategy}]${colorReset()} ${message}`)
+}
+
+export function getColorForToken(token: string): string {
+  let hash = 0
+  for (let i = 0; i < token.length; i++) {
+    hash = token.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  const colorIndex = Math.abs(hash) % colors.length
+  return colors[colorIndex]
+}
+
+export function getColorForValidatorBalance(): string {
+  return CYAN
+}
+
+export function getColorForFinalWeight(): string {
+  return MAGENTA
+}
+
+export function getColorForStrategy(id: number): string {
+  return colors[id % colors.length]
+}
+
+export function colorReset(): string {
+  return RESET
+}
+
+export function logStrategy(id: StrategyID, message: string): void {
+  const color = getColorForStrategy(id)
+  console.log(`${color}[🧍strategy ${id}] ${colorReset()} ${message}`)
+}

@@ -1,36 +1,21 @@
-import { ethers } from 'ethers'
 import dotenv from 'dotenv'
+
+import { App } from './app/app'
+import { getData } from './get-data'
 
 dotenv.config()
 
-// Load environment variables
-const INFURA_RPC_URL = process.env.INFURA_RPC_URL || ''
-const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS || ''
-const EVENT_NAME = process.env.EVENT_NAME || ''
+const main = async () => {
+  const app = new App()
 
-// ABI: Minimal ABI required to listen for events (Replace with your contract's ABI)
-const CONTRACT_ABI = [
-  'event Transfer(address indexed from, address indexed to, uint256 value)', // Replace with your event
-]
+  const bAppAddress = process.env.BAPP_ADDRESS || ''
+  const useExponentialWeight = process.env.USE_EXPONENTIAL_WEIGHT === 'true'
+  const useHarmonicCombination = process.env.USE_HARMONIC_COMBINATION_FUNCTION === 'true'
 
-// Setup Provider
-const provider = new ethers.JsonRpcProvider(INFURA_RPC_URL)
+  const { bApp, strategies, slot } = await getData(bAppAddress)
 
-// Setup Contract
-const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider)
-
-// Listen for events
-const listenForEvents = async () => {
-  console.log(`🔍 Listening for ${EVENT_NAME} events on ${CONTRACT_ADDRESS}...`)
-
-  contract.on(EVENT_NAME, (from, to, value, event) => {
-    console.log(`📢 Event received: ${EVENT_NAME}`)
-    console.log(`From: ${from}`)
-    console.log(`To: ${to}`)
-    console.log(`Value: ${value.toString()}`)
-    console.log(`Transaction Hash: ${event.transactionHash}`)
-  })
+  app.Setup(bApp, strategies, useExponentialWeight, useHarmonicCombination)
+  app.StartAgreement(slot)
 }
 
-// Start listening
-listenForEvents().catch(console.error)
+main().catch(console.error)
