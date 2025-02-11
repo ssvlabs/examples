@@ -47,7 +47,7 @@
 // deposit owner 10 SSV: https://holesky.etherscan.io/tx/0x758d761e4b51b55b4ad1ab39d11dc48e35d3fbcde5b8345f77e7c7c849516f69
 
 export type StrategyID = number // Represents an identifier of a strategy
-export type Token = string // Represents a token address
+export type Address = string // Represents a token address
 export type Amount = number // Represents an amount of a token
 export type Percentage = number // Represents a percentage value
 
@@ -58,7 +58,7 @@ export type Percentage = number // Represents a percentage value
 // - the obligation percentage dedicated to the bApp
 // - the risk level of the token
 export type StrategyToken = {
-  token: Token
+  address: Address
   amount: Amount
   obligationPercentage: Percentage
   risk: number
@@ -67,7 +67,7 @@ export type StrategyToken = {
 // BAppToken represents the usage of a token by a bApp with
 // a shared risk level (beta) and significance (weight in the combination funtion)
 export type BAppToken = {
-  token: Token
+  address: Address
   sharedRiskLevel: number
   significance: number
 }

@@ -119,9 +119,8 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
       tokens: strategy.strategy.deposits.map((deposit) => {
         const obligation = strategy.obligations.find((obligation) => obligation.token === deposit.token)
         const balance = strategy.strategy.balances.find((balance) => balance.token === deposit.token)
-
         return {
-          token: deposit.token,
+          address: deposit.token,
           amount: Number(deposit.depositAmount),
           obligationPercentage: obligation ? Number(obligation.percentage) : 0,
           risk: balance ? Number(balance.riskValue) : 0,
@@ -133,7 +132,7 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
     const bApp: BApp = {
       address: bAppAddress,
       tokens: data.data.bapp.bAppTokens.map((token: any) => ({
-        token: token.token,
+        address: token.token,
         sharedRiskLevel: token.sharedRiskLevel,
         significance: 0,
       })),
@@ -141,7 +140,7 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
     }
 
     bApp.tokens.forEach((token) => {
-      logTokenWeightSummary(token.token, token.sharedRiskLevel, strategies)
+      logTokenWeightSummary(token.address, token.sharedRiskLevel, strategies)
     })
 
     // console.log('🔹 BApp:', JSON.stringify(bApp, null, 2))

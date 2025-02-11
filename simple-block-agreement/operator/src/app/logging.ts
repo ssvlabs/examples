@@ -1,5 +1,5 @@
 import { config, tokenMap } from '../config'
-import { BApp, Strategy, StrategyID, StrategyToken, Token } from './app_interface'
+import { BApp, Strategy, StrategyID, StrategyToken, Address } from './app_interface'
 import { Table } from 'console-table-printer'
 
 export const RED = '\x1b[31m'
@@ -23,7 +23,7 @@ export function logBAppSummary(bApp: BApp, strategies: Strategy[]): void {
   const totalValidatorBalance = strategies.reduce((acc, s) => acc + s.validatorBalance, 0)
   const getTokenTotalAmount = (token: string) =>
     strategies.reduce((acc, s) => {
-      const strategyToken = s.tokens.find((t: StrategyToken) => t.token === token)
+      const strategyToken = s.tokens.find((t: StrategyToken) => t.address === token)
       return acc + (strategyToken ? (strategyToken.amount * strategyToken.obligationPercentage) / 10000 / 10 ** 18 : 0)
     }, 0)
 
@@ -31,8 +31,8 @@ export function logBAppSummary(bApp: BApp, strategies: Strategy[]): void {
     bApp.tokens.length > 0
       ? bApp.tokens
           .map((t) => {
-            const symbol = tokenMap[t.token.toLowerCase()].symbol || t.token
-            const totalAmount = getTokenTotalAmount(t.token)
+            const symbol = tokenMap[t.address.toLowerCase()].symbol || t.address
+            const totalAmount = getTokenTotalAmount(t.address)
             return `${symbol} (${totalAmount.toLocaleString()})`
           })
           .join(', ')
@@ -104,12 +104,12 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
 
   // Calculate total obligated balance for this token
   const totalObligatedBalance = strategies.reduce((acc, s) => {
-    const strategyToken = s.tokens.find((t: StrategyToken) => t.token === tokenAddress)
+    const strategyToken = s.tokens.find((t: StrategyToken) => t.address === tokenAddress)
     return acc + (strategyToken ? strategyToken.amount * (strategyToken.obligationPercentage / 100) : 0)
   }, 0)
 
   strategies.forEach((strategy) => {
-    const strategyToken = strategy.tokens.find((t: StrategyToken) => t.token === tokenAddress)
+    const strategyToken = strategy.tokens.find((t: StrategyToken) => t.address === tokenAddress)
     if (!strategyToken) return
 
     const obligatedBalance = strategyToken.amount * (strategyToken.obligationPercentage / 10000)
@@ -122,7 +122,7 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
       'Obligation (%)': `${(strategyToken.obligationPercentage / 100).toFixed(2)}%`,
       Balance: `${formatBalance(strategyToken.amount)} ${tokenSymbol}`,
       'Obligated Balance': `${formatBalance(obligatedBalance)} ${tokenSymbol}`,
-      Risk: strategyToken.risk.toLocaleString(),
+      Risk: (strategyToken.risk / 100).toFixed(2).toLocaleString(),
       Weight: weight.toExponential(2),
     })
   })
@@ -130,9 +130,10 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
   tokenTable.printTable()
 }
 
-export function logToken(token: Token, message: string): void {
+export function logToken(token: Address, message: string): void {
   const color = getColorForToken(token)
-  const tokenSymbol = config.tokenMap[token.toLowerCase()].symbol || token
+  console.log(token)
+  const tokenSymbol = config.tokenMap[token].symbol || token
   console.log(`${color}[💲 Token ${tokenSymbol}]${colorReset()} ${message}`)
 }
 
@@ -146,7 +147,7 @@ export function logFinalWeight(message: string): void {
   console.log(`${color}[⚖️ Final Weight]${colorReset()} ${message}`)
 }
 
-export function logTokenStrategy(token: Token, strategy: StrategyID, message: string): void {
+export function logTokenStrategy(token: Address, strategy: StrategyID, message: string): void {
   logToken(token, `${getColorForStrategy(strategy)}[🧍‍♂️ strategy ${strategy}]${colorReset()} ${message}`)
 }
 
@@ -186,11 +187,4 @@ export function colorReset(): string {
 export function logStrategy(id: StrategyID, message: string): void {
   const color = getColorForStrategy(id)
   console.log(`${color}[🧍strategy ${id}] ${colorReset()} ${message}`)
-}
-
-export function TokenSymbol(token: Token): string {
-  if (token == '0x68a8ddd7a59a900e0657e9f8bbe02b70c947f25f') {
-    return 'SSV'
-  }
-  return token
 }
