@@ -3,8 +3,8 @@ import { BApp, BAppToken, Strategy, StrategyID, StrategyToken, Address } from '.
 import {
   BLUE,
   GREEN,
-  logFinalWeight,
   logFinalWeightStrategy,
+  logNormalizedFinalWeights,
   logToken,
   logTokenStrategy,
   logVB,
@@ -37,7 +37,6 @@ export function exponentialWeightFormula(
 
   const weight = obligationParticipation * Math.exp(-beta * Math.max(1, risk))
 
-  console.log('strategyToken', strategyToken)
   const symbol = config.tokenMap[strategyToken.address].symbol
 
   logTokenStrategy(
@@ -250,16 +249,16 @@ function calculateFinalWeights(
     weightSum = 1
   }
 
-  // Normalize weights
-  let normWeightsLog = `📊  Normalized final weights: \n`
+  // let normWeightsLog = `📊  Normalized final weights: \n`
   for (const strategy of tokenWeights.keys()) {
     const weight = finalWeights.get(strategy)!
     const normalizedWeight = weight / weightSum
     finalWeights.set(strategy, normalizedWeight)
 
-    normWeightsLog += `   - strategy ${strategy}: ${YELLOW}${(100 * normalizedWeight).toFixed(2)}%${RESET}\n`
+    // normWeightsLog += `   - strategy ${strategy}: ${YELLOW}${(100 * normalizedWeight).toFixed(2)}%${RESET}`
   }
-  logFinalWeight(normWeightsLog)
+
+  logNormalizedFinalWeights(finalWeights)
 
   return finalWeights
 }

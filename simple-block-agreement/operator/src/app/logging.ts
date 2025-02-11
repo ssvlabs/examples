@@ -141,9 +141,33 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
   tokenTable.printTable()
 }
 
+export function logNormalizedFinalWeights(finalWeights: Map<number, number>): void {
+  const weightSum = Array.from(finalWeights.values()).reduce((sum, w) => sum + w, 0)
+
+  const weightTable = new Table({
+    columns: [
+      { name: 'Strategy', alignment: 'center', color: 'blue' },
+      { name: 'Weight (%)', alignment: 'right', color: 'yellow' },
+    ],
+    title: '📊 Normalized Final Weights',
+  })
+
+  for (const [strategy, weight] of finalWeights.entries()) {
+    const normalizedWeight = (weight / weightSum) * 100
+    finalWeights.set(strategy, normalizedWeight / 100) // Store normalized weight back in the map
+
+    weightTable.addRow({
+      Strategy: strategy,
+      'Weight (%)': `${normalizedWeight.toFixed(2)}%`,
+    })
+  }
+
+  weightTable.printTable()
+  console.log('\n')
+}
+
 export function logToken(token: Address, message: string): void {
   const color = getColorForToken(token)
-  console.log(token)
   const tokenSymbol = config.tokenMap[token].symbol || token
   console.log(`${color}[💲 Token ${tokenSymbol}]${colorReset()} ${message}`)
 }
