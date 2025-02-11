@@ -30,6 +30,14 @@ __`❍ cd simple-block-agreement/operator/src`__
 
 __`❍ npm install`__
 
-**4)** Run the operator:
+**4)** Setup the env:
+
+__`❍ cp .env.example .env`__
+
+**5)** Load the env:
+
+__`❍ cd .`__
+
+**6)** Run the operator:
 
 __`❍ npm run start`__
