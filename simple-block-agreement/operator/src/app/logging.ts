@@ -1,5 +1,5 @@
-import { tokenMap } from '../config'
-import { BApp, Strategy, StrategyID, Token } from './app_interface'
+import { config, tokenMap } from '../config'
+import { BApp, Strategy, StrategyID, StrategyToken, Token } from './app_interface'
 import { Table } from 'console-table-printer'
 
 export const RED = '\x1b[31m'
@@ -11,33 +11,45 @@ export const CYAN = '\x1b[36m'
 export const RESET = '\x1b[0m'
 export const colors = [RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN]
 
-// 🔹 Log BApp Summary
 export function logBAppSummary(bApp: BApp, strategies: Strategy[]): void {
-  console.log(`${CYAN}📊 BApp Summary${RESET}`)
   const summaryTable = new Table({
     columns: [
       { name: 'Metric', alignment: 'left', color: 'cyan' },
       { name: 'Value', alignment: 'right' },
     ],
+    title: '📊 BApp Overview',
   })
+
+  const totalValidatorBalance = strategies.reduce((acc, s) => acc + s.validatorBalance, 0)
+  const getTokenTotalAmount = (token: string) =>
+    strategies.reduce((acc, s) => {
+      const strategyToken = s.tokens.find((t: StrategyToken) => t.token === token)
+      return acc + (strategyToken ? (strategyToken.amount * strategyToken.obligationPercentage) / 10000 / 10 ** 18 : 0)
+    }, 0)
+
+  const tokenSummary =
+    bApp.tokens.length > 0
+      ? bApp.tokens
+          .map((t) => {
+            const symbol = tokenMap[t.token.toLowerCase()] || t.token
+            const totalAmount = getTokenTotalAmount(t.token)
+            return `${symbol} (${totalAmount.toLocaleString()})`
+          })
+          .join(', ')
+      : 'None'
 
   summaryTable.addRow({ Metric: 'Address', Value: bApp.address })
   summaryTable.addRow({ Metric: 'Validator Balance Significance', Value: bApp.validatorBalanceSignificance })
-  summaryTable.addRow({
-    Metric: 'Tokens',
-    Value: bApp.tokens.map((t) => tokenMap[t.token.toLowerCase()] || t.token).join(', '),
-  })
+  summaryTable.addRow({ Metric: 'Tokens', Value: tokenSummary })
   summaryTable.addRow({ Metric: 'Strategies', Value: strategies.length })
-  summaryTable.addRow({
-    Metric: 'Total Validator Balance',
-    Value: strategies.reduce((acc, s) => acc + s.validatorBalance, 0) + ' ETH',
-  })
+  summaryTable.addRow({ Metric: 'Total Validator Balance', Value: `${totalValidatorBalance.toLocaleString()} ETH` })
+
   summaryTable.printTable()
 }
 
 export function logToken(token: Token, message: string): void {
   const color = getColorForToken(token)
-  const tokenSymbol = TokenSymbol(token)
+  const tokenSymbol = config.tokenMap[token.toLowerCase()] || token
   console.log(`${color}[💲 Token ${tokenSymbol}]${colorReset()} ${message}`)
 }
 
@@ -48,7 +60,7 @@ export function logVB(message: string): void {
 
 export function logFinalWeight(message: string): void {
   const color = getColorForFinalWeight()
-  console.log(`${color}[⚖️  Final Weight]${colorReset()} ${message}`)
+  console.log(`${color}[⚖️ Final Weight]${colorReset()} ${message}`)
 }
 
 export function logTokenStrategy(token: Token, strategy: StrategyID, message: string): void {
@@ -90,7 +102,7 @@ export function colorReset(): string {
 
 export function logStrategy(id: StrategyID, message: string): void {
   const color = getColorForStrategy(id)
-  console.log(`${color}[🧍‍♂️ strategy ${id}] ${colorReset()} ${message}`)
+  console.log(`${color}[🧍strategy ${id}] ${colorReset()} ${message}`)
 }
 
 export function TokenSymbol(token: Token): string {

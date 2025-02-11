@@ -88,7 +88,7 @@ export class App implements AppInterface {
 
   // Starts an agreement round on a slot number
   StartAgreement(slot: number): void {
-    console.log(`🚀  ${YELLOW}Starting agreement for slot ${slot}${RESET}`)
+    console.log(`🚀 ${YELLOW}Simulate Blockchain Agreement Process for Slot ${slot}${RESET}`)
 
     for (const state of this.states.values()) {
       state.handleNewBlock(slot)

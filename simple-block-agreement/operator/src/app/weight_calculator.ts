@@ -1,3 +1,4 @@
+import { config } from '../config'
 import { BApp, BAppToken, Strategy, StrategyID, StrategyToken, Token } from './app_interface'
 import {
   BLUE,
@@ -43,11 +44,9 @@ export function exponentialWeightFormula(
     `🧮 Calculating weight (exponential formula):
   - Obligation percentage: ${(100 * strategyToken.obligationPercentage).toFixed(2)}%
   - Balance: ${strategyToken.amount} SSV
-  -> Obligated balance (obligation percentage * balance): ${obligation}
-
-  - Total bApp amount: ${totalBAppAmount}
+  -> Obligated balance (obligation percentage * balance): ${obligation} ${config.tokenMap[strategyToken.token]}
+  - Total bApp amount: ${totalBAppAmount} ${config.tokenMap[strategyToken.token]}
   -> Obligation participation (obligated balance / total bApp amount): ${obligationParticipation}
-
   - Risk: ${risk}
   - Beta: ${beta}
   -> Weight (obligation participation * exp(-beta * max(1, risk))): ${GREEN}${weight}${RESET}`,
@@ -76,11 +75,9 @@ export function polynomialWeightFormula(
     `🧮 Calculating weight (polynomial formula):
   - Obligation percentage: ${(100 * strategyToken.obligationPercentage).toFixed(2)}%
   - Balance: ${strategyToken.amount}
-  -> Obligated balance (obligation percentage * balance): ${obligation}
-
-  - Total bApp amount: ${totalBAppAmount}
+  -> Obligated balance (obligation percentage * balance): ${obligation} ${config.tokenMap[strategyToken.token]}
+  - Total bApp amount: ${totalBAppAmount} ${config.tokenMap[strategyToken.token]}
   -> Obligation participation (obligated balance / total bApp amount): ${obligationParticipation}
-
   - Risk: ${risk}
   - Beta: ${beta}
   -> Weight (obligation participation / (max(1, risk)^{beta})): ${GREEN}${weight}${RESET}`,
