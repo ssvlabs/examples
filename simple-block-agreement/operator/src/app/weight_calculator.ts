@@ -47,7 +47,6 @@ export function exponentialWeightFormula(
   - Obligation percentage: ${(100 * strategyToken.obligationPercentage).toFixed(2)}%
   - Balance: ${strategyToken.amount} ${symbol}
   -> Obligated balance (obligation percentage * balance): ${obligation} ${symbol}
-  - Total bApp amount: ${totalBAppAmount} ${symbol}
   -> Obligation participation (obligated balance / total bApp amount): ${obligationParticipation}
   - Risk: ${risk}
   -> Weight (obligation participation * exp(-beta * max(1, risk))): ${GREEN}${weight}${RESET}`,
@@ -79,7 +78,6 @@ export function polynomialWeightFormula(
   - Obligation percentage: ${(100 * strategyToken.obligationPercentage).toFixed(2)}%
   - Balance: ${strategyToken.amount} ${symbol}
   -> Obligated balance (obligation percentage * balance): ${obligation} ${symbol}
-  - Total bApp amount: ${totalBAppAmount} ${symbol}
   -> Obligation participation (obligated balance / total bApp amount): ${obligationParticipation}
   - Risk: ${risk}
   -> Weight (obligation participation / (max(1, risk)^{beta})): ${GREEN}${weight}${RESET}`,

@@ -1,3 +1,4 @@
+import { tokenMap } from '../config'
 import { AppInterface, BApp, Strategy, StrategyID } from './app_interface'
 import { RESET, YELLOW } from './logging'
 import { State } from './protocol'
@@ -102,9 +103,9 @@ function sanitizeStrategies(strategies: Strategy[]): Strategy[] {
   for (const strategy of strategies) {
     strategy.id = sanitizeStrategyID(strategy.id)
     for (const token of strategy.tokens) {
-      token.obligationPercentage /= 10000
-      token.risk /= 10000
-      token.amount = weiToToken(BigInt(token.amount), tokenDecimals(token.address))
+      token.obligationPercentage /= 100
+      token.risk /= 100
+      token.amount = weiToToken(BigInt(token.amount), tokenMap[token.address].decimals)
     }
   }
   return strategies
@@ -112,11 +113,6 @@ function sanitizeStrategies(strategies: Strategy[]): Strategy[] {
 
 function weiToToken(weiAmount: bigint | string, decimals: number): number {
   return Number(ethers.formatUnits(BigInt(weiAmount), decimals))
-}
-
-function tokenDecimals(token: string): number {
-  if (token === '0x68A8DDD7a59A900E0657e9f8bbE02B70c947f25F') return 18
-  return 18
 }
 
 function sanitizeStrategyID(strategyID: number | string): number {
