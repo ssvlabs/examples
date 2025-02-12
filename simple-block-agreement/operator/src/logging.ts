@@ -1,5 +1,5 @@
-import { config, tokenMap } from '../config'
-import { BApp, Strategy, StrategyID, StrategyToken, Address } from './app_interface'
+import { config, tokenMap } from './config'
+import { BApp, Strategy, StrategyID, StrategyToken, Address } from './types/app-interface'
 import { Table } from 'console-table-printer'
 
 export const RED = '\x1b[31m'

@@ -1,4 +1,4 @@
-import { BApp, BAppToken, Strategy, StrategyToken, Address } from './app_interface'
+import { BApp, BAppToken, Strategy, StrategyToken, Address } from '../types/app-interface'
 
 export function getStrategyToken(strategy: Strategy, tokenAddress: Address): StrategyToken {
   for (const strategyToken of strategy.tokens) {

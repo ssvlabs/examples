@@ -9,8 +9,8 @@ import {
   equalSignedVote,
 } from './testingutils/protocol'
 import { Testing4Strategies, TestingBApp } from './testingutils/app'
-import { SignedVote } from '../src/app/protocol_types'
-import { StrategyID } from '../src/app/app_interface'
+import { SignedVote } from '../src/types/protocol-types'
+import { StrategyID } from '../src/types/app-interface'
 
 describe('App', () => {
   let app: App

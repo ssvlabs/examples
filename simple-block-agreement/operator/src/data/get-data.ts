@@ -2,11 +2,11 @@ import dotenv from 'dotenv'
 
 import { request } from 'undici'
 
-import { config } from './config'
+import { config } from '../config'
 
-import type { BApp, Strategy } from './app/app_interface'
-import type { BAppToken, Owner, ResponseData } from './types/ssv-graphql'
-import { logBAppSummary, logTokenWeightSummary } from './app/logging'
+import type { BApp, Strategy } from '../types/app-interface'
+import type { BAppToken, Owner, ResponseData } from '../types/ssv-graphql'
+import { logBAppSummary, logTokenWeightSummary } from '../logging'
 
 dotenv.config()
 

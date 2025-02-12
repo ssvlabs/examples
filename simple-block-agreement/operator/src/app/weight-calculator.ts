@@ -1,5 +1,5 @@
 import { config } from '../config'
-import { BApp, BAppToken, Strategy, StrategyID, StrategyToken, Address } from './app_interface'
+import { BApp, BAppToken, Strategy, StrategyID, StrategyToken, Address } from '../types/app-interface'
 import {
   BLUE,
   GREEN,
@@ -12,7 +12,7 @@ import {
   logVB,
   logVBStrategy,
   RESET,
-} from './logging'
+} from '../logging'
 import { getBAppToken, getStrategyToken } from './util'
 
 // ==================== Weight Formula ====================

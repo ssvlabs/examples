@@ -1,11 +1,11 @@
-import { BApp, Strategy } from '../src/app/app_interface'
+import { BApp, Strategy } from '../src/types/app-interface'
 import {
   arithmeticCombinationFunction,
   calculateParticipantsWeight,
   exponentialWeightFormula,
   harmonicCombinationFunction,
   polynomialWeightFormula,
-} from '../src/app/weight_calculator'
+} from '../src/app/weight-calculator'
 import { TestingBApp } from './testingutils/app'
 describe('HarmonicWeightCalculator', () => {
   let bApp: BApp
