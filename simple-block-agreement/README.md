@@ -24,7 +24,7 @@ __`❍ git clone https://github.com/ssvlabs/examples.git`__
 
 **2)** Enter the example folder:
 
-__`❍ cd simple-block-agreement/operator/src`__
+__`❍ cd examples/simple-block-agreement/operator`__
 
 **3)** Install dependencies:
 
