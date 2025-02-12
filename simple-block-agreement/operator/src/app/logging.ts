@@ -40,7 +40,7 @@ export function logBAppSummary(bApp: BApp, strategies: Strategy[]): void {
           .map((t) => {
             const symbol = tokenMap[t.address.toLowerCase()].symbol || t.address
             const totalAmount = getTokenTotalAmount(t.address)
-            return `${symbol} (Tot: ${totalAmount.toLocaleString()} / Sig: ${t.significance})`
+            return `${symbol} (Amount: ${totalAmount.toLocaleString()} / Significance: ${t.significance})`
           })
           .join(', ')
       : 'None'
@@ -62,7 +62,7 @@ export function logValidatorBalanceTable(strategies: Strategy[]): void {
       { name: 'Validator Balance', alignment: 'right', color: 'green' },
       { name: 'Weight (%)', alignment: 'right', color: 'magenta' },
     ],
-    title: '🔑 Validator Balance Distribution',
+    title: '🔑 Validator Weights',
   })
 
   const totalValidatorBalance = strategies.reduce((acc, s) => acc + s.validatorBalance, 0)
@@ -119,7 +119,6 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
       Balance: `${formatBalance(strategyToken.amount)} ${tokenSymbol}`,
       'Obligated Balance': `${formatBalance(obligatedBalance)} ${tokenSymbol}`,
       Risk: `${strategyToken.risk.toFixed(2).toLocaleString()}%`,
-      // Weight: weight.toExponential(2),
     })
   })
 
@@ -127,24 +126,28 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
   console.log('\n')
 }
 
-export function logNormalizedFinalWeights(finalWeights: Map<number, number>): void {
-  const weightSum = Array.from(finalWeights.values()).reduce((sum, w) => sum + w, 0)
+const toPercentage = (value: number) => (value * 100).toFixed(2)
 
+export function logNormalizedFinalWeights(
+  finalWeights: Map<StrategyID, number>,
+  rawWeights: Map<StrategyID, number>,
+): void {
   const weightTable = new Table({
     columns: [
       { name: 'Strategy', alignment: 'center', color: 'blue' },
+      { name: 'Raw Weight', alignment: 'right', color: 'red' },
+      { name: 'Norm. Weight', alignment: 'right', color: 'magenta' },
       { name: 'Weight (%)', alignment: 'right', color: 'yellow' },
     ],
     title: '📊 Normalized Final Weights',
   })
 
   for (const [strategy, weight] of finalWeights.entries()) {
-    const normalizedWeight = (weight / weightSum) * 100
-    finalWeights.set(strategy, normalizedWeight / 100) // Store normalized weight back in the map
-
     weightTable.addRow({
       Strategy: strategy,
-      'Weight (%)': `${normalizedWeight.toFixed(2)}%`,
+      'Raw Weight': rawWeights.get(strategy)?.toExponential(2),
+      'Norm. Weight': weight.toExponential(2),
+      'Weight (%)': `${toPercentage(weight)}%`,
     })
   }
 
@@ -172,6 +175,8 @@ export function logStrategyTokenWeights(
   const tokenWeightTable = new Table({
     columns: [
       { name: 'Strategy', alignment: 'center', color: 'blue' },
+      { name: 'Raw Weight', alignment: 'right', color: 'magenta' },
+      { name: 'Norm. Weight', alignment: 'right', color: 'red' },
       { name: 'Weight (%)', alignment: 'right', color: 'yellow' },
     ],
     title: `\n📊 Normalized Weights for ${tokenMap[tokenAddress].symbol}`,
@@ -181,11 +186,13 @@ export function logStrategyTokenWeights(
     if (!strategyTokens.has(tokenAddress)) continue // Skip strategies without this token
 
     const rawWeight = strategyTokens.get(tokenAddress)!
-    const normalizedWeight = totalWeight > 0 ? (rawWeight / totalWeight) * 100 : 0
+    const normalizedWeight = totalWeight > 0 ? rawWeight / totalWeight : 0
 
     tokenWeightTable.addRow({
       Strategy: strategy,
-      'Weight (%)': `${normalizedWeight.toFixed(2)}%`,
+      'Raw Weight': rawWeight.toExponential(2),
+      'Norm. Weight': normalizedWeight.toExponential(2),
+      'Weight (%)': `${toPercentage(normalizedWeight)}%`,
     })
   }
 
