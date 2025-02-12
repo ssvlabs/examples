@@ -24,7 +24,14 @@ export function logBAppSummary(bApp: BApp, strategies: Strategy[]): void {
   const getTokenTotalAmount = (token: string) =>
     strategies.reduce((acc, s) => {
       const strategyToken = s.tokens.find((t: StrategyToken) => t.address === token)
-      return acc + (strategyToken ? (strategyToken.amount * strategyToken.obligationPercentage) / 10000 / 10 ** 18 : 0)
+      return (
+        acc +
+        (strategyToken
+          ? (strategyToken.amount * strategyToken.obligationPercentage) /
+            100 /
+            10 ** tokenMap[strategyToken.address].decimals
+          : 0)
+      )
     }, 0)
 
   const tokenSummary =
@@ -33,17 +40,16 @@ export function logBAppSummary(bApp: BApp, strategies: Strategy[]): void {
           .map((t) => {
             const symbol = tokenMap[t.address.toLowerCase()].symbol || t.address
             const totalAmount = getTokenTotalAmount(t.address)
-            return `${symbol} (${totalAmount.toLocaleString()})`
+            return `${symbol} (Tot: ${totalAmount.toLocaleString()} / Sig: ${t.significance})`
           })
           .join(', ')
       : 'None'
 
   summaryTable.addRow({ Metric: 'Address', Value: bApp.address })
-  summaryTable.addRow({ Metric: 'Validator Balance Significance', Value: bApp.validatorBalanceSignificance })
   summaryTable.addRow({ Metric: 'Tokens', Value: tokenSummary })
   summaryTable.addRow({ Metric: 'Strategies', Value: strategies.length })
   summaryTable.addRow({ Metric: 'Total Validator Balance', Value: `${totalValidatorBalance.toLocaleString()} ETH` })
-
+  summaryTable.addRow({ Metric: 'Validator Balance Significance', Value: bApp.validatorBalanceSignificance })
   summaryTable.printTable()
 }
 
@@ -92,27 +98,19 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
   const tokenTable = new Table({
     columns: [
       { name: 'Strategy', alignment: 'center', color: 'blue' },
-      { name: 'Obligation (%)', alignment: 'right', color: 'cyan' },
       { name: 'Balance', alignment: 'right', color: 'green' },
+      { name: 'Obligation (%)', alignment: 'right', color: 'cyan' },
       { name: 'Obligated Balance', alignment: 'right', color: 'yellow' },
       { name: 'Risk', alignment: 'right', color: 'magenta' },
-      { name: 'Weight', alignment: 'right', color: 'red' },
     ],
     title: `💲 BApp Token Weight Summary for ${tokenSymbol}`,
   })
-
-  const totalObligatedBalance = strategies.reduce((acc, s) => {
-    const strategyToken = s.tokens.find((t: StrategyToken) => t.address === tokenAddress)
-    return acc + (strategyToken ? strategyToken.amount * strategyToken.obligationPercentage : 0)
-  }, 0)
 
   strategies.forEach((strategy) => {
     const strategyToken = strategy.tokens.find((t: StrategyToken) => t.address === tokenAddress)
     if (!strategyToken) return
 
     const obligatedBalance = (strategyToken.amount * strategyToken.obligationPercentage) / 100
-    const obligationParticipation = totalObligatedBalance > 0 ? obligatedBalance / totalObligatedBalance : 0
-    const weight = obligationParticipation / Math.max(1, strategyToken.risk) ** beta
     const formatBalance = (balance: number) => (balance / 10 ** config.tokenMap[tokenAddress].decimals).toLocaleString()
 
     tokenTable.addRow({
@@ -121,7 +119,7 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
       Balance: `${formatBalance(strategyToken.amount)} ${tokenSymbol}`,
       'Obligated Balance': `${formatBalance(obligatedBalance)} ${tokenSymbol}`,
       Risk: `${strategyToken.risk.toFixed(2).toLocaleString()}%`,
-      Weight: weight.toExponential(2),
+      // Weight: weight.toExponential(2),
     })
   })
 
