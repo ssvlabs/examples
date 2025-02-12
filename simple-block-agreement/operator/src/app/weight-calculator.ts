@@ -1,5 +1,5 @@
 import { config } from '../config'
-import { BApp, BAppToken, Strategy, StrategyID, StrategyToken, Address } from './app_interface'
+import { BApp, BAppToken, Strategy, StrategyID, StrategyToken, Address } from '../types/app-interface'
 import {
   BLUE,
   GREEN,
@@ -12,7 +12,7 @@ import {
   logVB,
   logVBStrategy,
   RESET,
-} from './logging'
+} from '../logging'
 import { getBAppToken, getStrategyToken } from './util'
 
 // ==================== Weight Formula ====================
@@ -34,19 +34,15 @@ export function exponentialWeightFormula(
   const obligation = strategyToken.obligationPercentage * strategyToken.amount
   const obligationParticipation = obligation / totalBAppAmount
   const risk = strategyToken.risk
+  console.log('RISK:', risk)
   const beta = bAppToken.sharedRiskLevel
 
   const weight = obligationParticipation * Math.exp(-beta * Math.max(1, risk))
-
-  const symbol = config.tokenMap[strategyToken.address].symbol
 
   logTokenStrategy(
     bAppToken.address,
     strategyID,
     `🧮 Calculating weight (exponential formula):
-  - Obligation percentage: ${(100 * strategyToken.obligationPercentage).toFixed(2)}%
-  - Balance: ${strategyToken.amount} ${symbol}
-  -> Obligated balance (obligation percentage * balance): ${obligation} ${symbol}
   -> Obligation participation (obligated balance / total bApp amount): ${obligationParticipation}
   - Risk: ${risk}
   -> Weight (obligation participation * exp(-beta * max(1, risk))): ${GREEN}${weight}${RESET}`,
@@ -69,15 +65,10 @@ export function polynomialWeightFormula(
 
   const weight = obligationParticipation / Math.pow(Math.max(1, risk), beta)
 
-  const symbol = config.tokenMap[strategyToken.address].symbol
-
   logTokenStrategy(
     bAppToken.address,
     strategyID,
     `🧮 Calculating weight (polynomial formula):
-  - Obligation percentage: ${(100 * strategyToken.obligationPercentage).toFixed(2)}%
-  - Balance: ${strategyToken.amount} ${symbol}
-  -> Obligated balance (obligation percentage * balance): ${obligation} ${symbol}
   -> Obligation participation (obligated balance / total bApp amount): ${obligationParticipation}
   - Risk: ${risk}
   -> Weight (obligation participation / (max(1, risk)^{beta})): ${GREEN}${weight}${RESET}`,
@@ -122,7 +113,7 @@ export function harmonicCombinationFunction(
   }
 
   // Calculate the harmonic mean
-  let log: string = '🧮 Calculating final weight:\n'
+  let log: string = '🧮 Calculating Final Weight:\n'
 
   const significanceSum = SignificanceSum(bApp)
   log += `  -> Total significance sum: ${significanceSum}\n`
@@ -164,7 +155,7 @@ export function arithmeticCombinationFunction(
   tokenWeights: Map<Address, number>,
   validatorBalanceWeight: number,
 ): number {
-  let log: string = '🧮 Calculating final weight:\n'
+  let log: string = '🧮 Calculating Final Weight:\n'
 
   const significanceSum = SignificanceSum(bApp)
   log += `  -> Total significance sum: ${significanceSum}\n`
@@ -228,6 +219,7 @@ function calculateFinalWeights(
   combinationFunction: CombinationFunction,
 ): Map<StrategyID, number> {
   const finalWeights = new Map<StrategyID, number>()
+  const rawWeights = new Map<StrategyID, number>()
 
   let weightSum: number = 0
   for (const strategy of tokenWeights.keys()) {
@@ -239,8 +231,9 @@ function calculateFinalWeights(
       tokenWeights.get(strategy)!,
       validatorBalanceWeights.get(strategy)!,
     )
-    finalWeights.set(strategy, strategyNonNormalizedWeight)
 
+    finalWeights.set(strategy, strategyNonNormalizedWeight)
+    rawWeights.set(strategy, strategyNonNormalizedWeight)
     weightSum += strategyNonNormalizedWeight
   }
 
@@ -254,7 +247,7 @@ function calculateFinalWeights(
     finalWeights.set(strategy, normalizedWeight)
   }
 
-  logNormalizedFinalWeights(finalWeights)
+  logNormalizedFinalWeights(finalWeights, rawWeights)
 
   return finalWeights
 }

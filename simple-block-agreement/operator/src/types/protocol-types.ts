@@ -1,4 +1,4 @@
-import { StrategyID } from './app_interface'
+import { StrategyID } from './app-interface'
 
 // ProtocolParticipant is a strategy that opted-in to the bApp.
 // Includes the participant's weight and public key.

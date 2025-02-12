@@ -5,7 +5,7 @@ import { hexToUint8Array } from './app/util'
 
 dotenv.config()
 
-const bAppConfigPath = path.resolve(__dirname, 'bapp.json')
+const bAppConfigPath = path.resolve(__dirname, 'bapp.config.json')
 const bAppConfig = JSON.parse(fs.readFileSync(bAppConfigPath, 'utf-8'))
 
 const privateKeysMap = new Map<string, Uint8Array>()

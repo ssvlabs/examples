@@ -1,16 +1,15 @@
 import { tokenMap } from '../config'
-import { AppInterface, BApp, Strategy, StrategyID } from './app_interface'
-import { RESET, YELLOW } from './logging'
-import { State } from './protocol'
-import { Network, CryptoService, Ed25519CryptoService } from './protocol_interfaces'
-import { ProtocolParticipant, SignedVote } from './protocol_types'
+import { AppInterface, BApp, Strategy, StrategyID } from '../types/app-interface'
+import { RESET, YELLOW } from '../logging'
+import { CryptoService, Ed25519CryptoService, Network, State } from './protocol'
+import { ProtocolParticipant, SignedVote } from '../types/protocol-types'
 import {
   arithmeticCombinationFunction,
   calculateParticipantsWeight,
   exponentialWeightFormula,
   harmonicCombinationFunction,
   polynomialWeightFormula,
-} from './weight_calculator'
+} from './weight-calculator'
 import { ethers } from 'ethers'
 
 // App is a protocol implementation as a single process.

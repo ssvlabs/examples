@@ -1,4 +1,4 @@
-import { generateEd25519KeyPair, generateOptInData, verifyOptInData } from '../app/opt_in_data'
+import { generateEd25519KeyPair, generateOptInData, verifyOptInData } from '../src/data/opt-in-data'
 
 describe('Opt-In Data Functions', () => {
   const bAppAddress = 'test_bApp_address'

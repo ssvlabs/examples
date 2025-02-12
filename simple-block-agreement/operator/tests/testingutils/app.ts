@@ -1,4 +1,4 @@
-import { BApp, Strategy } from '../../app/app_interface'
+import { BApp, Strategy } from '../../src/types/app-interface'
 import { testingKeyPair1, testingKeyPair2, testingKeyPair3, testingKeyPair4 } from './protocol'
 
 // BApp
