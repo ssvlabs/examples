@@ -1,7 +1,7 @@
-import { StrategyID } from '../../app/app_interface'
-import { generateEd25519KeyPair } from '../../app/opt_in_data'
-import { Network, Ed25519CryptoService } from '../../app/protocol_interfaces'
-import { Vote, SignedVote, ProtocolParticipant, Slot } from '../../app/protocol_types'
+import { StrategyID } from '../../src/app/app_interface'
+import { generateEd25519KeyPair } from '../../src/app/opt_in_data'
+import { Network, Ed25519CryptoService } from '../../src/app/protocol_interfaces'
+import { Vote, SignedVote, ProtocolParticipant, Slot } from '../../src/app/protocol_types'
 
 // Slot
 export const testingSlot1 = 1
