@@ -129,15 +129,13 @@ The keys below are randomly generated and are used solely for testing purposes.
   ```
 - **Strategy Token:** `SSV Holesky (0xad45A78180961079BFaeEe349704F411dfF947C6)`
 
-### 🔹 Transactions
+#### 🔹 Transactions
 - **Approve Main Contract to move SSV tokens**
 - **Deposit (Owner: 20 SSV):**
 - **Deposit (Non-Owner: 30 SSV)**
 
----
-
-## 🎯 STRATEGY 5
-### 🔹 Creating the Strategy
+### 🎯 Strategy 5
+#### 🔹 Creating the Strategy
 - **Owner:** `0x8F3A66Bb003EBBD5fB115981DfaD8D8400FCeb76`
 - **Delegation:** Owner delegates **100% balance** to itself.
 - **Opt-in to bApp** with **SSV token** and data:
@@ -147,6 +145,6 @@ The keys below are randomly generated and are used solely for testing purposes.
 
 - **Strategy Token:** `SSV Holesky (0xad45A78180961079BFaeEe349704F411dfF947C6)`
 
-### 🔹 Transactions
+#### 🔹 Transactions
 - **Approve Main Contract to move SSV tokens:** 
 - **Deposit (Owner: 30 SSV):**
