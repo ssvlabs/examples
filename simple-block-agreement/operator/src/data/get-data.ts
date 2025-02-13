@@ -103,8 +103,6 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
 
     if (!data?.data?.bapp) throw new Error('No BApp data returned from The Graph')
 
-    // console.log('📊 SSV bApps Subgraph Data:', JSON.stringify(data))
-
     const getValidatorBalance = (owner: Owner): number =>
       owner.delegators?.reduce(
         (acc, delegation) =>
