@@ -1,12 +1,13 @@
 import dotenv from 'dotenv'
+import { ethers } from 'ethers'
 
 import { request } from 'undici'
 
 import { config } from '../config'
+import { tokenMap } from '../config'
 
 import type { BApp, Strategy } from '../types/app-interface'
 import type { BAppToken, Owner, ResponseData } from '../types/ssv-graphql'
-import { logBAppSummary, logTokenWeightSummary } from '../logging'
 
 dotenv.config()
 
@@ -112,7 +113,7 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
         0,
       ) ?? 0
 
-    const strategies: Strategy[] = data.data.bapp.strategies.map((strategy) => ({
+    var strategies: Strategy[] = data.data.bapp.strategies.map((strategy) => ({
       id: Number(strategy.strategy.id),
       owner: strategy.strategy.owner.id,
       privateKey: config.privateKeysMap.get(strategy.strategy.owner.id.toLowerCase()) ?? new Uint8Array(),
@@ -129,7 +130,7 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
       validatorBalance: getValidatorBalance(strategy.strategy.owner),
     }))
 
-    const bApp: BApp = {
+    var bApp: BApp = {
       address: bAppAddress,
       tokens: data.data.bapp.bAppTokens.map((token: BAppToken) => ({
         address: token.token,
@@ -139,11 +140,7 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
       validatorBalanceSignificance: config.validatorBalanceSignificance,
     }
 
-    logBAppSummary(bApp, strategies)
-
-    bApp.tokens.forEach((token) => {
-      logTokenWeightSummary(token.address, token.sharedRiskLevel, strategies)
-    })
+    strategies = sanitizeStrategies(strategies, data.data.bapp.bAppTokens)
 
     return {
       bApp,
@@ -163,4 +160,47 @@ export async function getData(bAppAddress: string): Promise<ReturnData> {
   const { bApp, strategies } = await querySubgraph(bAppAddress)
 
   return { bApp, strategies, slot }
+}
+
+
+// ========================= Input sanitization =========================
+
+function sanitizeStrategies(strategies: Strategy[], bAppTokens: BAppToken[]): Strategy[] {
+  for (const strategy of strategies) {
+    strategy.id = sanitizeStrategyID(strategy.id)
+    for (const token of strategy.tokens) {
+      token.obligationPercentage /= 100
+      token.risk /= 100
+      token.amount = weiToToken(BigInt(token.amount), tokenMap[token.address].decimals)
+    }
+
+    // Add missing tokens as 0 obligation
+    for (const token of bAppTokens) {
+      const strategyToken = strategy.tokens.find((t) => t.address === token.token)
+      if (!strategyToken) {
+        strategy.tokens.push({
+          address: token.token,
+          amount: 0,
+          obligationPercentage: 0,
+          risk: 0,
+        })
+      }
+    }
+  }
+  return strategies
+}
+
+function weiToToken(weiAmount: bigint | string, decimals: number): number {
+  return Number(ethers.formatUnits(BigInt(weiAmount), decimals))
+}
+
+function sanitizeStrategyID(strategyID: number | string): number {
+  if (typeof strategyID === 'string') {
+    const index = strategyID.indexOf('0x')
+    if (index !== -1) {
+      const numericPart = strategyID.substring(0, index)
+      return Number(numericPart)
+    }
+  }
+  return strategyID as number
 }
