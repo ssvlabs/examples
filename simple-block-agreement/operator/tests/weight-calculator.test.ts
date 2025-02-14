@@ -20,7 +20,7 @@ describe('HarmonicWeightCalculator', () => {
         owner: 'owner1',
         privateKey: new Uint8Array([1, 2, 3, 4]),
         tokens: [
-          { address: '0x68a8ddd7a59a900e0657e9f8bbe02b70c947f25f', amount: 100, obligationPercentage: 0.5, risk: 1.5 },
+          { address: '0xad45a78180961079bfaeee349704f411dff947c6', amount: 100, obligationPercentage: 0.5, risk: 1.5 },
         ],
         validatorBalance: 32,
       },
@@ -29,7 +29,7 @@ describe('HarmonicWeightCalculator', () => {
         owner: 'owner2',
         privateKey: new Uint8Array([5, 6, 7, 8]),
         tokens: [
-          { address: '0x68a8ddd7a59a900e0657e9f8bbe02b70c947f25f', amount: 200, obligationPercentage: 0.1, risk: 1.0 },
+          { address: '0xad45a78180961079bfaeee349704f411dff947c6', amount: 200, obligationPercentage: 0.1, risk: 1.0 },
         ],
         validatorBalance: 96,
       },

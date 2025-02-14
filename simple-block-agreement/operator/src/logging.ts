@@ -54,8 +54,6 @@ export function logBAppSummary(bApp: BApp, strategies: Strategy[]): void {
 }
 
 export function logValidatorBalanceTable(strategies: Strategy[]): void {
-  console.log('\n')
-
   const validatorTable = new Table({
     columns: [
       { name: 'Strategy', alignment: 'center', color: 'blue' },
@@ -86,13 +84,12 @@ export function logValidatorBalanceTable(strategies: Strategy[]): void {
     { color: 'yellow' },
   )
 
+  console.log()
   validatorTable.printTable()
-  console.log('\n')
+  console.log()
 }
 
 export function logTokenWeightSummary(tokenAddress: string, beta: number, strategies: Strategy[]): void {
-  console.log('\n')
-
   const tokenSymbol = tokenMap[tokenAddress.toLowerCase()].symbol || tokenAddress
 
   const tokenTable = new Table({
@@ -121,9 +118,9 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
       Risk: `${strategyToken.risk.toFixed(2).toLocaleString()}%`,
     })
   })
-
+  console.log()
   tokenTable.printTable()
-  console.log('\n')
+  console.log()
 }
 
 const toPercentage = (value: number) => (value * 100).toFixed(2)
@@ -150,9 +147,9 @@ export function logNormalizedFinalWeights(
       'Weight (%)': `${toPercentage(weight)}%`,
     })
   }
-
+  console.log()
   weightTable.printTable()
-  console.log('\n')
+  console.log()
 }
 
 export function logStrategyTokenWeights(
@@ -195,9 +192,9 @@ export function logStrategyTokenWeights(
       'Weight (%)': `${toPercentage(normalizedWeight)}%`,
     })
   }
-
+  console.log()
   tokenWeightTable.printTable()
-  console.log('\n')
+  console.log()
 }
 
 export function logToken(token: Address, message: string): void {
@@ -217,15 +214,15 @@ export function logFinalWeight(message: string): void {
 }
 
 export function logTokenStrategy(token: Address, strategy: StrategyID, message: string): void {
-  logToken(token, `${getColorForStrategy(strategy)}[🧍‍♂️ strategy ${strategy}]${colorReset()} ${message}`)
+  logToken(token, `${getColorForStrategy(strategy)}[🧍strategy ${strategy}]${colorReset()} ${message}`)
 }
 
 export function logVBStrategy(strategy: StrategyID, message: string): void {
-  logVB(`${getColorForStrategy(strategy)}[🧍‍♂️ strategy ${strategy}]${colorReset()} ${message}`)
+  logVB(`${getColorForStrategy(strategy)}[🧍strategy ${strategy}]${colorReset()} ${message}`)
 }
 
 export function logFinalWeightStrategy(strategy: StrategyID, message: string): void {
-  logFinalWeight(`${getColorForStrategy(strategy)}[🧍‍♂️ strategy ${strategy}]${colorReset()} ${message}`)
+  logFinalWeight(`${getColorForStrategy(strategy)}[🧍strategy ${strategy}]${colorReset()} ${message}`)
 }
 
 export function getColorForToken(token: string): string {
