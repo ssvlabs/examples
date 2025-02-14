@@ -48,6 +48,7 @@ __`❍ npm run start`__
 
 
 ```console
+
                                📊 BApp Overview                                
 ┌────────────────────────────────┬────────────────────────────────────────────┐
 │ Metric                         │                                      Value │
@@ -68,6 +69,26 @@ __`❍ npm run start`__
 └──────────┴─────────┴────────────────┴───────────────────┴─────────┘
 
 🚀  Starting weight calculations for 2 strategies
+
+|==============================================================================================|
+|                              Token Weight Formula (Polynomial)                               |
+|==============================================================================================|
+|                      ObligatedBalance              1                                         |
+| W_strategy,token =  -------------------  *  -------------------                              |
+|                       TotalAmount            max(1, Risk)^β                                  |
+|==============================================================================================|
+
+
+|==============================================================================================|
+|                     Combination Function (Final Weight) (Harmonic Mean)                      |
+|==============================================================================================|
+|                                           1                                                  |
+| W_strategy^final  =  --------------------------------------                                  |
+|                     Σ(Significance_token / Weight_strategy,token)                            |
+|                     + (Significance_ValidatorBalance / Weight_strategy,ValidatorBalance)     |
+|==============================================================================================|
+
+
 [💲 Token SSV] 🪙  Calculating token weights
 [💲 Token SSV] 🗂️  Total amount obligated to bApp: 76
 [💲 Token SSV] 🗂️  Beta: 100
@@ -142,25 +163,25 @@ __`❍ npm run start`__
 │    5     │    8.18e-2 │      8.65e-1 │     86.46% │
 └──────────┴────────────┴──────────────┴────────────┘
 
-🚀 Simulate Blockchain Agreement Process for Slot 11058358
-[🧍strategy 4]  📦 Handling new block with slot 11058358.
+🚀 Simulate Blockchain Agreement Process for Slot 11059006
+[🧍strategy 4]  📦 Handling new block with slot 11059006.
 [🧍strategy 4]  📤 Broadcasting vote
-[🧍strategy 4]  🗳️ Received vote from participant 4 with slot 11058358
-[🧍strategy 4]  📄 Checking majority for slot 11058358
+[🧍strategy 4]  🗳️ Received vote from participant 4 with slot 11059006
+[🧍strategy 4]  📄 Checking majority for slot 11059006
 [🧍strategy 4]  🔢 Total weight: 13.54%. Decomposition: 13.54% (from P4)
-[🧍strategy 4]  ❌ Majority not yet reached for slot: 11058358
-[🧍strategy 5]  🗳️ Received vote from participant 4 with slot 11058358
-[🧍strategy 5]  📄 Checking majority for slot 11058358
+[🧍strategy 4]  ❌ Majority not yet reached for slot: 11059006
+[🧍strategy 5]  🗳️ Received vote from participant 4 with slot 11059006
+[🧍strategy 5]  📄 Checking majority for slot 11059006
 [🧍strategy 5]  🔢 Total weight: 13.54%. Decomposition: 13.54% (from P4)
-[🧍strategy 5]  ❌ Majority not yet reached for slot: 11058358
-[🧍strategy 5]  📦 Handling new block with slot 11058358.
+[🧍strategy 5]  ❌ Majority not yet reached for slot: 11059006
+[🧍strategy 5]  📦 Handling new block with slot 11059006.
 [🧍strategy 5]  📤 Broadcasting vote
-[🧍strategy 4]  🗳️ Received vote from participant 5 with slot 11058358
-[🧍strategy 4]  📄 Checking majority for slot 11058358
+[🧍strategy 4]  🗳️ Received vote from participant 5 with slot 11059006
+[🧍strategy 4]  📄 Checking majority for slot 11059006
 [🧍strategy 4]  🔢 Total weight: 100.00%. Decomposition: 13.54% (from P4) + 86.46% (from P5)
-[🧍strategy 4]  ✅ Majority found for slot: 11058358. Updating last decided slot.
-[🧍strategy 5]  🗳️ Received vote from participant 5 with slot 11058358
-[🧍strategy 5]  📄 Checking majority for slot 11058358
+[🧍strategy 4]  ✅ Majority found for slot: 11059006. Updating last decided slot.
+[🧍strategy 5]  🗳️ Received vote from participant 5 with slot 11059006
+[🧍strategy 5]  📄 Checking majority for slot 11059006
 [🧍strategy 5]  🔢 Total weight: 100.00%. Decomposition: 13.54% (from P4) + 86.46% (from P5)
-[🧍strategy 5]  ✅ Majority found for slot: 11058358. Updating last decided slot.
+[🧍strategy 5]  ✅ Majority found for slot: 11059006. Updating last decided slot.
 ```
