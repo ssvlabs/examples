@@ -37,7 +37,7 @@ describe('HarmonicWeightCalculator', () => {
   })
 
   it('SSV token and validator balance with 2 strategies - exponential weight and harmonic combination', () => {
-    const weights = calculateParticipantsWeight(bApp, strategies, exponentialWeightFormula, harmonicCombinationFunction)
+    const weights = calculateParticipantsWeight(bApp, strategies, true, true)
 
     expect(weights.get(1)).toBeCloseTo(0.387, 2)
     expect(weights.get(2)).toBeCloseTo(0.613, 2)
@@ -47,8 +47,7 @@ describe('HarmonicWeightCalculator', () => {
     const weights = calculateParticipantsWeight(
       bApp,
       strategies,
-      polynomialWeightFormula,
-      arithmeticCombinationFunction,
+      false, false,
     )
 
     expect(weights.get(1)).toBeCloseTo(0.4342, 2)
