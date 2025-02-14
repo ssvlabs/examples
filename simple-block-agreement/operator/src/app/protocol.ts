@@ -1,6 +1,6 @@
 import { ProtocolParticipant, Vote, SignedVote, Slot } from '../types/protocol-types'
 import { StrategyID } from '../types/app-interface'
-import { colorReset, getColorForStrategy, logStrategy } from '../logging'
+import { colorReset, formatPercentage, getColorForStrategy, logStrategy, refParticipant } from '../logging'
 
 import { ed25519 } from '@noble/curves/ed25519'
 import { sha512 } from '@noble/hashes/sha512'
@@ -74,7 +74,7 @@ export class State {
 
   // Handles a new Ethereum block by creating a vote and broadcasting it
   public handleNewBlock(slot: Slot): void {
-    logStrategy(this.id, `📦 Handling new block with slot ${slot}.`)
+    logStrategy(this.id, `📦 Handling new block with slot ${slot}. 📤 Broadcasting vote.`)
 
     const vote: Vote = { slot }
     const signature = this.cryptoService.sign(vote, this.privateKey)
@@ -85,17 +85,15 @@ export class State {
       vote: vote,
     }
 
-    logStrategy(this.id, `📤 Broadcasting vote`)
     this.network.broadcast(signedVote)
   }
 
   // Processes a vote by storing it and checking if majority is reached for slot
   public processVote(signedVote: SignedVote): void {
     // Log vote
-    const color = getColorForStrategy(signedVote.participantID)
     logStrategy(
       this.id,
-      `🗳️ Received vote from ${color}participant ${signedVote.participantID}${colorReset()} with slot ${
+      `🗳️  Received vote from ${refParticipant(signedVote.participantID)} with slot ${
         signedVote.vote.slot
       }`,
     )
@@ -129,7 +127,6 @@ export class State {
 
     // Log searching for majority
     const slot = signedVotes.values().next()!.value!.vote.slot
-    logStrategy(this.id, `📄 Checking majority for slot ${slot}`)
 
     // If votes are invalid, return false
     if (!this.areValidVotes(signedVotes)) {
@@ -149,13 +146,11 @@ export class State {
       if (decompositionLog.length > 0) {
         decompositionLog += ` + `
       }
-      decompositionLog += `${(100 * participantWeight).toFixed(2)}% (from ${getColorForStrategy(
-        participantID,
-      )}P${participantID}${colorReset()})`
+      decompositionLog += `${formatPercentage(participantWeight)} (from ${refParticipant(participantID)})`
     }
 
     // Log the total weight and decomposition
-    logStrategy(this.id, `🔢 Total weight: ${(100 * collectionWeight).toFixed(2)}%. Decomposition: ${decompositionLog}`)
+    logStrategy(this.id, `📄 Checking majority for slot ${slot}. 🔢 Total weight: ${formatPercentage(collectionWeight)}%. Decomposition: ${decompositionLog}`)
 
     // Returns true if weight is above 66%
     return collectionWeight >= 0.66
