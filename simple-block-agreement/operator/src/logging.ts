@@ -197,70 +197,66 @@ export function logStrategyTokenWeights(
   console.log()
 }
 
-
 // ============================== Weight Logging ==============================
 
 // Longest formula line for consistent formatting
-const LEN = 95;
+const LEN = 95
 
 function padLine(content: string, length: number = LEN): string {
-  const padding = length - content.length;
-  return content + " ".repeat(padding) + "|";
+  const padding = length - content.length
+  return content + ' '.repeat(padding) + '|'
 }
 
 function centerText(text: string, length: number = LEN): string {
-  const padding = Math.max(0, (length - text.length) / 2);
-  return " ".repeat(Math.floor(padding)) + text + " ".repeat(Math.ceil(padding));
+  const padding = Math.max(0, (length - text.length) / 2)
+  return ' '.repeat(Math.floor(padding)) + text + ' '.repeat(Math.ceil(padding))
 }
 
 function printHeaderDivision(): void {
-  console.log("|"+"=".repeat(LEN-1)+"|");
+  console.log('|' + '='.repeat(LEN - 1) + '|')
 }
 
 function headerText(text: string): void {
-  console.log(`|${CYAN}${centerText(text, LEN - 1)}${RESET}|`);
+  console.log(`|${CYAN}${centerText(text, LEN - 1)}${RESET}|`)
 }
 
 export function logCombinationFunction(useHarmonicCombination: boolean): void {
-  console.log("\n")
-
   printHeaderDivision()
   if (useHarmonicCombination) {
-    headerText(`COMBINATION FUNCTION (FINAL WEIGHT) (Harmonic Mean)`)
+    headerText(`Combination Function (Final Weight) (Harmonic Mean)`)
     printHeaderDivision()
-    console.log(padLine("|                                           1"));
-    console.log(padLine("| W_strategy^final  =  --------------------------------------"));
-    console.log(padLine("|                     ( Σ (Significance_token / Weight_strategy,token)"));
-    console.log(padLine("|                     + (Significance_ValidatorBalance / Weight_strategy,ValidatorBalance) )"));
+    console.log(padLine('|                                           1'))
+    console.log(padLine('| W_strategy^final  =  --------------------------------------'))
+    console.log(padLine('|                     Σ(Significance_token / Weight_strategy,token)'))
+    console.log(padLine('|                     + (Significance_ValidatorBalance / Weight_strategy,ValidatorBalance)'))
   } else {
-    headerText(`COMBINATION FUNCTION (FINAL WEIGHT) (Arithmetic Mean)`)
+    headerText(`Combination Function (Final Weight) (Arithmetic Mean)`)
     printHeaderDivision()
-    console.log(padLine("| W_strategy^final  =  ( Σ Weight_strategy,token * Significance_token )"));
-    console.log(padLine("|                     + Weight_strategy,ValidatorBalance * Significance_ValidatorBalance"));
+    console.log(padLine('| W_strategy^final  =  Σ(Weight_strategy,token * Significance_token)'))
+    console.log(padLine('|                     + Weight_strategy,ValidatorBalance * Significance_ValidatorBalance'))
   }
 
   printHeaderDivision()
-  console.log("\n");
+  console.log('\n')
 }
-
 
 export function logWeightFormula(useExponentialWeight: boolean): void {
   printHeaderDivision()
   if (useExponentialWeight) {
-    headerText(`TOKEN WEIGHT FORMULA (Exponential)`)
+    headerText(`Token Weight Formula (Exponential)`)
     printHeaderDivision()
-    console.log(padLine("|                     ObligatedBalance"));
-    console.log(padLine("| W_strategy,token = ------------------ * e^(-β * max(1, Risk))"));
-    console.log(padLine("|                       TotalAmount"));
+    console.log(padLine('|                     ObligatedBalance'))
+    console.log(padLine('| W_strategy,token = ------------------ * e^(-β * max(1, Risk))'))
+    console.log(padLine('|                       TotalAmount'))
   } else {
-    headerText(`TOKEN WEIGHT FORMULA (Polynomial)`)
+    headerText(`Token Weight Formula (Polynomial)`)
     printHeaderDivision()
-    console.log(padLine("|                      ObligatedBalance              1 "));
-    console.log(padLine("| W_strategy,token =  -------------------  *  -------------------"));
-    console.log(padLine("|                       TotalAmount            max(1, Risk)^β"));
+    console.log(padLine('|                      ObligatedBalance              1 '))
+    console.log(padLine('| W_strategy,token =  -------------------  *  -------------------'))
+    console.log(padLine('|                       TotalAmount            max(1, Risk)^β'))
   }
   printHeaderDivision()
-  console.log("\n");
+  console.log('\n')
 }
 
 // ============================== Logging Utilities ==============================

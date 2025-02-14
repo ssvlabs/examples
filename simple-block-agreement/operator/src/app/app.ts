@@ -48,7 +48,7 @@ export class App implements AppInterface {
     this.bApp = bApp
     this.strategies = sanitizeStrategies(strategies)
 
-    console.log(`🚀  ${YELLOW}Starting weight calculations for ${this.strategies.length} strategies${RESET}`)
+    console.log(`🚀  ${YELLOW}Starting weight calculations for ${this.strategies.length} strategies${RESET}\n`)
 
     // Set weight and combination functions
     const weightFunction = useExponentialWeight ? exponentialWeightFormula : polynomialWeightFormula

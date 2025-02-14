@@ -14,7 +14,7 @@ const main = async () => {
 
   const { bApp, strategies, slot } = await getData(bAppAddress)
 
-  app.Setup(bApp, strategies, useExponentialWeight, useHarmonicCombination)
+  app.Setup(bApp, strategies, !useExponentialWeight, !useHarmonicCombination)
   app.StartAgreement(slot)
 }
 
