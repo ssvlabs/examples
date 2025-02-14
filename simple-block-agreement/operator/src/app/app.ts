@@ -1,4 +1,3 @@
-import { tokenMap } from '../config'
 import { AppInterface, BApp, Strategy, StrategyID } from '../types/app-interface'
 import { RESET, YELLOW } from '../logging'
 import { CryptoService, Ed25519CryptoService, Network, State } from './protocol'
@@ -10,7 +9,6 @@ import {
   harmonicCombinationFunction,
   polynomialWeightFormula,
 } from './weight-calculator'
-import { ethers } from 'ethers'
 
 // App is a protocol implementation as a single process.
 export class App implements AppInterface {
@@ -46,18 +44,12 @@ export class App implements AppInterface {
   ): void {
     // Store bApp and participants
     this.bApp = bApp
-    this.strategies = sanitizeStrategies(strategies)
+    this.strategies = strategies
 
     console.log(`🚀  ${YELLOW}Starting weight calculations for ${this.strategies.length} strategies${RESET}`)
 
-    // Set weight and combination functions
-    const weightFunction = useExponentialWeight ? exponentialWeightFormula : polynomialWeightFormula
-    const combinationFunction = useHarmonicCombinationFunction
-      ? harmonicCombinationFunction
-      : arithmeticCombinationFunction
-
     // Compute weight for each participant
-    const weights = calculateParticipantsWeight(bApp, strategies, weightFunction, combinationFunction)
+    const weights = calculateParticipantsWeight(bApp, strategies, useExponentialWeight, useHarmonicCombinationFunction)
 
     // Create protocol participants
     const participants = new Map<StrategyID, ProtocolParticipant>()
@@ -94,33 +86,4 @@ export class App implements AppInterface {
       state.handleNewBlock(slot)
     }
   }
-}
-
-// ========================= Input sanitization =========================
-
-function sanitizeStrategies(strategies: Strategy[]): Strategy[] {
-  for (const strategy of strategies) {
-    strategy.id = sanitizeStrategyID(strategy.id)
-    for (const token of strategy.tokens) {
-      token.obligationPercentage /= 100
-      token.risk /= 100
-      token.amount = weiToToken(BigInt(token.amount), tokenMap[token.address].decimals)
-    }
-  }
-  return strategies
-}
-
-function weiToToken(weiAmount: bigint | string, decimals: number): number {
-  return Number(ethers.formatUnits(BigInt(weiAmount), decimals))
-}
-
-function sanitizeStrategyID(strategyID: number | string): number {
-  if (typeof strategyID === 'string') {
-    const index = strategyID.indexOf('0x')
-    if (index !== -1) {
-      const numericPart = strategyID.substring(0, index)
-      return Number(numericPart)
-    }
-  }
-  return strategyID as number
 }
