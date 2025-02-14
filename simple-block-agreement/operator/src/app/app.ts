@@ -1,6 +1,6 @@
 import { tokenMap } from '../config'
 import { AppInterface, BApp, Strategy, StrategyID } from '../types/app-interface'
-import { RESET, YELLOW } from '../logging'
+import { logCombinationFunction, logWeightFormula, RESET, YELLOW } from '../logging'
 import { CryptoService, Ed25519CryptoService, Network, State } from './protocol'
 import { ProtocolParticipant, SignedVote } from '../types/protocol-types'
 import {
@@ -48,13 +48,15 @@ export class App implements AppInterface {
     this.bApp = bApp
     this.strategies = sanitizeStrategies(strategies)
 
-    console.log(`🚀  ${YELLOW}Starting weight calculations for ${this.strategies.length} strategies${RESET}`)
+    console.log(`🚀  ${YELLOW}Starting weight calculations for ${this.strategies.length} strategies${RESET}\n`)
 
     // Set weight and combination functions
     const weightFunction = useExponentialWeight ? exponentialWeightFormula : polynomialWeightFormula
     const combinationFunction = useHarmonicCombinationFunction
       ? harmonicCombinationFunction
       : arithmeticCombinationFunction
+    logWeightFormula(useExponentialWeight)
+    logCombinationFunction(useHarmonicCombinationFunction)
 
     // Compute weight for each participant
     const weights = calculateParticipantsWeight(bApp, strategies, weightFunction, combinationFunction)

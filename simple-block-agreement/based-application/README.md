@@ -14,18 +14,14 @@ This project calculates voting power for a given `bApp` using the SSV Subgraph a
 
 1. Provide the `bApp` address for the operator.
    
-2. Provide the four `private_keys` required for consensus.
+2. Provide the two `private_keys` required for consensus.
 
 ### Data Sources
 
 * **SSV Subgraph:**
    
    - Fetch strategies and delegation details for a given `bApp`.
-  
-   - Extract the voting power based on different strategies.
-
-* **SSV API:**
-   
+     
    - Calculate validator balance.
   
    - Determine active vs. inactive validators.
@@ -41,20 +37,11 @@ This project calculates voting power for a given `bApp` using the SSV Subgraph a
 #### Querying Strategies from SSV Subgraph
 
 ```sh
-  curl -X POST "https://api.studio.thegraph.com/query/53804/ssv-bapps-subgraph/version/latest" \
+  curl -X POST "https://api.studio.thegraph.com/query/71118/based-applications-ssv-holesky/version/latest/" \
      -H "Content-Type: application/json" \
      -d '{
        "query": "query MyQuery { bapp(id: \"0x8F3A66Bb003EBBD5fB115981DfaD8D8400FCeb76\") { strategies { id strategy { deposits { depositAmount token } balances { id } } obligations { obligatedBalance percentage } } bAppTokens { token totalObligatedBalance } owner { id } } }"
      }'
-```
-
-&nbsp;
-
-
-#### Querying Active Validators by Owner from SSV API
-
-```sh
-curl -s -X GET "https://api.stage.ops.ssvlabsinternal.com/api/v4/holesky/validators/explorer?ownerAddress=0x5cC0DdE14E7256340CC820415a6022a7d1c93A35" | jq
 ```
 
 &nbsp;
@@ -84,9 +71,8 @@ curl -s -X GET "https://api.stage.ops.ssvlabsinternal.com/api/v4/holesky/validat
 ## :page_with_curl: __Contract and Token Details__
 
 - **Owner bApp and Strategy:** `0x219437D13532d225D98bACe5638EB9146D4BDD4B`
-- **Devnet Contract:** `0x9B3345F3B1Ce2d8655FC4B6e2ed39322d52aA317`
+- **Holesky Prod Based App Contract:** `0x1bd6ceb98daf7ffeb590236b720f81b65213836a`
 - **bApp Registered with ETH:** `0x8F3A66Bb003EBBD5fB115981DfaD8D8400FCeb76`
-- **Native ETH Token:** `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE`
 - **SSV Token:** `0xad45A78180961079BFaeEe349704F411dfF947C6`
 
 &nbsp;
@@ -107,3 +93,61 @@ curl -s -X GET "https://api.stage.ops.ssvlabsinternal.com/api/v4/holesky/validat
   
 - The CLI tool is responsible for handling the consensus mechanism.
 
+### ⚠️ DISCLAIMER
+
+The keys below are randomly generated and are used solely for testing purposes.
+
+```json
+{
+  "id": 1,
+  "publicKey": "dc47786918f4462de09fe6d02537f216e80c9844dfd2eff66a15b89cf73c6ce7",
+  "privateKey": "63920609bb76b09d816b9427e906d1ad7d3008b4f8a164adf3b4900969ac97fa"
+}
+{
+  "id": 2,
+  "publicKey": "02e86e4e71811735582785d4d161a2a0e85c77d40e9b200b63d940b7e9f78e6e",
+  "privateKey": "228ffcb12deb17c72d7348415909290db647153c6b255c0b76628496d136b875"
+}
+```
+
+### 📌 Registering bApp
+- **bApp Address:** `0x89EF15BC1E7495e3dDdc0013C0d2B049d487b2fD`
+- **Metadata URL:** [GitHub Metadata](https://github.com/ssvlabs/examples/tree/main/simple-block-agreement/based-application/metadata.json)
+- **Owner:** `0x8F3A66Bb003EBBD5fB115981DfaD8D8400FCeb76`
+- **bApp Token:** `SSV Holesky (0xad45A78180961079BFaeEe349704F411dfF947C6)`
+- **Shared Risk Level:** `100`
+
+### 🎯 Strategy 4
+
+#### 🔹 Creating the Strategy
+
+- **Owner:** `0x219437D13532d225D98bACe5638EB9146D4BDD4B`
+- **Delegation:** Owner delegates **100% balance** to itself.
+- **Opt-in to bApp** with **SSV token** and data:
+  ```
+  0x02e86e4e71811735582785d4d161a2a0e85c77d40e9b200b63d940b7e9f78e6e
+  ```
+- **Strategy Token:** `SSV Holesky (0xad45A78180961079BFaeEe349704F411dfF947C6)`
+
+#### 🔹 Transactions
+
+- **Approve Main Contract to move SSV tokens**
+- **Deposit (Owner: 20 SSV):**
+- **Deposit (Non-Owner: 30 SSV)**
+
+### 🎯 Strategy 5
+
+#### 🔹 Creating the Strategy
+- **Owner:** `0x8F3A66Bb003EBBD5fB115981DfaD8D8400FCeb76`
+- **Delegation:** Owner delegates **100% balance** to itself.
+- **Opt-in to bApp** with **SSV token** and data:
+  ```
+  0xdc47786918f4462de09fe6d02537f216e80c9844dfd2eff66a15b89cf73c6ce7
+  ```
+
+- **Strategy Token:** `SSV Holesky (0xad45A78180961079BFaeEe349704F411dfF947C6)`
+
+#### 🔹 Transactions
+
+- **Approve Main Contract to move SSV tokens:** 
+- **Deposit (Owner: 30 SSV):**

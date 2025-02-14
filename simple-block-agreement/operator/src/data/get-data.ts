@@ -103,8 +103,6 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
 
     if (!data?.data?.bapp) throw new Error('No BApp data returned from The Graph')
 
-    // console.log('📊 SSV bApps Subgraph Data:', JSON.stringify(data))
-
     const getValidatorBalance = (owner: Owner): number =>
       owner.delegators?.reduce(
         (acc, delegation) =>
@@ -120,7 +118,7 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
         const obligation = strategy.obligations.find((obligation) => obligation.token === deposit.token)
         const balance = strategy.strategy.balances.find((balance) => balance.token === deposit.token)
         return {
-          address: deposit.token,
+          address: deposit.token.toLowerCase(),
           amount: Number(deposit.depositAmount),
           obligationPercentage: obligation ? Number(obligation.percentage) / 100 : 0,
           risk: balance ? Number(balance.riskValue) / 100 : 0,
@@ -132,7 +130,7 @@ async function querySubgraph(bAppAddress: string): Promise<SubgraphResponse> {
     const bApp: BApp = {
       address: bAppAddress,
       tokens: data.data.bapp.bAppTokens.map((token: BAppToken) => ({
-        address: token.token,
+        address: token.token.toLowerCase(),
         sharedRiskLevel: Number(token.sharedRiskLevel),
         significance: config.tokenMap[token.token.toLowerCase()].significance,
       })),

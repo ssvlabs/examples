@@ -54,8 +54,6 @@ export function logBAppSummary(bApp: BApp, strategies: Strategy[]): void {
 }
 
 export function logValidatorBalanceTable(strategies: Strategy[]): void {
-  console.log('\n')
-
   const validatorTable = new Table({
     columns: [
       { name: 'Strategy', alignment: 'center', color: 'blue' },
@@ -86,13 +84,12 @@ export function logValidatorBalanceTable(strategies: Strategy[]): void {
     { color: 'yellow' },
   )
 
+  console.log()
   validatorTable.printTable()
-  console.log('\n')
+  console.log()
 }
 
 export function logTokenWeightSummary(tokenAddress: string, beta: number, strategies: Strategy[]): void {
-  console.log('\n')
-
   const tokenSymbol = tokenMap[tokenAddress.toLowerCase()].symbol || tokenAddress
 
   const tokenTable = new Table({
@@ -121,9 +118,9 @@ export function logTokenWeightSummary(tokenAddress: string, beta: number, strate
       Risk: `${strategyToken.risk.toFixed(2).toLocaleString()}%`,
     })
   })
-
+  console.log()
   tokenTable.printTable()
-  console.log('\n')
+  console.log()
 }
 
 const toPercentage = (value: number) => (value * 100).toFixed(2)
@@ -150,9 +147,9 @@ export function logNormalizedFinalWeights(
       'Weight (%)': `${toPercentage(weight)}%`,
     })
   }
-
+  console.log()
   weightTable.printTable()
-  console.log('\n')
+  console.log()
 }
 
 export function logStrategyTokenWeights(
@@ -195,10 +192,74 @@ export function logStrategyTokenWeights(
       'Weight (%)': `${toPercentage(normalizedWeight)}%`,
     })
   }
-
+  console.log()
   tokenWeightTable.printTable()
+  console.log()
+}
+
+// ============================== Weight Logging ==============================
+
+// Longest formula line for consistent formatting
+const LEN = 95
+
+function padLine(content: string, length: number = LEN): string {
+  const padding = length - content.length
+  return content + ' '.repeat(padding) + '|'
+}
+
+function centerText(text: string, length: number = LEN): string {
+  const padding = Math.max(0, (length - text.length) / 2)
+  return ' '.repeat(Math.floor(padding)) + text + ' '.repeat(Math.ceil(padding))
+}
+
+function printHeaderDivision(): void {
+  console.log('|' + '='.repeat(LEN - 1) + '|')
+}
+
+function headerText(text: string): void {
+  console.log(`|${CYAN}${centerText(text, LEN - 1)}${RESET}|`)
+}
+
+export function logCombinationFunction(useHarmonicCombination: boolean): void {
+  printHeaderDivision()
+  if (useHarmonicCombination) {
+    headerText(`Combination Function (Final Weight) (Harmonic Mean)`)
+    printHeaderDivision()
+    console.log(padLine('|                                           1'))
+    console.log(padLine('| W_strategy^final  =  --------------------------------------'))
+    console.log(padLine('|                     Σ(Significance_token / Weight_strategy,token)'))
+    console.log(padLine('|                     + (Significance_ValidatorBalance / Weight_strategy,ValidatorBalance)'))
+  } else {
+    headerText(`Combination Function (Final Weight) (Arithmetic Mean)`)
+    printHeaderDivision()
+    console.log(padLine('| W_strategy^final  =  Σ(Weight_strategy,token * Significance_token)'))
+    console.log(padLine('|                     + Weight_strategy,ValidatorBalance * Significance_ValidatorBalance'))
+  }
+
+  printHeaderDivision()
   console.log('\n')
 }
+
+export function logWeightFormula(useExponentialWeight: boolean): void {
+  printHeaderDivision()
+  if (useExponentialWeight) {
+    headerText(`Token Weight Formula (Exponential)`)
+    printHeaderDivision()
+    console.log(padLine('|                     ObligatedBalance'))
+    console.log(padLine('| W_strategy,token = ------------------ * e^(-β * max(1, Risk))'))
+    console.log(padLine('|                       TotalAmount'))
+  } else {
+    headerText(`Token Weight Formula (Polynomial)`)
+    printHeaderDivision()
+    console.log(padLine('|                      ObligatedBalance              1 '))
+    console.log(padLine('| W_strategy,token =  -------------------  *  -------------------'))
+    console.log(padLine('|                       TotalAmount            max(1, Risk)^β'))
+  }
+  printHeaderDivision()
+  console.log('\n')
+}
+
+// ============================== Logging Utilities ==============================
 
 export function logToken(token: Address, message: string): void {
   const color = getColorForToken(token)
@@ -217,15 +278,15 @@ export function logFinalWeight(message: string): void {
 }
 
 export function logTokenStrategy(token: Address, strategy: StrategyID, message: string): void {
-  logToken(token, `${getColorForStrategy(strategy)}[🧍‍♂️ strategy ${strategy}]${colorReset()} ${message}`)
+  logToken(token, `${getColorForStrategy(strategy)}[🧍strategy ${strategy}]${colorReset()} ${message}`)
 }
 
 export function logVBStrategy(strategy: StrategyID, message: string): void {
-  logVB(`${getColorForStrategy(strategy)}[🧍‍♂️ strategy ${strategy}]${colorReset()} ${message}`)
+  logVB(`${getColorForStrategy(strategy)}[🧍strategy ${strategy}]${colorReset()} ${message}`)
 }
 
 export function logFinalWeightStrategy(strategy: StrategyID, message: string): void {
-  logFinalWeight(`${getColorForStrategy(strategy)}[🧍‍♂️ strategy ${strategy}]${colorReset()} ${message}`)
+  logFinalWeight(`${getColorForStrategy(strategy)}[🧍strategy ${strategy}]${colorReset()} ${message}`)
 }
 
 export function getColorForToken(token: string): string {

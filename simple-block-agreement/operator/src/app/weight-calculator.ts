@@ -34,7 +34,6 @@ export function exponentialWeightFormula(
   const obligation = strategyToken.obligationPercentage * strategyToken.amount
   const obligationParticipation = obligation / totalBAppAmount
   const risk = strategyToken.risk
-  console.log('RISK:', risk)
   const beta = bAppToken.sharedRiskLevel
 
   const weight = obligationParticipation * Math.exp(-beta * Math.max(1, risk))

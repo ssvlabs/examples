@@ -18,9 +18,9 @@
       {
         "name": "SSV",
         "symbol": "SSV",
-        "address": "0x68a8ddd7a59a900e0657e9f8bbe02b70c947f25f",
+        "address": "0xad45a78180961079bfaeee349704f411dff947c6",
         "decimals": 18,
-        "significance": 1
+        "significance": 50
       }
     ]
   }
