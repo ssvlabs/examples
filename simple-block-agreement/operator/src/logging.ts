@@ -1,5 +1,6 @@
+import { getStrategyToken } from './app/util'
 import { config, tokenMap } from './config'
-import { BApp, Strategy, StrategyID, StrategyToken, Address } from './types/app-interface'
+import { BApp, Strategy, StrategyID, StrategyToken, Address, BAppToken } from './types/app-interface'
 import { Table } from 'console-table-printer'
 
 export const RED = '\x1b[31m'
@@ -11,15 +12,23 @@ export const CYAN = '\x1b[36m'
 export const RESET = '\x1b[0m'
 export const colors = [RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN]
 
+// ============================== BApp Summary ==============================
+
+// Logs a summary of the BApp
 export function logBAppSummary(bApp: BApp, strategies: Strategy[]): void {
+  // Summary table (address, number of strategies)
   const summaryTable = new Table({
     columns: [
-      { name: 'Metric', alignment: 'left', color: 'cyan' },
+      { name: 'Parameter', alignment: 'left', color: 'cyan' },
       { name: 'Value', alignment: 'right' },
     ],
     title: '📊 BApp Overview',
   })
+  summaryTable.addRow({Parameter: 'Address', Value: bApp.address })
+  summaryTable.addRow({Parameter: 'Strategies', Value: strategies.length })
+  summaryTable.printTable()
 
+  // Capital profile table (capital type, significance, shared risk level, total amount)
   const totalValidatorBalance = strategies.reduce((acc, s) => acc + s.validatorBalance, 0)
   const getTokenTotalAmount = (token: string) =>
     strategies.reduce((acc, s) => {
@@ -27,31 +36,159 @@ export function logBAppSummary(bApp: BApp, strategies: Strategy[]): void {
       return (
         acc +
         (strategyToken
-          ? (strategyToken.amount * strategyToken.obligationPercentage) /
-            100 /
-            10 ** tokenMap[strategyToken.address].decimals
+          ? (strategyToken.amount * strategyToken.obligationPercentage)
           : 0)
       )
     }, 0)
 
-  const tokenSummary =
-    bApp.tokens.length > 0
-      ? bApp.tokens
-          .map((t) => {
-            const symbol = tokenMap[t.address.toLowerCase()].symbol || t.address
-            const totalAmount = getTokenTotalAmount(t.address)
-            return `${symbol} (Amount: ${totalAmount.toLocaleString()} / Significance: ${t.significance})`
-          })
-          .join(', ')
-      : 'None'
+  const capitalProfileTable = new Table({
+    columns: [
+      { name: 'Capital', alignment: 'center', color: 'white' },
+      { name: 'Significance', alignment: 'center', color: 'green' },
+      { name: 'Shared Risk Level (β)', alignment: 'center', color: 'cyan' },
+      { name: 'Total Amount', alignment: 'center', color: 'yellow' },
+    ],
+    title: '💲 Capital Profile',
+  })
 
-  summaryTable.addRow({ Metric: 'Address', Value: bApp.address })
-  summaryTable.addRow({ Metric: 'Tokens', Value: tokenSummary })
-  summaryTable.addRow({ Metric: 'Strategies', Value: strategies.length })
-  summaryTable.addRow({ Metric: 'Total Validator Balance', Value: `${totalValidatorBalance.toLocaleString()} ETH` })
-  summaryTable.addRow({ Metric: 'Validator Balance Significance', Value: bApp.validatorBalanceSignificance })
-  summaryTable.printTable()
+  bApp.tokens.forEach((token) => {
+    const symbol = tokenMap[token.address.toLowerCase()].symbol || token.address
+    const totalAmount = getTokenTotalAmount(token.address)
+    capitalProfileTable.addRow({
+      Capital: symbol + ' Token',
+      Significance: token.significance,
+      'Shared Risk Level (β)': token.sharedRiskLevel,
+      'Total Amount': `${totalAmount.toLocaleString()} ${symbol}`,
+    })
+  })
+  capitalProfileTable.addRow({
+    Capital: 'Validator Balance',
+    Significance: bApp.validatorBalanceSignificance,
+    'Shared Risk Level (β)': '-',
+    'Total Amount': `${totalValidatorBalance.toLocaleString()} ETH`,
+  })
+  capitalProfileTable.printTable()
+
+  console.log('\n')
+  console.log('\n')
 }
+
+
+// ============================== Weight Logging ==============================
+
+// Longest formula line for consistent formatting
+const LEN = 95;
+
+function padLine(content: string, length: number = LEN): string {
+  const padding = length - content.length;
+  return content + " ".repeat(padding) + "|";
+}
+
+function centerText(text: string, length: number = LEN): string {
+  const padding = Math.max(0, (length - text.length) / 2);
+  return " ".repeat(Math.floor(padding)) + text + " ".repeat(Math.ceil(padding));
+}
+
+function printDivision(): void {
+  console.log("|"+"=".repeat(LEN-1)+"|");
+}
+
+function headerText(text: string): void {
+  console.log(`|${CYAN}${centerText(text, LEN - 1)}${RESET}|`);
+}
+
+export function logCombinationFunction(useHarmonicCombination: boolean): void {
+  console.log("\n")
+
+  printDivision()
+  if (useHarmonicCombination) {
+    headerText(`COMBINATION FUNCTION (FINAL WEIGHT) (Harmonic Mean)`)
+    printDivision()
+    console.log(padLine("|                                           1"));
+    console.log(padLine("| W_strategy^final  =  --------------------------------------"));
+    console.log(padLine("|                     ( Σ (Significance_token / Weight_strategy,token)"));
+    console.log(padLine("|                     + (Significance_ValidatorBalance / Weight_strategy,ValidatorBalance) )"));
+  } else {
+    headerText(`COMBINATION FUNCTION (FINAL WEIGHT) (Arithmetic Mean)`)
+    printDivision()
+    console.log(padLine("| W_strategy^final  =  ( Σ Weight_strategy,token * Significance_token )"));
+    console.log(padLine("|                     + Weight_strategy,ValidatorBalance * Significance_ValidatorBalance"));
+  }
+
+  printDivision()
+  console.log("\n");
+}
+
+
+export function logWeightFormula(useExponentialWeight: boolean): void {
+  printDivision()
+  if (useExponentialWeight) {
+    headerText(`TOKEN WEIGHT FORMULA (Exponential)`)
+    printDivision()
+    console.log(padLine("|                  ObligatedBalance"));
+    console.log(padLine("| W_strategy,token = ------------------ * e^(-β * max(1, Risk))"));
+    console.log(padLine("|                     TotalAmount"));
+  } else {
+    headerText(`TOKEN WEIGHT FORMULA (Polynomial)`)
+    printDivision()
+    console.log(padLine("|                      ObligatedBalance              1 "));
+    console.log(padLine("| W_strategy,token =  -------------------  *  -------------------"));
+    console.log(padLine("|                       TotalAmount            max(1, Risk)^β"));
+  }
+  printDivision()
+  console.log("\n");
+}
+
+// ============================== Token Weight Summary ==============================
+
+const formatBalance = (balance: number, tokenSymbol: string) => `${(balance).toLocaleString()} ${tokenSymbol}`
+export const formatPercentage = (value: number) => `${(value * 100).toFixed(2)}%`
+const formatWeight = (value: number) => `${value.toExponential(2)}%`
+
+export function logTokenWeightTable(bAppToken: BAppToken, strategies: Strategy[], totalBAppAmount: number, weights: Map<StrategyID, number>): void {
+
+  const tokenSymbol = tokenMap[bAppToken.address.toLowerCase()].symbol || bAppToken.address
+
+  const tokenTable = new Table({
+    columns: [
+      { name: 'Strategy', alignment: 'center', color: 'blue' },
+      { name: 'Balance', alignment: 'right', color: 'green' },
+      { name: 'Obligation (%)', alignment: 'right', color: 'cyan' },
+      { name: 'Obligated Balance', alignment: 'right', color: 'yellow' },
+      { name: 'Obligation Participation (%)', alignment: 'right', color: 'blue' },
+      { name: 'Risk', alignment: 'right', color: 'magenta' },
+      { name: 'Weight', alignment: 'right', color: 'green' },
+      { name: 'Norm. Weight (%)', alignment: 'right', color: 'yellow' },
+    ],
+    title: `💲 BApp Token Weight Summary for ${tokenSymbol} (β = ${bAppToken.sharedRiskLevel})`,
+  })
+
+  var weightSum = 0
+  for (const [strategy, weight] of weights.entries()) {
+    weightSum += weight
+  }
+
+
+  for (const strategy of strategies) {
+    const strategyToken = getStrategyToken(strategy, bAppToken.address)
+    const obligatedBalance = (strategyToken.amount * strategyToken.obligationPercentage)
+    const weight = weights.get(strategy.id)!
+
+    tokenTable.addRow({
+      Strategy: strategy.id,
+      Balance: formatBalance(strategyToken.amount, tokenSymbol),
+      'Obligation (%)': formatPercentage(strategyToken.obligationPercentage),
+      'Obligated Balance': formatBalance(obligatedBalance, tokenSymbol),
+      'Obligation Participation (%)': formatPercentage(obligatedBalance / totalBAppAmount),
+      Risk: formatPercentage(strategyToken.risk),
+      Weight: formatWeight(weight),
+      'Norm. Weight (%)': formatPercentage(weight / weightSum),
+    })
+  }
+
+  tokenTable.printTable()
+}
+
 
 export function logValidatorBalanceTable(strategies: Strategy[]): void {
   console.log('\n')
@@ -60,9 +197,9 @@ export function logValidatorBalanceTable(strategies: Strategy[]): void {
     columns: [
       { name: 'Strategy', alignment: 'center', color: 'blue' },
       { name: 'Validator Balance', alignment: 'right', color: 'green' },
-      { name: 'Weight (%)', alignment: 'right', color: 'magenta' },
+      { name: 'Weight (%)', alignment: 'right', color: 'yellow' },
     ],
-    title: '🔑 Validator Weights',
+    title: '🔑 Validator Weights (No risk, β = 0)',
   })
 
   const totalValidatorBalance = strategies.reduce((acc, s) => acc + s.validatorBalance, 0)
@@ -90,44 +227,6 @@ export function logValidatorBalanceTable(strategies: Strategy[]): void {
   console.log('\n')
 }
 
-export function logTokenWeightSummary(tokenAddress: string, beta: number, strategies: Strategy[]): void {
-  console.log('\n')
-
-  const tokenSymbol = tokenMap[tokenAddress.toLowerCase()].symbol || tokenAddress
-
-  const tokenTable = new Table({
-    columns: [
-      { name: 'Strategy', alignment: 'center', color: 'blue' },
-      { name: 'Balance', alignment: 'right', color: 'green' },
-      { name: 'Obligation (%)', alignment: 'right', color: 'cyan' },
-      { name: 'Obligated Balance', alignment: 'right', color: 'yellow' },
-      { name: 'Risk', alignment: 'right', color: 'magenta' },
-    ],
-    title: `💲 BApp Token Weight Summary for ${tokenSymbol}`,
-  })
-
-  strategies.forEach((strategy) => {
-    const strategyToken = strategy.tokens.find((t: StrategyToken) => t.address === tokenAddress)
-    if (!strategyToken) return
-
-    const obligatedBalance = (strategyToken.amount * strategyToken.obligationPercentage) / 100
-    const formatBalance = (balance: number) => (balance / 10 ** config.tokenMap[tokenAddress].decimals).toLocaleString()
-
-    tokenTable.addRow({
-      Strategy: strategy.id,
-      'Obligation (%)': `${strategyToken.obligationPercentage.toFixed(2)}%`,
-      Balance: `${formatBalance(strategyToken.amount)} ${tokenSymbol}`,
-      'Obligated Balance': `${formatBalance(obligatedBalance)} ${tokenSymbol}`,
-      Risk: `${strategyToken.risk.toFixed(2).toLocaleString()}%`,
-    })
-  })
-
-  tokenTable.printTable()
-  console.log('\n')
-}
-
-const toPercentage = (value: number) => (value * 100).toFixed(2)
-
 export function logNormalizedFinalWeights(
   finalWeights: Map<StrategyID, number>,
   rawWeights: Map<StrategyID, number>,
@@ -136,8 +235,7 @@ export function logNormalizedFinalWeights(
     columns: [
       { name: 'Strategy', alignment: 'center', color: 'blue' },
       { name: 'Raw Weight', alignment: 'right', color: 'red' },
-      { name: 'Norm. Weight', alignment: 'right', color: 'magenta' },
-      { name: 'Weight (%)', alignment: 'right', color: 'yellow' },
+      { name: 'Norm. Weight (%)', alignment: 'right', color: 'yellow' },
     ],
     title: '📊 Normalized Final Weights',
   })
@@ -145,9 +243,8 @@ export function logNormalizedFinalWeights(
   for (const [strategy, weight] of finalWeights.entries()) {
     weightTable.addRow({
       Strategy: strategy,
-      'Raw Weight': rawWeights.get(strategy)?.toExponential(2),
-      'Norm. Weight': weight.toExponential(2),
-      'Weight (%)': `${toPercentage(weight)}%`,
+      'Raw Weight': formatWeight(rawWeights.get(strategy)!),
+      'Norm. Weight (%)': formatPercentage(weight),
     })
   }
 
@@ -155,73 +252,11 @@ export function logNormalizedFinalWeights(
   console.log('\n')
 }
 
-export function logStrategyTokenWeights(
-  tokenAddress: string,
-  tokenWeights: Map<StrategyID, Map<Address, number>>,
-): void {
-  const tokenEntry = Object.values(tokenMap).find((t) => t.address === tokenAddress)
-  if (!tokenEntry) {
-    console.error(`❌ Token ${tokenAddress} not found in tokenMap.`)
-    return
-  }
-
-  let totalWeight = 0
-  tokenWeights.forEach((strategyTokens) => {
-    if (strategyTokens.has(tokenAddress)) {
-      totalWeight += strategyTokens.get(tokenAddress)!
-    }
-  })
-
-  const tokenWeightTable = new Table({
-    columns: [
-      { name: 'Strategy', alignment: 'center', color: 'blue' },
-      { name: 'Raw Weight', alignment: 'right', color: 'magenta' },
-      { name: 'Norm. Weight', alignment: 'right', color: 'red' },
-      { name: 'Weight (%)', alignment: 'right', color: 'yellow' },
-    ],
-    title: `\n📊 Normalized Weights for ${tokenMap[tokenAddress].symbol}`,
-  })
-
-  for (const [strategy, strategyTokens] of tokenWeights.entries()) {
-    if (!strategyTokens.has(tokenAddress)) continue // Skip strategies without this token
-
-    const rawWeight = strategyTokens.get(tokenAddress)!
-    const normalizedWeight = totalWeight > 0 ? rawWeight / totalWeight : 0
-
-    tokenWeightTable.addRow({
-      Strategy: strategy,
-      'Raw Weight': rawWeight.toExponential(2),
-      'Norm. Weight': normalizedWeight.toExponential(2),
-      'Weight (%)': `${toPercentage(normalizedWeight)}%`,
-    })
-  }
-
-  tokenWeightTable.printTable()
-  console.log('\n')
-}
-
-export function logToken(token: Address, message: string): void {
-  const color = getColorForToken(token)
-  const tokenSymbol = config.tokenMap[token].symbol || token
-  console.log(`${color}[💲 Token ${tokenSymbol}]${colorReset()} ${message}`)
-}
-
-export function logVB(message: string): void {
-  const color = getColorForValidatorBalance()
-  console.log(`${color}[🔑 Validator Balance]${colorReset()} ${message}`)
-}
+// ============================== Logging Utilities ==============================
 
 export function logFinalWeight(message: string): void {
   const color = getColorForFinalWeight()
   console.log(`${color}[⚖️ Final Weight]${colorReset()} ${message}`)
-}
-
-export function logTokenStrategy(token: Address, strategy: StrategyID, message: string): void {
-  logToken(token, `${getColorForStrategy(strategy)}[🧍‍♂️ strategy ${strategy}]${colorReset()} ${message}`)
-}
-
-export function logVBStrategy(strategy: StrategyID, message: string): void {
-  logVB(`${getColorForStrategy(strategy)}[🧍‍♂️ strategy ${strategy}]${colorReset()} ${message}`)
 }
 
 export function logFinalWeightStrategy(strategy: StrategyID, message: string): void {
@@ -246,7 +281,7 @@ export function getColorForFinalWeight(): string {
 }
 
 export function getColorForStrategy(id: number): string {
-  return colors[id % colors.length]
+  return colors[Number(id) % colors.length]
 }
 
 export function colorReset(): string {
@@ -256,4 +291,9 @@ export function colorReset(): string {
 export function logStrategy(id: StrategyID, message: string): void {
   const color = getColorForStrategy(id)
   console.log(`${color}[🧍strategy ${id}] ${colorReset()} ${message}`)
+}
+
+export function refParticipant(id: StrategyID): string {
+  const color = getColorForStrategy(id)
+  return `${color}S${id}${colorReset()}`
 }

@@ -1,24 +1,17 @@
-import { config } from '../config'
 import { BApp, BAppToken, Strategy, StrategyID, StrategyToken, Address } from '../types/app-interface'
 import {
-  BLUE,
-  GREEN,
+  logCombinationFunction,
   logFinalWeightStrategy,
   logNormalizedFinalWeights,
-  logStrategyTokenWeights,
-  logToken,
-  logTokenStrategy,
+  logTokenWeightTable,
   logValidatorBalanceTable,
-  logVB,
-  logVBStrategy,
-  RESET,
+  logWeightFormula,
 } from '../logging'
 import { getBAppToken, getStrategyToken } from './util'
 
 // ==================== Weight Formula ====================
 
 export type WeightFormula = (
-  strategyID: StrategyID,
   strategyToken: StrategyToken,
   bAppToken: BAppToken,
   totalBAppAmount: number,
@@ -26,7 +19,6 @@ export type WeightFormula = (
 
 // Calculate the weight for a token for a strategy that decreases exponentially with the strategy's risk
 export function exponentialWeightFormula(
-  strategyID: StrategyID,
   strategyToken: StrategyToken,
   bAppToken: BAppToken,
   totalBAppAmount: number,
@@ -34,26 +26,15 @@ export function exponentialWeightFormula(
   const obligation = strategyToken.obligationPercentage * strategyToken.amount
   const obligationParticipation = obligation / totalBAppAmount
   const risk = strategyToken.risk
-  console.log('RISK:', risk)
   const beta = bAppToken.sharedRiskLevel
 
   const weight = obligationParticipation * Math.exp(-beta * Math.max(1, risk))
-
-  logTokenStrategy(
-    bAppToken.address,
-    strategyID,
-    `🧮 Calculating weight (exponential formula):
-  -> Obligation participation (obligated balance / total bApp amount): ${obligationParticipation}
-  - Risk: ${risk}
-  -> Weight (obligation participation * exp(-beta * max(1, risk))): ${GREEN}${weight}${RESET}`,
-  )
 
   return weight
 }
 
 // Calculate the weight for a token for a strategy that decreases polynomially with the strategy's risk
 export function polynomialWeightFormula(
-  strategyID: StrategyID,
   strategyToken: StrategyToken,
   bAppToken: BAppToken,
   totalBAppAmount: number,
@@ -64,15 +45,6 @@ export function polynomialWeightFormula(
   const beta = bAppToken.sharedRiskLevel
 
   const weight = obligationParticipation / Math.pow(Math.max(1, risk), beta)
-
-  logTokenStrategy(
-    bAppToken.address,
-    strategyID,
-    `🧮 Calculating weight (polynomial formula):
-  -> Obligation participation (obligated balance / total bApp amount): ${obligationParticipation}
-  - Risk: ${risk}
-  -> Weight (obligation participation / (max(1, risk)^{beta})): ${GREEN}${weight}${RESET}`,
-  )
 
   return weight
 }
@@ -99,7 +71,7 @@ export function harmonicCombinationFunction(
     if (bAppToken.significance != 0 && weight == 0) {
       logFinalWeightStrategy(
         strategyID,
-        `⚠️  Token ${token} has significance but strategy's weight is 0. Final weight will be 0.`,
+        `⚠️  Token ${token} has significance > 0 but strategy's weight is 0. Final weight will be 0.`,
       )
       return 0
     }
@@ -107,16 +79,13 @@ export function harmonicCombinationFunction(
   if (bApp.validatorBalanceSignificance != 0 && validatorBalanceWeight == 0) {
     logFinalWeightStrategy(
       strategyID,
-      `⚠️  Validator balance has significance but strategy's weight is 0. Final weight will be 0.`,
+      `⚠️  Validator balance has significance > 0 but strategy's weight is 0. Final weight will be 0.`,
     )
     return 0
   }
 
   // Calculate the harmonic mean
-  let log: string = '🧮 Calculating Final Weight:\n'
-
   const significanceSum = SignificanceSum(bApp)
-  log += `  -> Total significance sum: ${significanceSum}\n`
 
   let harmonicMean = 0
   // Sum the significance / weight for each token
@@ -125,25 +94,14 @@ export function harmonicCombinationFunction(
     const weight = tokenWeights.get(token)!
     const weightContribution = bAppToken.significance / significanceSum / weight
     harmonicMean += weightContribution
-    log += `  - Token: ${config.tokenMap[token].symbol}
-  - Significance: ${bAppToken.significance}
-  - Weight: ${weight}
-  -> (Significance/Significance Sum) / Weight = ${BLUE}${weightContribution}${RESET}\n`
   }
   // Sum the significance / weight for the validator balance
   const validatorBalanceWeightContribution =
     bApp.validatorBalanceSignificance / significanceSum / validatorBalanceWeight
   harmonicMean += validatorBalanceWeightContribution
-  log += `  - Validator Balance
-  - Significance: ${bApp.validatorBalanceSignificance}
-  - Weight: ${validatorBalanceWeight}
-  -> (Significance/Significance Sum) / Weight = ${BLUE}${validatorBalanceWeightContribution}${RESET}\n`
 
   // Invert the sum to get the harmonic mean
   harmonicMean = 1 / harmonicMean
-  log += `  --> Harmonic mean = (1/(sum_t (significance_t/significance sum) / weight_t)): ${GREEN}${harmonicMean}${RESET}\n`
-
-  logFinalWeightStrategy(strategyID, log)
 
   return harmonicMean
 }
@@ -155,10 +113,8 @@ export function arithmeticCombinationFunction(
   tokenWeights: Map<Address, number>,
   validatorBalanceWeight: number,
 ): number {
-  let log: string = '🧮 Calculating Final Weight:\n'
 
   const significanceSum = SignificanceSum(bApp)
-  log += `  -> Total significance sum: ${significanceSum}\n`
 
   let arithmeticMean = 0
   // Sum the significance * weight for each token
@@ -167,23 +123,11 @@ export function arithmeticCombinationFunction(
     const weight = tokenWeights.get(token)!
     const weightContribution = (bAppToken.significance / significanceSum) * weight
     arithmeticMean += weightContribution
-    log += `  - Token: ${config.tokenMap[token].symbol}
-  - Significance: ${bAppToken.significance}
-  - Weight: ${weight}
-  -> (Significance/Significance Sum) * Weight = ${BLUE}${weightContribution}${RESET}\n`
   }
   // Sum the significance * weight for the validator balance
   const validatorBalanceWeightContribution =
     (bApp.validatorBalanceSignificance / significanceSum) * validatorBalanceWeight
   arithmeticMean += validatorBalanceWeightContribution
-  log += `  - Validator Balance
-  - Significance: ${bApp.validatorBalanceSignificance}
-  - Weight: ${validatorBalanceWeight}
-  -> (Significance/Significance Sum) * Weight = ${BLUE}${validatorBalanceWeightContribution}${RESET}\n`
-
-  log += `  --> Arithmetic mean = sum_t (significance_t/significance sum) * weight_t: ${GREEN}${arithmeticMean}${RESET}\n`
-
-  logFinalWeightStrategy(strategyID, log)
 
   return arithmeticMean
 }
@@ -202,12 +146,20 @@ function SignificanceSum(bApp: BApp): number {
 export function calculateParticipantsWeight(
   bApp: BApp,
   strategies: Strategy[],
-  weightFormula: WeightFormula,
-  combinationFunction: CombinationFunction,
+  useExponentialWeight: boolean, useHarmonicCombinationFunction: boolean,
 ): Map<StrategyID, number> {
-  const tokenWeights = calculateTokenWeights(bApp, strategies, weightFormula)
+
+  // Set weight and combination functions
+  const weightFunction = useExponentialWeight ? exponentialWeightFormula : polynomialWeightFormula
+  const combinationFunction = useHarmonicCombinationFunction
+    ? harmonicCombinationFunction
+    : arithmeticCombinationFunction
+
+  logWeightFormula(useExponentialWeight)
+  const tokenWeights = calculateTokenWeights(bApp, strategies, weightFunction)
   const validatorBalanceWeights = calculateValidatorBalanceWeights(strategies)
 
+  logCombinationFunction(useHarmonicCombinationFunction)
   return calculateFinalWeights(bApp, tokenWeights, validatorBalanceWeights, combinationFunction)
 }
 
@@ -260,24 +212,24 @@ function calculateTokenWeights(
   strategies: Strategy[],
   weightFormula: WeightFormula,
 ): Map<StrategyID, Map<Address, number>> {
+
+  // Init return variable
   const tokenWeights = new Map<StrategyID, Map<Address, number>>()
 
+  // Compute weights for each token
   for (const bAppToken of bApp.tokens) {
-    logToken(bAppToken.address, '🪙  Calculating token weights')
 
     // Total amount obligated to bApp
     let totalBAppAmount = calculateTotalBAppAmount(bAppToken.address, strategies)
     if (totalBAppAmount === 0) {
       totalBAppAmount = 1
     }
-    logToken(bAppToken.address, `🗂️  Total amount obligated to bApp: ${totalBAppAmount}`)
-    logToken(bAppToken.address, `🗂️  Beta: ${bAppToken.sharedRiskLevel}`)
 
     // Calculate weights for each strategy
     let weightSum: number = 0
     for (const strategy of strategies) {
       const strategyToken = getStrategyToken(strategy, bAppToken.address)
-      const weight = weightFormula(strategy.id, strategyToken, bAppToken, totalBAppAmount)
+      const weight = weightFormula(strategyToken, bAppToken, totalBAppAmount)
       weightSum += weight
 
       // Store weight
@@ -290,13 +242,20 @@ function calculateTokenWeights(
     if (weightSum === 0) {
       weightSum = 1
     }
+
+    // Log
+    const tokenWeightMap = new Map<StrategyID, number>()
+    for (const [strategyID, weights] of tokenWeights) {
+      tokenWeightMap.set(strategyID, weights.get(bAppToken.address)!)
+    }
+    logTokenWeightTable(bAppToken, strategies, totalBAppAmount, tokenWeightMap)
+
     // Normalize weights
     for (const strategy of strategies) {
       const weight = tokenWeights.get(strategy.id)!.get(bAppToken.address)!
       const normalizedWeight = weight / weightSum
       tokenWeights.get(strategy.id)!.set(bAppToken.address, normalizedWeight)
     }
-    logStrategyTokenWeights(bAppToken.address.toLowerCase(), tokenWeights)
   }
 
   return tokenWeights
@@ -320,7 +279,6 @@ function calculateTotalBAppAmount(token: Address, strategies: Strategy[]): numbe
 
 // Calculate the weights for validator balance
 function calculateValidatorBalanceWeights(strategies: Strategy[]): Map<StrategyID, number> {
-  logVB('🪙  Calculating validator balance weights')
 
   const validatorBalanceWeights = new Map<StrategyID, number>()
 
@@ -330,20 +288,11 @@ function calculateValidatorBalanceWeights(strategies: Strategy[]): Map<StrategyI
     totalValidatorBalance = 1
   }
 
-  logVB(`🗂️  Total VB amount in bApp: ${totalValidatorBalance}`)
 
   for (const strategy of strategies) {
     // Calculate weight for each strategy
     const weight = strategy.validatorBalance / totalValidatorBalance
     validatorBalanceWeights.set(strategy.id, weight)
-
-    logVBStrategy(
-      strategy.id,
-      `🧮 Calculating normalized weight:
-  - Validator Balance: ${strategy.validatorBalance}
-  - Total VB amount in bApp: ${totalValidatorBalance}
-  - Weight (validator balance / total amount): ${GREEN}${(100 * weight).toFixed(2)}%${RESET}`,
-    )
   }
 
   logValidatorBalanceTable(strategies)
