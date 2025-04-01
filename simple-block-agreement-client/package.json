@@ -1,0 +1,26 @@
+{
+  "name": "simple-block-agreement-client",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "block-agreement-client": "ts-node block-agreement-client.ts",
+    "sdk": "NODE_OPTIONS='--experimental-strip-types --no-warnings' npx ts-node src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@ssv-labs/bapps-sdk": "^0.0.7",
+    "@types/node": "^22.13.9",
+    "@types/node-fetch": "^2.6.12",
+    "fs": "^0.0.1-security",
+    "node-fetch": "^3.3.2",
+    "typescript": "^5.8.2",
+    "viem": "^2.23.10"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2"
+  }
+}
