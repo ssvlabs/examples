@@ -12,13 +12,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@ssv-labs/bapps-sdk": "^0.0.7",
+    "@ssv-labs/bapps-sdk": "^0.0.8",
     "@types/node": "^22.13.9",
-    "@types/node-fetch": "^2.6.12",
     "fs": "^0.0.1-security",
-    "node-fetch": "^3.3.2",
     "typescript": "^5.8.2",
-    "viem": "^2.23.10"
+    "viem": "^2.27.0"
   },
   "devDependencies": {
     "ts-node": "^10.9.2"

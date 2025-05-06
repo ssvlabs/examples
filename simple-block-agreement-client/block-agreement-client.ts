@@ -26,17 +26,15 @@
 import * as fs from 'fs';
 import { exec } from 'child_process';
 import { BasedAppsSDK, chains } from "@ssv-labs/bapps-sdk";
-import { createPublicClient, createWalletClient, http } from 'viem'
+import { createPublicClient, createWalletClient, http, defineChain } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
 const args: string[] = process.argv.slice(2);
 const strategyArgIndex: number = args.indexOf('--strategy');
-const keyArgIndex: number = args.indexOf('--key');
+const calculationTypeArgIndex: number = args.indexOf('--calculation_type');
 const verboseMode: boolean = args.includes('--verbose');
 const strategy: string = (strategyArgIndex !== -1 && args[strategyArgIndex + 1]) ? args[strategyArgIndex + 1] : 'default';
-// TODO: key validation 
-const providedKey: string = (keyArgIndex !== -1 && args[keyArgIndex + 1]) ? args[keyArgIndex + 1] : '';
-// TODO: add custom bapp address arg
+const calculationType: string = (calculationTypeArgIndex !== -1 && args[calculationTypeArgIndex + 1]) ? args[calculationTypeArgIndex + 1] : 'arithmetic';
 
 const logFile: string = 'client.log';
 const lockFile: string = 'client.lock';
@@ -47,32 +45,33 @@ const INITIAL_WAIT = 5000;   // Initial monitoring period
 const DEBUG_INTERVAL = 2000; // Interval for monitoring messages
 const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
-// Setup viem clients
-const chain = chains.holesky // or chains.hoodi
+const hoodi = chains.hoodi
+
+
 const transport = http()
 
 const publicClient = createPublicClient({
-  chain,
+  chain: hoodi,
   transport,
 })
 
 const account = privateKeyToAccount('0xa3f73db07859670fa5f7de20ce77d6ef872934f8a3fb978841321125dd31b392')
 const walletClient = createWalletClient({
   account,
-  chain,
+  chain: hoodi,
   transport,
 })
 
 const sdk = new BasedAppsSDK({
-    beaconchainUrl: "https://eth-beacon-chain-holesky.drpc.org/rest/",
+    beaconchainUrl: "https://eth-beacon-chain-hoodi.drpc.org/rest/",
     publicClient,
     walletClient,
-    // @ts-ignore
     _: {
-        subgraphUrl: "https://api.studio.thegraph.com/query/53804/ssv-bapps-subgraph/version/latest/",
+        subgraphUrl: "https://api.studio.thegraph.com/query/71118/ssv-network-hoodi-stage/version/latest",
       },
  })
 
+// Add these constants at the top with other constants
 const TITLE_ART = `
 ██████╗  █████╗ ██████╗ ██████╗     ██████╗██╗     ██╗███████╗███╗   ██╗████████╗
 ██╔══██╗██╔══██╗██╔══██╗██╔══██╗   ██╔════╝██║     ██║██╔════╝████╗  ██║╚══██╔══╝
@@ -84,13 +83,22 @@ const TITLE_ART = `
 
 const DIVIDER = '════════════════════════════════════════════════════════════════════════════════';
 
-
-async function getLatestBlock(): Promise<number> {
+// simulate fetching slot number
+async function fetchSlot(): Promise<number> {
     try {
-        const blockNumber = await publicClient.getBlockNumber();
-        return Number(blockNumber);
+        /*
+        const response = await fetch('https://holesky.beaconcha.in/api/v1/epoch/latest');
+        const data = await response.json();
+        if (!data || !data.data || !data.data.epoch) {
+            console.error('Invalid response structure:', data);
+            return 0;
+        }
+        // Each epoch has 32 slots, so we'll use the epoch number * 32 as the slot number
+        return data.data.epoch * 32;
+        */
+        return 1;
     } catch (error) {
-        console.error('Error getting latest block:', error);
+        console.error('Error fetching slot number:', error);
         return 0;
     }
 }
@@ -151,6 +159,7 @@ async function writeToClient(message: string, type: 'info' | 'success' | 'error'
             prefix = '📡 ';
     }
 
+    // Add strategy identifier to each message
     const strategyPrefix = `[S${strategy}] `;
 
     // Only write to file if logToFile is true
@@ -163,37 +172,75 @@ async function writeToClient(message: string, type: 'info' | 'success' | 'error'
     });
 }
 
+    // Log to console only with strategy identifier
     await logToConsole(`${strategyPrefix}${message}`, type);
     return Promise.resolve();
 }
 
+// safely read the total strategy weight (inside lock)
+async function readTotalStrategyWeight(): Promise<number> {
+    let totalStrategyWeight = 0;
+
+    if (fs.existsSync(logFile)) {
+        const logContent = fs.readFileSync(logFile, 'utf8');
+        const weightEntries = logContent.matchAll(/\[\d{1,2}:\d{2}:\d{2}.*?\] .*?\[S\d+\] Broadcasting vote of slot number \[\d+\] with vote weight \[(\d+)%\] to network\.\.\./g);
+        for (const match of weightEntries) {
+            totalStrategyWeight += parseInt(match[1], 10);
+        }
+    }
+
+    return totalStrategyWeight;
+}
 
 export async function calculateParticipantsWeightSDK(): Promise<Map<string, number>> {
     try {
         const tokenCoefficient: Array<{ token: `0x${string}`; coefficient: number }> = [
             {
-                token: "0xad45A78180961079BFaeEe349704F411dfF947C6" as `0x${string}`,
-                coefficient: 5,
+                token: "0x9F5d4Ec84fC4785788aB44F9de973cF34F7A038e" as `0x${string}`,
+                coefficient: 200,
+            },
+            {
+                token: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" as `0x${string}`,
+                coefficient: 220,
             },
         ] as const;
-        const validatorCoefficient = 1;
+        const validatorCoefficient = 100;
         
         const strategyTokenWeights = await sdk.api.getParticipantWeights({
-            bAppId: "0x4da9f34f83d608cAB03868662e93c96Bc9793495",
+            bAppId: "0xbc8e0973fE8898716Df33C15C26ea74D032Df98a",
         });
         
         const weightCalculationOptions = {
             coefficients: tokenCoefficient,
             validatorCoefficient: validatorCoefficient,
         }
+
+        if (verboseMode) {
+            console.log(DIVIDER);
+            console.log('Strategy Token Weights:');
+            console.log(JSON.stringify(strategyTokenWeights, null, 2));
+            console.log(DIVIDER);
+        }
         
-        const arithmeticStrategyWeights = sdk.utils.calcArithmeticStrategyWeights(strategyTokenWeights, weightCalculationOptions);
-        const strategyWeight = arithmeticStrategyWeights.get(strategy);
+        let strategyWeights;
+        switch (calculationType.toLowerCase()) {
+            case 'geometric':
+                strategyWeights = sdk.utils.calcGeometricStrategyWeights(strategyTokenWeights, weightCalculationOptions);
+                break;
+            case 'harmonic':
+                strategyWeights = sdk.utils.calcHarmonicStrategyWeights(strategyTokenWeights, weightCalculationOptions);
+                break;
+            case 'arithmetic':
+            default:
+                strategyWeights = sdk.utils.calcArithmeticStrategyWeights(strategyTokenWeights, weightCalculationOptions);
+        }
+
+        const strategyWeight = strategyWeights.get(strategy);
 
         return new Map([[strategy, Number(strategyWeight)]]);
     } catch (error) {
         console.error("Error in calculateParticipantsWeightSDK:", error);
-        return new Map([[strategy, 0.26]]);
+        return new Map([[strategy, 0]]);
     }
 }
 
@@ -205,14 +252,15 @@ export async function calculateParticipantsWeightSDK(): Promise<Map<string, numb
 interface Task {
     id: string;           // Unique 4-character identifier
     timestamp: number;    // Creation time
-    blockNumber?: number;  // Optional block number for task
+    slotNumber?: number;  // Optional slot number for task
     status: 'pending' | 'active' | 'expired' | 'completed';
     votes: Map<string, number>; // Strategy -> Weight mapping
 }
 
 /**
  * Task ID Generation
- * Creates random 4-char identifier for new tasks
+ * Creates random 4-character identifier for new tasks
+ * Uses alphanumeric characters from CHARS constant
  */
 function generateTaskId(): string {
     return Array.from({ length: 4 }, () => CHARS.charAt(Math.random() * CHARS.length)).join('');
@@ -259,6 +307,7 @@ function isTimeForNewTask(firstTimestamp: number): boolean {
     return timeInCycle < 1000;
 }
 
+// Add this helper function to generate random Ethereum addresses
 function generateRandomAddress(): string {
     const chars = '0123456789abcdef';
     let address = '0x';
@@ -266,12 +315,6 @@ function generateRandomAddress(): string {
         address += chars[Math.floor(Math.random() * chars.length)];
     }
     return address;
-}
-
-// TODO: key validation function
-function validateStrategyKey(strategyNumber: string, key: string): boolean {
-    const expectedKey = `XXX${strategyNumber}`;
-    return key === expectedKey;
 }
 
 /**
@@ -510,17 +553,17 @@ async function voteOnTask(task: Task): Promise<void> {
         return;
     }
 
-    // Get current block number
-    const currentBlock = await getLatestBlock();
-    await writeToClient(`Current block number: [${currentBlock}]`, 'status', false);
+    // Get current slot number
+    const currentSlot = await fetchSlot();
+    await writeToClient(`Current slot number: [${currentSlot}]`, 'status', false);
 
     const weights = await calculateParticipantsWeightSDK();
     const strategyWeight = weights.get(strategy) || 0;
     const currentStrategyWeight = Math.floor(strategyWeight * 100);
 
     await writeToClient(`Strategy ${strategy} submitting vote for task [${task.id}]`, 'status', false);
-    await writeToClient(`VOTE|${task.id}|S${strategy}|${currentStrategyWeight}|${currentBlock}`, 'info', true);
-    await writeToClient(`Strategy ${strategy} submitted vote: ${currentStrategyWeight}% for block [${currentBlock}]`, 'success', true);
+    await writeToClient(`VOTE|${task.id}|S${strategy}|${currentStrategyWeight}|${currentSlot}`, 'info', true);
+    await writeToClient(`Strategy ${strategy} submitted vote: ${currentStrategyWeight}% for slot [${currentSlot}]`, 'success', true);
 
     // Wait briefly to allow other votes to be recorded
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -543,7 +586,7 @@ async function voteOnTask(task: Task): Promise<void> {
                 `Task Completed Successfully`,
                 `Task ID: ${task.id}`,
                 `Total Weight: ${totalWeight}%`,
-                `Final Block Number: ${currentBlock}`,
+                `Final Slot Number: ${currentSlot}`,
                 `TASK_COMPLETE|${task.id}`,
                 `${DIVIDER}`
             ];
@@ -567,14 +610,6 @@ async function voteOnTask(task: Task): Promise<void> {
 
 // Modify the run function to include verbose mode notification
 async function run(): Promise<void> {
-    // Validate the key first
-    if (!validateStrategyKey(strategy, providedKey)) {
-        console.log('\x1b[31m%s\x1b[0m', '❌ Error: Invalid key provided for strategy ' + strategy);
-        console.log('\x1b[31m%s\x1b[0m', '❌ Program terminated');
-        process.exit(1);
-        return;
-    }
-
     console.clear();
     console.log('\x1b[36m%s\x1b[0m', TITLE_ART);
     console.log('\x1b[33m%s\x1b[0m', DIVIDER);

@@ -25,15 +25,17 @@ npm install
 
 ## Usage
 
-To run the client with a specific strategy and key:
+To run the client with a specific strategy:
 
 ```bash
-npm run block-agreement-client --strategy 531 --key XXX531
+npm run block-agreement-client -- --strategy 11 --calculation_type arithmetic
 ```
+
+The default bapp in this example currently has strategies 8, 9, 11 and 12 opted into it, so can these be used.
 
 ### Command Line Arguments
 - `--strategy`: Your strategy number (required)
-- `--key`: Your strategy key (required)
+- `--calculation_type`: The calculation type you wish to use ( arithmetic | geometric | harmonic ) (required)
 - `--verbose`: Enable verbose logging (optional)
 
 ## How It Works
