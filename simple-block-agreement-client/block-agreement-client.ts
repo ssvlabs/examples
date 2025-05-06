@@ -26,7 +26,7 @@
 import * as fs from 'fs';
 import { exec } from 'child_process';
 import { BasedAppsSDK, chains } from "@ssv-labs/bapps-sdk";
-import { createPublicClient, createWalletClient, http, defineChain } from 'viem'
+import { createPublicClient, createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
 const args: string[] = process.argv.slice(2);
@@ -177,21 +177,6 @@ async function writeToClient(message: string, type: 'info' | 'success' | 'error'
     return Promise.resolve();
 }
 
-// safely read the total strategy weight (inside lock)
-async function readTotalStrategyWeight(): Promise<number> {
-    let totalStrategyWeight = 0;
-
-    if (fs.existsSync(logFile)) {
-        const logContent = fs.readFileSync(logFile, 'utf8');
-        const weightEntries = logContent.matchAll(/\[\d{1,2}:\d{2}:\d{2}.*?\] .*?\[S\d+\] Broadcasting vote of slot number \[\d+\] with vote weight \[(\d+)%\] to network\.\.\./g);
-        for (const match of weightEntries) {
-            totalStrategyWeight += parseInt(match[1], 10);
-        }
-    }
-
-    return totalStrategyWeight;
-}
-
 export async function calculateParticipantsWeightSDK(): Promise<Map<string, number>> {
     try {
         const tokenCoefficient: Array<{ token: `0x${string}`; coefficient: number }> = [
@@ -329,7 +314,7 @@ async function monitorTasks(): Promise<void> {
     const firstTimestamp = await getOrCreateFirstTimestamp();
     let lastProcessedTaskId: string | null = null;
     let lastDebugTime = 0;
-    let lastTaskCompletionTime = 0;
+    const lastTaskCompletionTime = 0;
     
     // Initial 5-second monitoring period
     const startTime = Date.now();
@@ -401,7 +386,6 @@ async function getCurrentTask(): Promise<Task | null> {
     const content = fs.readFileSync(logFile, 'utf8');
     const lines = content.split('\n').reverse(); // Read from bottom to get most recent task
     
-    let taskMatch = null;
     let taskStatus = 'pending';
     let taskId = null;
     let taskTimestamp = null;
