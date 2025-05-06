@@ -1,10 +1,11 @@
 # Block Agreement Client
 
-This is an educational example demonstrating how a Based Application Client could function. The client participates in a block agreement protocol where multiple clients vote on tasks using their strategy weights. 
+This is an educational example demonstrating how a Based Application Client could function. The client participates in a block agreement protocol where multiple clients vote on tasks using their strategy weights.
 
 ## Overview
 
 The Block Agreement Client demonstrates:
+
 - Distributed task creation and voting
 - Strategy-based weight calculation
 - Majority-based voting
@@ -14,11 +15,13 @@ The Block Agreement Client demonstrates:
 
 1. Clone the repository
 2. Navigate to the project directory:
+
 ```bash
 cd simple-block-agreement-client
 ```
 
 3. Install dependencies:
+
 ```bash
 npm install
 ```
@@ -34,6 +37,7 @@ npm run block-agreement-client -- --strategy 11 --calculation_type arithmetic
 The default bapp in this example currently has strategies 8, 9, 11 and 12 opted into it, so can these be used.
 
 ### Command Line Arguments
+
 - `--strategy`: Your strategy number (required)
 - `--calculation_type`: The calculation type you wish to use ( arithmetic | geometric | harmonic ) (required)
 - `--verbose`: Enable verbose logging (optional)

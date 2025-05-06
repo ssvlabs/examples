@@ -5,7 +5,8 @@
   "scripts": {
     "build": "tsc",
     "block-agreement-client": "ts-node block-agreement-client.ts",
-    "sdk": "NODE_OPTIONS='--experimental-strip-types --no-warnings' npx ts-node src/index.ts"
+    "sdk": "NODE_OPTIONS='--experimental-strip-types --no-warnings' npx ts-node src/index.ts",
+    "format": "prettier --write \"**/*.{ts,js,json,md}\""
   },
   "keywords": [],
   "author": "",
@@ -16,9 +17,10 @@
     "@types/node": "^22.13.9",
     "fs": "^0.0.1-security",
     "typescript": "^5.8.2",
-    "viem": "^2.27.0"
+    "viem": "^2.23.10"
   },
   "devDependencies": {
+    "prettier": "^3.2.5",
     "ts-node": "^10.9.2"
   }
 }
