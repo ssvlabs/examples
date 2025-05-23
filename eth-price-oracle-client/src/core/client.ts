@@ -1,4 +1,3 @@
-import { exec } from 'child_process';
 import { TITLE_ART, DIVIDER, CONTRACT_ADDRESS } from '../config/constants';
 import { writeToClient } from '../utils/logger';
 import { startEventListener, setStrategyParams } from './eventListener';

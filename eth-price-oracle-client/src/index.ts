@@ -1,6 +1,5 @@
 console.log('ENTRY POINT REACHED: index.ts');
 import { run } from './core/client';
-import { writeToClient } from './utils/logger';
 
 async function main() {
   try {

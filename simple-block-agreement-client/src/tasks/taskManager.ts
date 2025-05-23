@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { Task } from '../config/types';
-import { CHARS, TASK_INTERVAL, DIVIDER } from '../config/constants';
+import { TASK_INTERVAL, DIVIDER } from '../config/constants';
 import { writeToClient } from '../utils/logger';
 
 const logFile: string = 'client.log';
