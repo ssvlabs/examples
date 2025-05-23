@@ -4,19 +4,20 @@ import { run } from './core/client';
 async function main() {
   try {
     console.log('Starting ETH Price Oracle Client...');
-    
+
     // Parse command line arguments
     const args = process.argv.slice(2);
-    const strategyIndex = args.findIndex(arg => arg === '--strategy');
-    const calculationTypeIndex = args.findIndex(arg => arg === '--calculation_type');
-    const verboseIndex = args.findIndex(arg => arg === '--verbose');
+    const strategyIndex = args.findIndex((arg) => arg === '--strategy');
+    const calculationTypeIndex = args.findIndex((arg) => arg === '--calculation_type');
+    const verboseIndex = args.findIndex((arg) => arg === '--verbose');
 
     if (strategyIndex === -1) {
       throw new Error('--strategy argument is required');
     }
 
     const strategy = args[strategyIndex + 1];
-    const calculationType = calculationTypeIndex !== -1 ? args[calculationTypeIndex + 1] : 'arithmetic';
+    const calculationType =
+      calculationTypeIndex !== -1 ? args[calculationTypeIndex + 1] : 'arithmetic';
     const verboseMode = verboseIndex !== -1;
 
     console.log('Configuration:');
@@ -31,4 +32,4 @@ async function main() {
   }
 }
 
-main().catch(console.error); 
+main().catch(console.error);

@@ -6,10 +6,7 @@ export async function signTaskResponse(taskNumber: number, ethPrice: number): Pr
   // Create the message that will be signed (task num + price)
   // Match exactly what the contract does: keccak256(abi.encodePacked(taskNumber, ethPrice))
   const messageHash = keccak256(
-    encodePacked(
-      ['uint32', 'uint256'],
-      [taskNumber, BigInt(ethPrice)]
-    )
+    encodePacked(['uint32', 'uint256'], [taskNumber, BigInt(ethPrice)])
   );
 
   // Log the message hash for debugging
@@ -19,7 +16,7 @@ export async function signTaskResponse(taskNumber: number, ethPrice: number): Pr
 
   // Sign the raw message hash directly without any prefix
   const signature = await account.sign({
-    hash: messageHash
+    hash: messageHash,
   });
 
   // Log the signature for debugging
@@ -27,4 +24,4 @@ export async function signTaskResponse(taskNumber: number, ethPrice: number): Pr
   await writeToClient(`Signer Address: ${account.address}`, 'info', true);
 
   return signature;
-} 
+}

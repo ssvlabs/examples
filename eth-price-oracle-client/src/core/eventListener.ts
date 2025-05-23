@@ -11,8 +11,8 @@ const NEW_TASK_CREATED_EVENT = {
   name: 'NewTaskCreated',
   inputs: [
     { type: 'uint32', name: 'taskIndex', indexed: true },
-    { type: 'bytes32', name: 'taskHash', indexed: false }
-  ]
+    { type: 'bytes32', name: 'taskHash', indexed: false },
+  ],
 } as const;
 
 let currentStrategy: string = '';
@@ -61,4 +61,4 @@ async function handleNewTask(taskIndex: bigint, taskHash: string) {
   } catch (error) {
     await writeToClient(`Error handling new task: ${error}`, 'error', false);
   }
-} 
+}

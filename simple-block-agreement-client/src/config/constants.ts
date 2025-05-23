@@ -12,7 +12,8 @@ export const TITLE_ART = `
 ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝         ╚═════╝╚══════╝╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝   
 `;
 
-export const DIVIDER = '════════════════════════════════════════════════════════════════════════════════';
+export const DIVIDER =
+  '════════════════════════════════════════════════════════════════════════════════';
 
 export const TOKEN_COEFFICIENTS: Array<{ token: `0x${string}`; coefficient: number }> = [
   {
@@ -25,4 +26,4 @@ export const TOKEN_COEFFICIENTS: Array<{ token: `0x${string}`; coefficient: numb
   },
 ] as const;
 
-export const VALIDATOR_COEFFICIENT = 100; 
+export const VALIDATOR_COEFFICIENT = 100;

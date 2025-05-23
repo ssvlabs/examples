@@ -60,7 +60,10 @@ export async function voteOnTask(
   const voteMatches = Array.from(
     updatedContent.matchAll(new RegExp(`VOTE\\|${task.id}\\|S\\d+\\|(\\d+)\\|(\\d+)`, 'g'))
   );
-  const totalWeight = voteMatches.reduce((sum: number, match: RegExpMatchArray) => sum + parseInt(match[1], 10), 0);
+  const totalWeight = voteMatches.reduce(
+    (sum: number, match: RegExpMatchArray) => sum + parseInt(match[1], 10),
+    0
+  );
 
   // Check if task was completed while we were calculating
   if (
@@ -96,4 +99,4 @@ export async function voteOnTask(
     await writeToClient(`Current Progress: ${totalWeight}% / 50%`, 'info', false);
     await writeToClient(`Need ${remainingWeight}% more for majority`, 'info', false);
   }
-} 
+}

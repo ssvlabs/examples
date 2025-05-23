@@ -41,7 +41,11 @@ export const sdk = new BasedAppsSDK({
   },
 });
 
-export async function calculateParticipantsWeightSDK(strategy: string, calculationType: string, verboseMode: boolean): Promise<Map<string, number>> {
+export async function calculateParticipantsWeightSDK(
+  strategy: string,
+  calculationType: string,
+  verboseMode: boolean
+): Promise<Map<string, number>> {
   try {
     const strategyTokenWeights = await sdk.api.getParticipantWeights({
       bAppId: '0x2224e61a609e850e67bc73997c2d7633fc18238b',
@@ -86,4 +90,4 @@ export async function calculateParticipantsWeightSDK(strategy: string, calculati
     console.error('Error in calculateParticipantsWeightSDK:', error);
     return new Map([[strategy, 0]]);
   }
-} 
+}

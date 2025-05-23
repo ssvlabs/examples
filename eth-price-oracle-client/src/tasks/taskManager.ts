@@ -58,7 +58,7 @@ export async function getCurrentTask(): Promise<Task | null> {
     timestamp: parseInt(taskTimestamp),
     status: taskStatus,
     votes,
-    taskNumber
+    taskNumber,
   };
 }
 
@@ -68,7 +68,7 @@ export async function createTaskFromEvent(taskIndex: bigint, taskHash: string): 
     status: 'pending',
     timestamp: Date.now(),
     votes: new Map<string, number>(),
-    taskNumber: Number(taskIndex)
+    taskNumber: Number(taskIndex),
   };
 
   try {
@@ -93,4 +93,4 @@ export async function createTaskFromEvent(taskIndex: bigint, taskHash: string): 
   }
 
   return task;
-} 
+}

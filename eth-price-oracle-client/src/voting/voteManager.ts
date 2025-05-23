@@ -26,7 +26,10 @@ export async function voteOnTask(
   try {
     // First check if task is already completed
     const content = fs.readFileSync(logFile, 'utf8');
-    if (content.includes(`TASK_COMPLETE|${task.id}`) || content.includes(`TASK_EXPIRED|${task.id}`)) {
+    if (
+      content.includes(`TASK_COMPLETE|${task.id}`) ||
+      content.includes(`TASK_EXPIRED|${task.id}`)
+    ) {
       await writeToClient(`Task [${task.id}] is no longer active`, 'warning', false);
       return;
     }
@@ -48,12 +51,16 @@ export async function voteOnTask(
     if (strategyWeight > totalWeight / 2) {
       await writeToClient(`${DIVIDER}`, 'info', true);
       await writeToClient('Majority vote reached!', 'success', true);
-      await writeToClient(`Strategy ${strategy} has majority with ${strategyWeight} weight`, 'info', true);
+      await writeToClient(
+        `Strategy ${strategy} has majority with ${strategyWeight} weight`,
+        'info',
+        true
+      );
 
       // Get all signatures and signers from votes
       const signatures: string[] = [];
       const signers: string[] = [];
-      
+
       // Use the account's address derived from the private key
       if (task.signature) {
         signatures.push(task.signature);
@@ -62,14 +69,18 @@ export async function voteOnTask(
 
       // Submit the task response on-chain
       const txHash = await submitTaskResponse(task, task.taskNumber, signatures, signers);
-      
+
       await writeToClient(`Task response submitted in transaction: ${txHash}`, 'success', true);
       await writeToClient(`${DIVIDER}`, 'info', true);
     } else {
-      await writeToClient(`Vote recorded for strategy ${strategy} with weight ${strategyWeight}`, 'info', true);
+      await writeToClient(
+        `Vote recorded for strategy ${strategy} with weight ${strategyWeight}`,
+        'info',
+        true
+      );
     }
   } catch (error) {
     await writeToClient(`Error voting on task: ${error}`, 'error', true);
     throw error;
   }
-} 
+}

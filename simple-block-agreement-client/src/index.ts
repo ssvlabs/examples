@@ -13,4 +13,4 @@ const calculationType: string =
     : 'arithmetic';
 
 // Run the client
-run(strategy, calculationType, verboseMode); 
+run(strategy, calculationType, verboseMode);

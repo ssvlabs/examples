@@ -6,48 +6,48 @@ import { DIVIDER } from '../config/constants';
 
 const respondToTaskABI = [
   {
-    "inputs": [],
-    "name": "AlreadyResponded",
-    "type": "error"
+    inputs: [],
+    name: 'AlreadyResponded',
+    type: 'error',
   },
   {
-    "inputs": [],
-    "name": "InvalidPrice",
-    "type": "error"
+    inputs: [],
+    name: 'InvalidPrice',
+    type: 'error',
   },
   {
-    "inputs": [],
-    "name": "InvalidSignature",
-    "type": "error"
+    inputs: [],
+    name: 'InvalidSignature',
+    type: 'error',
   },
   {
-    "inputs": [],
-    "name": "InvalidSigner",
-    "type": "error"
+    inputs: [],
+    name: 'InvalidSigner',
+    type: 'error',
   },
   {
-    "inputs": [],
-    "name": "NotOptedIn",
-    "type": "error"
+    inputs: [],
+    name: 'NotOptedIn',
+    type: 'error',
   },
   {
-    "inputs": [],
-    "name": "TaskMismatch",
-    "type": "error"
+    inputs: [],
+    name: 'TaskMismatch',
+    type: 'error',
   },
   {
-    "inputs": [
-      { "internalType": "bytes32", "name": "taskHash", "type": "bytes32" },
-      { "internalType": "uint32", "name": "taskNumber", "type": "uint32" },
-      { "internalType": "uint256", "name": "ethPrice", "type": "uint256" },
-      { "internalType": "bytes[]", "name": "signatures", "type": "bytes[]" },
-      { "internalType": "address[]", "name": "signers", "type": "address[]" }
+    inputs: [
+      { internalType: 'bytes32', name: 'taskHash', type: 'bytes32' },
+      { internalType: 'uint32', name: 'taskNumber', type: 'uint32' },
+      { internalType: 'uint256', name: 'ethPrice', type: 'uint256' },
+      { internalType: 'bytes[]', name: 'signatures', type: 'bytes[]' },
+      { internalType: 'address[]', name: 'signers', type: 'address[]' },
     ],
-    "name": "respondToTask",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }
+    name: 'respondToTask',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
 ] as const;
 
 export async function submitTaskResponse(
@@ -82,14 +82,14 @@ export async function submitTaskResponse(
         taskNumber,
         BigInt(task.ethPrice),
         signatures as `0x${string}`[],
-        signers as `0x${string}`[]
+        signers as `0x${string}`[],
       ],
-      account: walletClient.account
+      account: walletClient.account,
     });
 
     // Send the transaction
     const hash = await walletClient.writeContract(request);
-    
+
     await writeToClient(`Transaction submitted: ${hash}`, 'success', true);
     await writeToClient(`${DIVIDER}`, 'info', true);
 
@@ -98,4 +98,4 @@ export async function submitTaskResponse(
     await writeToClient(`Error submitting task response: ${error}`, 'error', true);
     throw error;
   }
-} 
+}

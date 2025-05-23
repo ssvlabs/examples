@@ -1,7 +1,18 @@
 import { exec } from 'child_process';
-import { TITLE_ART, DIVIDER, INITIAL_WAIT, DEBUG_INTERVAL, TASK_INTERVAL } from '../config/constants';
+import {
+  TITLE_ART,
+  DIVIDER,
+  INITIAL_WAIT,
+  DEBUG_INTERVAL,
+  TASK_INTERVAL,
+} from '../config/constants';
 import { writeToClient } from '../utils/logger';
-import { getOrCreateFirstTimestamp, isTimeForNewTask, getCurrentTask, createNewTask } from '../tasks/taskManager';
+import {
+  getOrCreateFirstTimestamp,
+  isTimeForNewTask,
+  getCurrentTask,
+  createNewTask,
+} from '../tasks/taskManager';
 import { voteOnTask } from '../voting/voteManager';
 
 const logFile: string = 'client.log';
@@ -98,4 +109,4 @@ export async function run(
 
   // Start monitoring tasks
   await monitorTasks(strategy, calculationType, verboseMode);
-} 
+}

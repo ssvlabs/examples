@@ -25,14 +25,18 @@ export async function run(
 
     await writeToClient(`Local client initialized for Strategy [${strategy}]`, 'success', false);
     await writeToClient(`Connecting to Hoodi network...`, 'status', false);
-    await writeToClient(`Listening for NewTaskCreated events on contract: ${CONTRACT_ADDRESS}`, 'status', false);
+    await writeToClient(
+      `Listening for NewTaskCreated events on contract: ${CONTRACT_ADDRESS}`,
+      'status',
+      false
+    );
 
     // Set strategy parameters
     setStrategyParams(strategy, calculationType, verboseMode);
 
     // Start the event listener
     unwatch = await startEventListener();
-    
+
     await writeToClient('Client is ready to process on-chain tasks', 'status', true);
 
     // Simple heartbet log every 10 seconds
@@ -60,4 +64,4 @@ export async function run(
     await writeToClient(`Error running client: ${error}`, 'error', false);
     throw error;
   }
-} 
+}

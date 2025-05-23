@@ -13,4 +13,4 @@ export type LogMessageType = 'info' | 'success' | 'error' | 'warning' | 'status'
 export interface TokenCoefficient {
   token: `0x${string}`;
   coefficient: number;
-} 
+}

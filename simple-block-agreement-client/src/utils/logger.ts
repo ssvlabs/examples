@@ -3,10 +3,7 @@ import { LogMessageType } from '../config/types';
 
 const logFile: string = 'client.log';
 
-export async function logToConsole(
-  message: string,
-  type: LogMessageType = 'info'
-): Promise<void> {
+export async function logToConsole(message: string, type: LogMessageType = 'info'): Promise<void> {
   const timestamp = new Date().toLocaleTimeString();
   let color = '';
   let prefix = '';
@@ -78,4 +75,4 @@ export async function writeToClient(
   // Log to console only with strategy identifier
   await logToConsole(`${strategyPrefix}${message}`, type);
   return Promise.resolve();
-} 
+}

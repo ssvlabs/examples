@@ -184,4 +184,4 @@ export async function createNewTask(): Promise<Task> {
       await writeToClient(`Error removing lock file: ${error}`, 'error', false);
     }
   }
-} 
+}
