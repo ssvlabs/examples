@@ -1,7 +1,13 @@
 import { BasedAppsSDK, chains } from '@ssv-labs/bapps-sdk';
 import { createPublicClient, createWalletClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { TOKEN_COEFFICIENTS, VALIDATOR_COEFFICIENT } from '../config/constants';
+import {
+  TOKEN_COEFFICIENTS,
+  VALIDATOR_COEFFICIENT,
+  BEACON_CHAIN_URL,
+  SUBGRAPH_URL,
+  BAPP_ID,
+} from '../config/constants';
 import * as dotenv from 'dotenv';
 
 // Load environment variables for private key only
@@ -32,12 +38,11 @@ export const walletClient = createWalletClient({
 });
 
 export const sdk = new BasedAppsSDK({
-  beaconchainUrl: 'https://eth-beacon-chain-hoodi.drpc.org/rest/',
+  beaconchainUrl: BEACON_CHAIN_URL,
   publicClient,
   walletClient,
   _: {
-    subgraphUrl:
-      'https://api.studio.thegraph.com/query/71118/ssv-network-hoodi-stage/version/latest',
+    subgraphUrl: SUBGRAPH_URL,
   },
 });
 
@@ -48,7 +53,7 @@ export async function calculateParticipantsWeightSDK(
 ): Promise<Map<string, number>> {
   try {
     const strategyTokenWeights = await sdk.api.getParticipantWeights({
-      bAppId: '0x2224e61a609e850e67bc73997c2d7633fc18238b',
+      bAppId: BAPP_ID,
     });
 
     const weightCalculationOptions = {

@@ -13,8 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@ssv-labs/bapps-sdk": "latest",
-    "viem": "latest"
+    "@ssv-labs/bapps-sdk": "0.0.10",
+    "viem": "2.7.9"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

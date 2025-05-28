@@ -7,16 +7,6 @@ import { submitTaskResponse } from '../tasks/submitTask';
 
 const logFile: string = 'client.log';
 
-export async function fetchSlot(): Promise<number> {
-  try {
-    // TODO: Implement actual slot fetching
-    return 1;
-  } catch (error) {
-    console.error('Error fetching slot number:', error);
-    return 0;
-  }
-}
-
 export async function voteOnTask(
   task: Task,
   strategy: string,
