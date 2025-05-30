@@ -27,7 +27,9 @@ contract EthPriceOracle is OwnableBasedApp {
     // Storage
     mapping(uint32 => bytes32) public allTaskHashes;
     mapping(address => mapping(uint32 => bytes)) public allTaskResponses;
+    mapping(address => bytes) public strategyData;
     uint32 public latestTaskNum;
+    uint256 public mostRecentPrice;
     ISSVBasedApps public immutable ssvBasedApps;
 
     constructor(
@@ -83,8 +85,19 @@ contract EthPriceOracle is OwnableBasedApp {
 
         // Store the response
         allTaskResponses[msg.sender][taskNumber] = abi.encode(ethPrice);
+        mostRecentPrice = ethPrice;
 
         // Emit event with the ETH price
         emit TaskResponded(taskNumber, taskHash, msg.sender, ethPrice);
+    }
+
+    function optInToBApp(
+        uint32 strategyId,
+        address[] calldata tokens,
+        uint32[] calldata obligationPercentages,
+        bytes calldata data
+    ) external override returns (bool success) {
+        strategyData[msg.sender] = data;
+        return true;
     }
 }
