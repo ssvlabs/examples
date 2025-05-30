@@ -31,9 +31,8 @@ contract EthPriceOracle is OwnableBasedApp {
     ISSVBasedApps public immutable ssvBasedApps;
 
     constructor(
-        address _ssvBasedApps,
-        address _initOwner
-    ) OwnableBasedApp(_ssvBasedApps, _initOwner) {
+        address _ssvBasedApps
+    ) OwnableBasedApp(_ssvBasedApps, msg.sender) {
         ssvBasedApps = ISSVBasedApps(_ssvBasedApps);
     }
 

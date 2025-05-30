@@ -42,11 +42,7 @@ Create a .env file and set the following environment variables:
 PRIVATE_KEY=your_private_key_here
 
 # SSV Based Apps contract address
-SSV_BASED_APPS=0x40d959B95e7c56962D6d388d87921c03734b9C2C
-
-# Deployer owner address for the contract
-INIT_OWNER=0xbc8e0973fE8898716Df33C15C26ea74D032Df98a
-```
+SSV_BASED_APPS=0xc7fCFeEc5FB9962bDC2234A7a25dCec739e27f9f
 
 **1)** Run the deployment script for the specific contract to deploy:
 
@@ -54,7 +50,7 @@ INIT_OWNER=0xbc8e0973fE8898716Df33C15C26ea74D032Df98a
 
 **2)** Verify the contract:
 
-```forge verify-contract <CONTRACT_ADDRESS> src/middleware/examples/ethPriceOracle.sol:EthPriceOracle --chain-id 560048 --etherscan-api-key <YOUR_API_KEY>```
+```forge verify-contract YOUR_DEPLOYED_CONTRACT src/middleware/examples/ethPriceOracle.sol:EthPriceOracle --chain-id 560048 --etherscan-api-key "YOUR_API_KEY" --constructor-args $(cast abi-encode "constructor(address)" "0xc7fCFeEc5FB9962bDC2234A7a25dCec739e27f9f")```
 
 &nbsp;
 

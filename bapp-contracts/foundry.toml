@@ -23,6 +23,3 @@ runs = 5
 [profile.ci]
 verbosity = 3
 fuzz = { runs = 1024 }
-
-[etherscan]
-hoodi = { key = "${ETHERSCAN_API_KEY}" }
