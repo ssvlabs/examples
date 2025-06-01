@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@ssv-labs/bapps-sdk':
-        specifier: git+https://github.com/taylorferran/based-apps-sdk.git#feature/milestone-4
-        version: git+https://git@github.com:taylorferran/based-apps-sdk.git#e2ec3f86a60c8dba8663660773acde78a2b2804c(graphql@16.10.0)(typescript@5.8.2)
+        specifier: ^0.0.10
+        version: 0.0.10(graphql@16.10.0)(typescript@5.8.2)
       '@types/node':
         specifier: ^22.13.9
         version: 22.13.10
@@ -24,6 +24,9 @@ importers:
         specifier: ^2.23.10
         version: 2.23.10(typescript@5.8.2)(zod@3.24.2)
     devDependencies:
+      prettier:
+        specifier: ^3.2.5
+        version: 3.5.3
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@22.13.10)(typescript@5.8.2)
@@ -92,9 +95,8 @@ packages:
   '@scure/bip39@1.5.4':
     resolution: {integrity: sha512-TFM4ni0vKvCfBpohoh+/lY05i9gRbSwXWngAsF4CABQxoaOHijxuaZ2R6cStDQ5CHtHO9aGJTr4ksVJASRRyMA==}
 
-  '@ssv-labs/bapps-sdk@git+https://git@github.com:taylorferran/based-apps-sdk.git#e2ec3f86a60c8dba8663660773acde78a2b2804c':
-    resolution: {commit: e2ec3f86a60c8dba8663660773acde78a2b2804c, repo: git@github.com:taylorferran/based-apps-sdk.git, type: git}
-    version: 0.0.4
+  '@ssv-labs/bapps-sdk@0.0.10':
+    resolution: {integrity: sha512-4HpjwmGBnXFlpYZZadfRIp/SJACG+4aufSLzKfvQ7mEG2Y+z92RM2Y7yaBcJYj5J12Dg3kalSXn6jbr3lXFzQA==}
     engines: {node: '>=18.0.0'}
 
   '@tsconfig/node10@1.0.11':
@@ -635,6 +637,11 @@ packages:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
     engines: {node: '>= 0.4'}
 
+  prettier@3.5.3:
+    resolution: {integrity: sha512-QQtaxnoDJeAkDvDKWCLiwIXkTgRhwYDEQCghU9Z6q03iyek/rxRh/2lC3HB7P8sWT2xC/y5JDctPLBIGzHKbhw==}
+    engines: {node: '>=14'}
+    hasBin: true
+
   process@0.11.10:
     resolution: {integrity: sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==}
     engines: {node: '>= 0.6.0'}
@@ -950,7 +957,7 @@ snapshots:
       '@noble/hashes': 1.7.1
       '@scure/base': 1.2.4
 
-  '@ssv-labs/bapps-sdk@git+https://git@github.com:taylorferran/based-apps-sdk.git#e2ec3f86a60c8dba8663660773acde78a2b2804c(graphql@16.10.0)(typescript@5.8.2)':
+  '@ssv-labs/bapps-sdk@0.0.10(graphql@16.10.0)(typescript@5.8.2)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.10.0)
       '@safe-global/protocol-kit': 5.2.4(typescript@5.8.2)(zod@3.24.2)
@@ -1547,6 +1554,8 @@ snapshots:
   picocolors@1.1.1: {}
 
   possible-typed-array-names@1.1.0: {}
+
+  prettier@3.5.3: {}
 
   process@0.11.10: {}
 

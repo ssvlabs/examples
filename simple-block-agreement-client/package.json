@@ -13,7 +13,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@ssv-labs/bapps-sdk": "^0.0.8",
+    "@ssv-labs/bapps-sdk": "^0.0.10",
     "@types/node": "^22.13.9",
     "fs": "^0.0.1-security",
     "typescript": "^5.8.2",
