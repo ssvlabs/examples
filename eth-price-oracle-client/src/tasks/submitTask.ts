@@ -1,7 +1,7 @@
 import { walletClient, publicClient } from '../sdk-weights/client';
 import { Task } from '../config/types';
 import { CONTRACT_ADDRESS } from '../config/constants';
-import { writeToClient } from '../utils/logger';
+import { writeToClient, writeToSharedLog } from '../utils/logger';
 import { DIVIDER } from '../config/constants';
 
 const respondToTaskABI = [
@@ -42,6 +42,7 @@ const respondToTaskABI = [
       { internalType: 'uint256', name: 'ethPrice', type: 'uint256' },
       { internalType: 'bytes[]', name: 'signatures', type: 'bytes[]' },
       { internalType: 'address[]', name: 'signers', type: 'address[]' },
+      { internalType: 'uint32', name: 'strategyId', type: 'uint32' }
     ],
     name: 'respondToTask',
     outputs: [],
@@ -54,7 +55,8 @@ export async function submitTaskResponse(
   task: Task,
   taskNumber: number,
   signatures: string[],
-  signers: string[]
+  signers: string[],
+  strategyId: number
 ): Promise<string> {
   try {
     if (!task.ethPrice) {
@@ -66,11 +68,18 @@ export async function submitTaskResponse(
       throw new Error(`Task number ${taskNumber} is not in valid uint32 range (0 to 4294967295)`);
     }
 
-    await writeToClient(`${DIVIDER}`, 'info', true);
-    await writeToClient('Submitting task response on-chain...', 'status', true);
-    await writeToClient(`Task Number: ${taskNumber}`, 'info', true);
-    await writeToClient(`ETH Price: $${task.ethPrice}`, 'info', true);
-    await writeToClient(`Number of Signatures: ${signatures.length}`, 'info', true);
+    // Ensure strategyId is a valid uint32
+    if (strategyId < 0 || strategyId > 4294967295) {
+      throw new Error(`Strategy ID ${strategyId} is not in valid uint32 range (0 to 4294967295)`);
+    }
+
+    // Write transaction details to log file
+    await writeToSharedLog(`${DIVIDER}`);
+    await writeToSharedLog(`TRANSACTION_START|${task.id}|${strategyId}`);
+    await writeToSharedLog(`Task Number: ${taskNumber}`);
+    await writeToSharedLog(`ETH Price: $${task.ethPrice}`);
+    await writeToSharedLog(`Number of Signatures: ${signatures.length}`);
+    await writeToSharedLog(`Strategy ID: ${strategyId}`);
 
     // Prepare the transaction
     const { request } = await publicClient.simulateContract({
@@ -83,6 +92,7 @@ export async function submitTaskResponse(
         BigInt(task.ethPrice),
         signatures as `0x${string}`[],
         signers as `0x${string}`[],
+        strategyId
       ],
       account: walletClient.account,
     });
@@ -90,8 +100,8 @@ export async function submitTaskResponse(
     // Send the transaction
     const hash = await walletClient.writeContract(request);
 
-    await writeToClient(`Transaction submitted: ${hash}`, 'success', true);
-    await writeToClient(`${DIVIDER}`, 'info', true);
+    await writeToSharedLog(`Transaction submitted: ${hash}`);
+    await writeToSharedLog(`${DIVIDER}`);
 
     return hash;
   } catch (error) {

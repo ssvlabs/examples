@@ -4,7 +4,7 @@ import { DIVIDER } from '../config/constants';
 import { createTaskFromEvent } from '../tasks/taskManager';
 import { voteOnTask } from '../voting/voteManager';
 
-const CONTRACT_ADDRESS = '0x2224E61A609E850E67bC73997c2d7633FC18238B';
+const CONTRACT_ADDRESS = '0x471bc3619E5f31f56c5fA4C01a55327854DbaD3C';
 
 const NEW_TASK_CREATED_EVENT = {
   type: 'event',

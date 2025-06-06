@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import { LogMessageType } from '../config/types';
+import { DIVIDER } from '../config/constants';
 
 const logFile: string = 'client.log';
 
@@ -66,15 +67,32 @@ export async function writeToClient(
   // Always log to console
   await logToConsole(formattedMessage, type);
 
-  // Write to file if logToFile is true
-  if (logToFile) {
+  // Only write VOTE and TASK_COMPLETE messages to the log file
+  if (logToFile && (message.startsWith('VOTE|') || message.startsWith('TASK_COMPLETE|'))) {
     return new Promise<void>((resolve) => {
       setTimeout(() => {
-        fs.appendFileSync(logFile, `[${timestamp}] ${prefix}${formattedMessage}\n`);
+        fs.appendFileSync(logFile, `${message}\n`);
         resolve(undefined);
       }, 750);
     });
   }
 
   return Promise.resolve();
+}
+
+// Function to write only VOTE and TASK_COMPLETE to client.log
+export async function writeToSharedLog(message: string): Promise<void> {
+  if (message.startsWith('VOTE|') || 
+      message.startsWith('TASK_COMPLETE|') || 
+      message.startsWith('TASK_SUBMITTED|') || 
+      message.startsWith('TASK_EXPIRED|') ||
+      message.startsWith('TRANSACTION_START|') || 
+      message.startsWith('Task Number: ') ||
+      message.startsWith('ETH Price: ') ||
+      message.startsWith('Number of Signatures: ') ||
+      message.startsWith('Strategy ID: ') ||
+      message.startsWith('Transaction submitted: ') ||
+      message === DIVIDER) {
+    fs.appendFileSync(logFile, `${message}\n`);
+  }
 }

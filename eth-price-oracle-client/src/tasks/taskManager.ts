@@ -47,9 +47,9 @@ export async function getCurrentTask(): Promise<Task | null> {
   // Get votes for this task
   const votes = new Map<string, number>();
   for (const line of lines) {
-    const voteMatch = line.match(new RegExp(`VOTE\\|${taskId}\\|S(\\d+)\\|(\\d+)`));
+    const voteMatch = line.match(new RegExp(`VOTE\\|${taskId}\\|S(\\d+)\\|([\\d.]+)\\|([\\d.]+)%`));
     if (voteMatch) {
-      votes.set(voteMatch[1], parseInt(voteMatch[2]));
+      votes.set(voteMatch[1], parseFloat(voteMatch[2]));
     }
   }
 

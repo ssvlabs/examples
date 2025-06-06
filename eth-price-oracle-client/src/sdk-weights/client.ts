@@ -21,30 +21,37 @@ export const publicClient = createPublicClient({
   transport,
 });
 
-const privateKey = process.env.PRIVATE_KEY;
-if (!privateKey) {
-  throw new Error('PRIVATE_KEY environment variable is not set');
+let account: ReturnType<typeof privateKeyToAccount>;
+let walletClient: ReturnType<typeof createWalletClient>;
+let sdk: BasedAppsSDK;
+
+export function initializeSDK(privateKey: string) {
+  if (!privateKey) {
+    throw new Error('Private key is required');
+  }
+
+  account = privateKeyToAccount(privateKey as `0x${string}`);
+  console.log('Derived address from private key:', account.address);
+
+  walletClient = createWalletClient({
+    account,
+    chain: hoodi,
+    transport,
+  });
+
+  sdk = new BasedAppsSDK({
+    beaconchainUrl: BEACON_CHAIN_URL,
+    publicClient,
+    walletClient,
+    _: {
+      subgraphUrl: SUBGRAPH_URL,
+    },
+  });
+
+  return { account, walletClient, sdk };
 }
 
-const derivedAddress = privateKeyToAccount(privateKey as `0x${string}`).address;
-console.log('Derived address from private key:', derivedAddress);
-
-export const account = privateKeyToAccount(privateKey as `0x${string}`);
-
-export const walletClient = createWalletClient({
-  account,
-  chain: hoodi,
-  transport,
-});
-
-export const sdk = new BasedAppsSDK({
-  beaconchainUrl: BEACON_CHAIN_URL,
-  publicClient,
-  walletClient,
-  _: {
-    subgraphUrl: SUBGRAPH_URL,
-  },
-});
+export { account, walletClient, sdk };
 
 export async function calculateParticipantsWeightSDK(
   strategy: string,
@@ -88,9 +95,8 @@ export async function calculateParticipantsWeightSDK(
         );
     }
 
-    const strategyWeight = strategyWeights.get(strategy);
-
-    return new Map([[strategy, Number(strategyWeight)]]);
+    // Return all strategy weights, not just the current strategy
+    return strategyWeights;
   } catch (error) {
     console.error('Error in calculateParticipantsWeightSDK:', error);
     return new Map([[strategy, 0]]);
