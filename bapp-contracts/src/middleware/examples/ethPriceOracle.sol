@@ -33,8 +33,6 @@ contract EthPriceOracle is OwnableBasedApp {
     uint32 public latestTaskNum;
     uint256 public mostRecentPrice;
     mapping(uint32 => address) public strategySigner;
-    mapping(uint32 => address) public testOne;
-    mapping(uint32 => address) public testTwo;
     ISSVBasedApps public immutable ssvBasedApps;
 
     constructor(
