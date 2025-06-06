@@ -4,6 +4,7 @@ pragma solidity 0.8.29;
 import { OwnableBasedApp } from "@ssv/src/middleware/modules/core+roles/OwnableBasedApp.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { ISSVBasedApps } from "@ssv/src/core/interfaces/ISSVBasedApps.sol";
+import { ICore } from "@ssv/src/core/interfaces/ICore.sol";
 
 interface IAccountBAppStrategy {
     function accountBAppStrategy(address account, address bApp) external view returns (uint32);
@@ -23,13 +24,17 @@ contract EthPriceOracle is OwnableBasedApp {
     // Events
     event NewTaskCreated(uint32 indexed taskIndex, bytes32 taskHash);
     event TaskResponded(uint32 indexed taskIndex, bytes32 taskHash, address responder, uint256 ethPrice);
+    event BAppOptedInByStrategy(uint32 indexed strategyId, address indexed bApp, bytes data, address[] tokens, uint32[] obligationPercentages);
+    event DebugOptIn(uint32 indexed strategyId, address signer, address testOneAddress, address testTwoAddress);
 
     // Storage
     mapping(uint32 => bytes32) public allTaskHashes;
     mapping(address => mapping(uint32 => bytes)) public allTaskResponses;
-    mapping(address => bytes) public strategyData;
     uint32 public latestTaskNum;
     uint256 public mostRecentPrice;
+    mapping(uint32 => address) public strategySigner;
+    mapping(uint32 => address) public testOne;
+    mapping(uint32 => address) public testTwo;
     ISSVBasedApps public immutable ssvBasedApps;
 
     constructor(
@@ -55,7 +60,8 @@ contract EthPriceOracle is OwnableBasedApp {
         uint32 taskNumber,
         uint256 ethPrice,
         bytes[] calldata signatures,
-        address[] calldata signers
+        address[] calldata signers,
+        uint32 strategyId
     ) external {
         // check that the task is valid and hasn't been responded to yet
         if (taskHash != allTaskHashes[taskNumber]) { revert TaskMismatch(); }
@@ -65,21 +71,27 @@ contract EthPriceOracle is OwnableBasedApp {
 
         // Create the message that was signed (task num + price)
         bytes32 messageHash = keccak256(abi.encodePacked(taskNumber, ethPrice));
+
+        // Get the strategy signer 
+        address strategySignerAddress = strategySigner[strategyId];
         
         // Verify each signature
         for (uint i = 0; i < signatures.length; i++) {
+
             // Recover the signer address from the signature
             address recoveredSigner = messageHash.recover(signatures[i]);
-            
-            // Verify the recovered signer matches the expected signer
-            if (recoveredSigner != signers[i]) {
-                revert InvalidSigner();
-            }
 
-            // Check if the signer has opted into this bApp
-            uint32 strategyId = IAccountBAppStrategy(address(ssvBasedApps)).accountBAppStrategy(recoveredSigner, address(this));
-            if (strategyId == 0) {
-                revert NotOptedIn();
+            if (strategySignerAddress != address(0)) {
+                // if strategy has a signer set, verify this signer is the correct one
+                if (strategySignerAddress != signers[i]) {
+                    revert InvalidSigner();
+                }
+            } else {
+                // if strategy has no signer set, check the signer is the owner of the strategy
+                uint32 derivedStrategyId = IAccountBAppStrategy(address(ssvBasedApps)).accountBAppStrategy(recoveredSigner, address(this));
+                if (derivedStrategyId != strategyId) {
+                    revert NotOptedIn();
+                }
             }
         }
 
@@ -93,11 +105,17 @@ contract EthPriceOracle is OwnableBasedApp {
 
     function optInToBApp(
         uint32 strategyId,
-        address[] calldata tokens,
-        uint32[] calldata obligationPercentages,
+        address[] calldata,
+        uint32[] calldata,
         bytes calldata data
-    ) external override returns (bool success) {
-        strategyData[msg.sender] = data;
+    ) external override onlySSVBasedAppManager returns (bool success) {
+        // Decode the padded address correctly from bytes32
+        address signer = address(uint160(uint256(abi.decode(data, (bytes32)))));
+        // Store the address in the mapping
+        strategySigner[strategyId] = signer;
+
+        emit DebugOptIn(strategyId, signer, testOne[1], testTwo[2]);
+
         return true;
     }
 }
