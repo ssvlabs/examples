@@ -1,15 +1,26 @@
 # Block Agreement Client
 
-This is an educational example demonstrating how a Based Application Client could function. The client participates in a block agreement protocol where multiple clients vote on tasks using their strategy weights.
+A client application for the SSV Network that handles task creation, voting, and agreement processes.
 
-## Overview
+## Project Structure
 
-The Block Agreement Client demonstrates:
+```
+src/
+├── config/         # Configuration and types
+├── core/           # Core client functionality
+├── sdk/            # SDK integration
+├── tasks/          # Task management
+├── utils/          # Utility functions
+└── voting/         # Voting system
+```
 
-- Distributed task creation and voting
-- Strategy-based weight calculation
-- Majority-based voting
-- Synchronized client coordination
+## Features
+
+- Task creation and management
+- Voting system with weight calculation
+- Real-time monitoring and logging
+- Multiple strategy support
+- Configurable calculation types (arithmetic, geometric, harmonic)
 
 ## Installation
 
@@ -28,19 +39,53 @@ npm install
 
 ## Usage
 
-To run the client with a specific strategy:
-
+Run the client with default settings:
 ```bash
-npm run block-agreement-client -- --strategy 11 --calculation_type arithmetic
+npm run dev
 ```
 
-The default bapp in this example currently has strategies 8, 9, 11 and 12 opted into it, so can these be used.
+Run with specific strategy and calculation type:
+```bash
+npm run dev -- --strategy 1 --calculation_type arithmetic
+```
 
-### Command Line Arguments
+Enable verbose mode:
+```bash
+npm run dev -- --verbose
+```
 
-- `--strategy`: Your strategy number (required)
-- `--calculation_type`: The calculation type you wish to use ( arithmetic | geometric | harmonic ) (required)
-- `--verbose`: Enable verbose logging (optional)
+## Configuration
+
+The client supports the following command-line arguments:
+
+- `--strategy`: Specify the strategy number (default: "default")
+- `--calculation_type`: Set the weight calculation type (arithmetic, geometric, or harmonic)
+- `--verbose`: Enable verbose logging
+
+## Development
+
+Build the project:
+```bash
+npm run build
+```
+
+Run in development mode:
+```bash
+npm run dev
+```
+
+## License
+
+ISC
+
+## Overview
+
+The Block Agreement Client demonstrates:
+
+- Distributed task creation and voting
+- Strategy-based weight calculation
+- Majority-based voting
+- Synchronized client coordination
 
 ## How It Works
 
