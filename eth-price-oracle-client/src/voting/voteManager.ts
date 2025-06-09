@@ -7,26 +7,34 @@ const logFile: string = 'client.log';
 
 // Function to write only VOTE and TASK_COMPLETE to client.log
 async function writeToSharedLog(message: string): Promise<void> {
-  if (message.startsWith('VOTE|') || message.startsWith('TASK_COMPLETE|') || 
-      message.startsWith('TASK_SUBMITTED|') || message.startsWith('TASK_EXPIRED|')) {
+  if (
+    message.startsWith('VOTE|') ||
+    message.startsWith('TASK_COMPLETE|') ||
+    message.startsWith('TASK_SUBMITTED|') ||
+    message.startsWith('TASK_EXPIRED|')
+  ) {
     fs.appendFileSync(logFile, `${message}\n`);
   }
 }
 
-// Function to read all votes for a task from the log file
+// Function to read votes from log file
 function readVotesFromLog(taskId: string): Map<string, number> {
-  const allVotes = new Map<string, number>();
-  if (!fs.existsSync(logFile)) return allVotes;
+  const votes = new Map<string, number>();
+  if (!fs.existsSync(logFile)) return votes;
 
   const content = fs.readFileSync(logFile, 'utf8');
   const lines = content.split('\n');
+
   for (const line of lines) {
     const voteMatch = line.match(new RegExp(`VOTE\\|${taskId}\\|S(\\d+)\\|([\\d.]+)`));
     if (voteMatch) {
-      allVotes.set(voteMatch[1], parseFloat(voteMatch[2]));
+      const strategyId = voteMatch[1];
+      const percentage = parseFloat(voteMatch[2]);
+      votes.set(strategyId, percentage);
     }
   }
-  return allVotes;
+
+  return votes;
 }
 
 export async function voteOnTask(
@@ -48,10 +56,10 @@ export async function voteOnTask(
 
     // Calculate strategy weights from SDK
     const weights = await calculateParticipantsWeightSDK(strategy, calculationType, verboseMode);
-    
+
     // Get the weight for this strategy
     const strategyWeight = weights.get(strategy) || 0;
-    
+
     // Calculate total weight of ALL strategies (not just this one)
     let totalWeight = 0;
     weights.forEach((weight) => {
@@ -111,7 +119,13 @@ export async function voteOnTask(
         }
 
         // Submit the task response on-chain
-        const txHash = await submitTaskResponse(task, task.taskNumber, signatures, signers, strategyId);
+        const txHash = await submitTaskResponse(
+          task,
+          task.taskNumber,
+          signatures,
+          signers,
+          strategyId
+        );
 
         // Write transaction submission to shared log file
         await writeToSharedLog(`TASK_SUBMITTED|${task.id}|${txHash}|${strategyId}`);

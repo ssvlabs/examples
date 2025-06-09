@@ -42,7 +42,7 @@ const respondToTaskABI = [
       { internalType: 'uint256', name: 'ethPrice', type: 'uint256' },
       { internalType: 'bytes[]', name: 'signatures', type: 'bytes[]' },
       { internalType: 'address[]', name: 'signers', type: 'address[]' },
-      { internalType: 'uint32', name: 'strategyId', type: 'uint32' }
+      { internalType: 'uint32', name: 'strategyId', type: 'uint32' },
     ],
     name: 'respondToTask',
     outputs: [],
@@ -92,7 +92,7 @@ export async function submitTaskResponse(
         BigInt(task.ethPrice),
         signatures as `0x${string}`[],
         signers as `0x${string}`[],
-        strategyId
+        strategyId,
       ],
       account: walletClient.account,
     });

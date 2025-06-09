@@ -62,17 +62,19 @@ export async function writeToClient(
 
 // Function to write only VOTE and TASK_COMPLETE to client.log
 export async function writeToSharedLog(message: string): Promise<void> {
-  if (message.startsWith('VOTE|') || 
-      message.startsWith('TASK_COMPLETE|') || 
-      message.startsWith('TASK_SUBMITTED|') || 
-      message.startsWith('TASK_EXPIRED|') ||
-      message.startsWith('TRANSACTION_START|') || 
-      message.startsWith('Task Number: ') ||
-      message.startsWith('ETH Price: ') ||
-      message.startsWith('Number of Signatures: ') ||
-      message.startsWith('Strategy ID: ') ||
-      message.startsWith('Transaction submitted: ') ||
-      message === DIVIDER) {
+  if (
+    message.startsWith('VOTE|') ||
+    message.startsWith('TASK_COMPLETE|') ||
+    message.startsWith('TASK_SUBMITTED|') ||
+    message.startsWith('TASK_EXPIRED|') ||
+    message.startsWith('TRANSACTION_START|') ||
+    message.startsWith('Task Number: ') ||
+    message.startsWith('ETH Price: ') ||
+    message.startsWith('Number of Signatures: ') ||
+    message.startsWith('Strategy ID: ') ||
+    message.startsWith('Transaction submitted: ') ||
+    message === DIVIDER
+  ) {
     fs.appendFileSync(logFile, `${message}\n`);
   }
 }

@@ -9,7 +9,7 @@ const logFile: string = 'client.log';
 // Function to monitor the log file for new votes and task events
 async function monitorVotes(taskId: string): Promise<void> {
   let lastSize = 0;
-  
+
   // Initial read of the file
   if (fs.existsSync(logFile)) {
     lastSize = fs.statSync(logFile).size;
@@ -23,7 +23,7 @@ async function monitorVotes(taskId: string): Promise<void> {
         // Read new content
         const content = fs.readFileSync(logFile, 'utf8');
         const lines = content.split('\n');
-        
+
         // Process only new lines
         for (let i = lines.length - 1; i >= 0; i--) {
           const line = lines[i];
@@ -40,7 +40,9 @@ async function monitorVotes(taskId: string): Promise<void> {
             const txMatch = line.match(new RegExp(`TRANSACTION_START\\|${taskId}\\|(\\d+)`));
             if (txMatch) {
               const strategyId = txMatch[1];
-              console.log(`\nMajority reached! Strategy ${strategyId} will send the transaction.\n`);
+              console.log(
+                `\nMajority reached! Strategy ${strategyId} will send the transaction.\n`
+              );
             }
           } else if (line === DIVIDER) {
             console.log(line);
