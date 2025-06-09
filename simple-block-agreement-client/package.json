@@ -1,17 +1,17 @@
 {
   "name": "simple-block-agreement-client",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Block Agreement Client for SSV Network",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "block-agreement-client": "ts-node block-agreement-client.ts",
-    "sdk": "NODE_OPTIONS='--experimental-strip-types --no-warnings' npx ts-node src/index.ts",
-    "format": "prettier --write \"**/*.{ts,js,json,md}\""
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "clean": "rm -rf dist"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "@ssv-labs/bapps-sdk": "^0.0.10",
     "@types/node": "^22.13.9",
@@ -20,7 +20,8 @@
     "viem": "^2.23.10"
   },
   "devDependencies": {
-    "prettier": "^3.2.5",
-    "ts-node": "^10.9.2"
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
   }
 }
