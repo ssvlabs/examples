@@ -40,26 +40,6 @@ export async function writeToClient(
   logToFile: boolean = true,
   strategy?: string
 ): Promise<void> {
-  const timestamp = new Date().toLocaleTimeString();
-  let prefix = '';
-
-  switch (type) {
-    case 'success':
-      prefix = '✅ ';
-      break;
-    case 'error':
-      prefix = '❌ ';
-      break;
-    case 'warning':
-      prefix = '⚠️ ';
-      break;
-    case 'status':
-      prefix = '📊 ';
-      break;
-    default:
-      prefix = '📡 ';
-  }
-
   // Add strategy identifier to each message if provided
   const strategyPrefix = strategy ? `[S${strategy}] ` : '';
   const formattedMessage = `${strategyPrefix}${message}`;

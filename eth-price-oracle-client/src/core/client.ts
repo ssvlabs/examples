@@ -3,8 +3,6 @@ import { writeToClient } from '../utils/logger';
 import { startEventListener, setStrategyParams } from './eventListener';
 import { account } from '../sdk-weights/client';
 import * as fs from 'fs';
-import { voteOnTask } from '../voting/voteManager';
-import { Task } from '../config/types';
 
 const logFile: string = 'client.log';
 

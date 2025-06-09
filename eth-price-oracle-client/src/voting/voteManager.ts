@@ -1,7 +1,5 @@
 import * as fs from 'fs';
 import { Task } from '../config/types';
-import { writeToClient } from '../utils/logger';
-import { DIVIDER } from '../config/constants';
 import { calculateParticipantsWeightSDK, account } from '../sdk-weights/client';
 import { submitTaskResponse } from '../tasks/submitTask';
 
