@@ -100,10 +100,6 @@ export async function voteOnTask(
       return;
     }
 
-    // Calculate percentage for this strategy based on SDK weights
-    // This will be 33% for S19 and 66% for S25
-    const strategyPercentage = (strategyWeight / totalWeight) * 100;
-
     // Display all votes in console (instance-specific)
     console.log('\nCurrent votes for this task:');
     const allVotes = readVotesFromLog(task.id);
