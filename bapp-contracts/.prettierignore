@@ -1,0 +1,13 @@
+node_modules
+out/
+cache/
+lib/
+!src/lib
+coverage
+coverage.json
+typechain
+typechain-types
+
+# Hardhat files
+cache
+artifacts
