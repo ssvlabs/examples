@@ -73,12 +73,8 @@ export async function voteOnTask(
       await writeToSharedLog(`SIGNATURE|${task.id}|${strategy}|${signature}|${account.address}`);
     }
 
-    await writeToSharedLog(
-      `Strategy ${strategy} submitting vote for task [${task.id}]`
-    );
-    await writeToSharedLog(
-      `VOTE|${task.id}|S${strategy}|${currentStrategyWeight}|${currentSlot}`
-    );
+    await writeToSharedLog(`Strategy ${strategy} submitting vote for task [${task.id}]`);
+    await writeToSharedLog(`VOTE|${task.id}|S${strategy}|${currentStrategyWeight}|${currentSlot}`);
     await writeToSharedLog(
       `Strategy ${strategy} submitted vote: ${currentStrategyWeight}% for slot [${currentSlot}]`
     );
@@ -107,7 +103,6 @@ export async function voteOnTask(
     // Calculate percentage for this strategy based on SDK weights
     // This will be 33% for S19 and 66% for S25
     const strategyPercentage = (strategyWeight / totalWeight) * 100;
-    const formattedPercentage = strategyPercentage.toFixed(1);
 
     // Display all votes in console (instance-specific)
     console.log('\nCurrent votes for this task:');
@@ -139,14 +134,14 @@ export async function voteOnTask(
         const signatures: string[] = [];
         const signers: string[] = [];
         const strategyIds: number[] = [];
-        
+
         // Read all signature entries from the log file
         const content = fs.readFileSync(logFile, 'utf8');
         const lines = content.split('\n');
-        
+
         for (const line of lines) {
           if (line.startsWith('SIGNATURE|')) {
-            const [_, taskId, strategyStr, signature, signer] = line.split('|');
+            const [, taskId, strategyStr, signature, signer] = line.split('|');
             if (taskId === task.id) {
               const sigStrategyId = parseInt(strategyStr.replace('S', ''));
               signatures.push(signature);

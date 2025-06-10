@@ -7,4 +7,4 @@ export async function fetchSlot(): Promise<number> {
     console.error('Error fetching slot number:', error);
     return 0;
   }
-} 
+}
