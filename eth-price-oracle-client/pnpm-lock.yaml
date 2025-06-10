@@ -15,8 +15,8 @@ importers:
         specifier: ^1.6.7
         version: 1.9.0
       dotenv:
-        specifier: ^16.4.5
-        version: 16.4.7
+        specifier: ^16.5.0
+        version: 16.5.0
       ora:
         specifier: ^8.0.1
         version: 8.2.0
@@ -360,8 +360,8 @@ packages:
   dom-walk@0.1.2:
     resolution: {integrity: sha512-6QvTW9mrGeIegrFXdtQi9pk7O/nSK6lSdXW2eqUspN5LWD7UTji2Fqw5V2YLjBpHEoU9Xl/eUWNpDeZvoyOv2w==}
 
-  dotenv@16.4.7:
-    resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
+  dotenv@16.5.0:
+    resolution: {integrity: sha512-m/C+AwOAr9/W1UOIZUo232ejMNnJAJtYQjUbHoNTBNTJSvqzzDh7vnrei3o3r3m9blf6ZoDkvcw0VmozNRFJxg==}
     engines: {node: '>=12'}
 
   dunder-proto@1.0.1:
@@ -1070,7 +1070,7 @@ snapshots:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.10.0)
       '@safe-global/protocol-kit': 5.2.4(typescript@5.8.2)(zod@3.24.2)
       abitype: 1.0.8(typescript@5.8.2)(zod@3.24.2)
-      dotenv: 16.4.7
+      dotenv: 16.5.0
       graphql-request: 7.1.2(graphql@16.10.0)
       lodash-es: 4.17.21
       ssv-keys: 1.2.1
@@ -1341,7 +1341,7 @@ snapshots:
 
   dom-walk@0.1.2: {}
 
-  dotenv@16.4.7: {}
+  dotenv@16.5.0: {}
 
   dunder-proto@1.0.1:
     dependencies:
