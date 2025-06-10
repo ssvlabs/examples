@@ -45,34 +45,37 @@ cd eth-price-oracle-client
 npm install
 ```
 
-4. Create a `.env` file in the root directory with your private key:
+4. Create a `.env` file in the root directory with your private keys:
 ```
-PRIVATE_KEY=your_private_key_here
+PRIVATE_KEY_1=your_private_key_1_here
+PRIVATE_KEY_2=your_private_key_2_here
+PRIVATE_KEY_3=your_private_key_3_here
 ```
 
 ## Usage
 
 Run the client with default settings:
 ```bash
-npm run dev
+npm run dev -- --strategy 19 --key_number 1
 ```
 
 Run with specific strategy and calculation type:
 ```bash
-npm run dev -- --strategy 19 --calculation_type arithmetic
+npm run dev -- --strategy 19 --calculation_type arithmetic --key_number 1
 ```
 
 Enable verbose mode:
 ```bash
-npm run dev -- --verbose
+npm run dev -- --strategy 19 --key_number 1 --verbose
 ```
 
 ## Configuration
 
 The client supports the following command-line arguments:
 
-- `--strategy`: Specify the strategy number (default: "19")
+- `--strategy`: Specify the strategy number (required)
 - `--calculation_type`: Set the weight calculation type (arithmetic, geometric, or harmonic)
+- `--key_number`: Specify which private key to use (1, 2, or 3)
 - `--verbose`: Enable verbose logging
 
 ## Contract Address
@@ -82,7 +85,7 @@ The client interacts with the ETH Price Oracle contract at:
 0x2224E61A609E850E67bC73997c2d7633FC18238B
 ```
 
-When the client is running, a transaction must be signed on-chain to trigger the task being created, the client will listen for this, and process it, signing the response and sending it back to the bapp with the private key provided in the .env file.
+When the client is running, a transaction must be signed on-chain to trigger the task being created, the client will listen for this, and process it, signing the response and sending it back to the bapp with the private key specified by the key_number argument.
 
 **Important**: The private key provided must be from the wallet that owns the strategy being used. The BApp contract will only accept signatures from strategy owners who have opted in to the system. If you're not the strategy owner or haven't opted in, the transactions will be rejected.
 
