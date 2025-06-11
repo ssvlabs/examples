@@ -28,8 +28,8 @@ contract EthPriceOracle is OwnableBasedApp {
 
     // Structs
     struct Task {
-        uint32 taskNumber;
         uint256 price;
+        uint32 taskNumber;
         address responder;
     }
 
@@ -80,7 +80,7 @@ contract EthPriceOracle is OwnableBasedApp {
         bytes32 messageHash = keccak256(abi.encodePacked(taskNumber, ethPrice));
         
         // Verify each signature
-        for (uint i = 0; i < signatures.length; i++) {
+        for (uint256 i = 0; i < signatures.length; i++) {
             // Recover the signer address from the signature
             address recoveredSigner = messageHash.recover(signatures[i]);
 
@@ -108,8 +108,8 @@ contract EthPriceOracle is OwnableBasedApp {
 
         // Update the latest complete task
         latestCompleteTask = Task({
-            taskNumber: taskNumber,
             price: ethPrice,
+            taskNumber: taskNumber,
             responder: msg.sender
         });
 
