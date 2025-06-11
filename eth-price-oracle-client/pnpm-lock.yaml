@@ -10,29 +10,29 @@ importers:
     dependencies:
       '@ssv-labs/bapps-sdk':
         specifier: 0.0.10
-        version: 0.0.10(graphql@16.10.0)(typescript@5.8.2)
+        version: 0.0.10(graphql@16.10.0)(typescript@5.8.3)
       axios:
         specifier: ^1.6.7
         version: 1.9.0
       dotenv:
-        specifier: ^16.5.0
+        specifier: ^16.4.5
         version: 16.5.0
       ora:
         specifier: ^8.0.1
         version: 8.2.0
       viem:
-        specifier: ^2.31.0
-        version: 2.31.0(typescript@5.8.2)(zod@3.24.2)
+        specifier: ^2.7.9
+        version: 2.31.0(typescript@5.8.3)(zod@3.24.2)
     devDependencies:
       '@types/node':
-        specifier: ^20.19.0
+        specifier: 20.19.0
         version: 20.19.0
       ts-node:
-        specifier: ^10.9.2
-        version: 10.9.2(@types/node@20.19.0)(typescript@5.8.2)
+        specifier: 10.9.2
+        version: 10.9.2(@types/node@20.19.0)(typescript@5.8.3)
       typescript:
-        specifier: ^5.8.2
-        version: 5.8.2
+        specifier: 5.8.3
+        version: 5.8.3
 
 packages:
 
@@ -907,8 +907,8 @@ packages:
     engines: {node: '>=4.2.0'}
     hasBin: true
 
-  typescript@5.8.2:
-    resolution: {integrity: sha512-aJn6wq13/afZp/jT9QZmwEjDqqvSGp1VT5GVg+f/t6/oVyrgXM6BY1h9BRh/O5p3PlUPAe+WuiEZOmb/49RqoQ==}
+  typescript@5.8.3:
+    resolution: {integrity: sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -1026,7 +1026,6 @@ snapshots:
   '@noble/curves@1.9.2':
     dependencies:
       '@noble/hashes': 1.8.0
-    optional: true
 
   '@noble/hashes@1.8.0': {}
 
@@ -1037,14 +1036,14 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
-  '@safe-global/protocol-kit@5.2.4(typescript@5.8.2)(zod@3.24.2)':
+  '@safe-global/protocol-kit@5.2.4(typescript@5.8.3)(zod@3.24.2)':
     dependencies:
       '@safe-global/safe-deployments': 1.37.30
       '@safe-global/safe-modules-deployments': 2.2.7
-      '@safe-global/types-kit': 1.0.4(typescript@5.8.2)(zod@3.24.2)
-      abitype: 1.0.8(typescript@5.8.2)(zod@3.24.2)
+      '@safe-global/types-kit': 1.0.4(typescript@5.8.3)(zod@3.24.2)
+      abitype: 1.0.8(typescript@5.8.3)(zod@3.24.2)
       semver: 7.7.1
-      viem: 2.31.0(typescript@5.8.2)(zod@3.24.2)
+      viem: 2.31.0(typescript@5.8.3)(zod@3.24.2)
     optionalDependencies:
       '@noble/curves': 1.9.2
       '@peculiar/asn1-schema': 2.3.15
@@ -1060,9 +1059,9 @@ snapshots:
 
   '@safe-global/safe-modules-deployments@2.2.7': {}
 
-  '@safe-global/types-kit@1.0.4(typescript@5.8.2)(zod@3.24.2)':
+  '@safe-global/types-kit@1.0.4(typescript@5.8.3)(zod@3.24.2)':
     dependencies:
-      abitype: 1.0.8(typescript@5.8.2)(zod@3.24.2)
+      abitype: 1.0.8(typescript@5.8.3)(zod@3.24.2)
     transitivePeerDependencies:
       - typescript
       - zod
@@ -1071,7 +1070,7 @@ snapshots:
 
   '@scure/bip32@1.7.0':
     dependencies:
-      '@noble/curves': 1.9.1
+      '@noble/curves': 1.9.2
       '@noble/hashes': 1.8.0
       '@scure/base': 1.2.6
 
@@ -1080,16 +1079,16 @@ snapshots:
       '@noble/hashes': 1.8.0
       '@scure/base': 1.2.6
 
-  '@ssv-labs/bapps-sdk@0.0.10(graphql@16.10.0)(typescript@5.8.2)':
+  '@ssv-labs/bapps-sdk@0.0.10(graphql@16.10.0)(typescript@5.8.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.10.0)
-      '@safe-global/protocol-kit': 5.2.4(typescript@5.8.2)(zod@3.24.2)
-      abitype: 1.0.8(typescript@5.8.2)(zod@3.24.2)
+      '@safe-global/protocol-kit': 5.2.4(typescript@5.8.3)(zod@3.24.2)
+      abitype: 1.0.8(typescript@5.8.3)(zod@3.24.2)
       dotenv: 16.5.0
       graphql-request: 7.1.2(graphql@16.10.0)
       lodash-es: 4.17.21
       ssv-keys: 1.2.1
-      viem: 2.31.0(typescript@5.8.2)(zod@3.24.2)
+      viem: 2.31.0(typescript@5.8.3)(zod@3.24.2)
       zod: 3.24.2
     transitivePeerDependencies:
       - bufferutil
@@ -1135,9 +1134,9 @@ snapshots:
     dependencies:
       '@types/yargs-parser': 21.0.3
 
-  abitype@1.0.8(typescript@5.8.2)(zod@3.24.2):
+  abitype@1.0.8(typescript@5.8.3)(zod@3.24.2):
     optionalDependencies:
-      typescript: 5.8.2
+      typescript: 5.8.3
       zod: 3.24.2
 
   acorn-walk@8.3.4:
@@ -1728,18 +1727,18 @@ snapshots:
       string-width: 7.2.0
       strip-ansi: 7.1.0
 
-  ox@0.7.1(typescript@5.8.2)(zod@3.24.2):
+  ox@0.7.1(typescript@5.8.3)(zod@3.24.2):
     dependencies:
       '@adraffy/ens-normalize': 1.11.0
       '@noble/ciphers': 1.3.0
-      '@noble/curves': 1.9.1
+      '@noble/curves': 1.9.2
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
       '@scure/bip39': 1.6.0
-      abitype: 1.0.8(typescript@5.8.2)(zod@3.24.2)
+      abitype: 1.0.8(typescript@5.8.3)(zod@3.24.2)
       eventemitter3: 5.0.1
     optionalDependencies:
-      typescript: 5.8.2
+      typescript: 5.8.3
     transitivePeerDependencies:
       - zod
 
@@ -1918,7 +1917,7 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
-  ts-node@10.9.2(@types/node@20.19.0)(typescript@5.8.2):
+  ts-node@10.9.2(@types/node@20.19.0)(typescript@5.8.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
@@ -1932,7 +1931,7 @@ snapshots:
       create-require: 1.1.1
       diff: 4.0.2
       make-error: 1.3.6
-      typescript: 5.8.2
+      typescript: 5.8.3
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
 
@@ -1967,7 +1966,7 @@ snapshots:
 
   typescript@4.9.5: {}
 
-  typescript@5.8.2: {}
+  typescript@5.8.3: {}
 
   underscore@1.13.7: {}
 
@@ -1991,18 +1990,18 @@ snapshots:
 
   validator@13.12.0: {}
 
-  viem@2.31.0(typescript@5.8.2)(zod@3.24.2):
+  viem@2.31.0(typescript@5.8.3)(zod@3.24.2):
     dependencies:
       '@noble/curves': 1.9.1
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
       '@scure/bip39': 1.6.0
-      abitype: 1.0.8(typescript@5.8.2)(zod@3.24.2)
+      abitype: 1.0.8(typescript@5.8.3)(zod@3.24.2)
       isows: 1.0.7(ws@8.18.2)
-      ox: 0.7.1(typescript@5.8.2)(zod@3.24.2)
+      ox: 0.7.1(typescript@5.8.3)(zod@3.24.2)
       ws: 8.18.2
     optionalDependencies:
-      typescript: 5.8.2
+      typescript: 5.8.3
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
