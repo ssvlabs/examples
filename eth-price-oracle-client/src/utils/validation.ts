@@ -9,4 +9,4 @@ export function getBappAddress(): `0x${string}` {
     throw new Error('BAPP_ADDRESS is not a valid Ethereum address');
   }
   return address as `0x${string}`;
-} 
+}
