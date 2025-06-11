@@ -83,16 +83,14 @@ export async function voteOnTask(
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     // Read all votes from the log file
-    const updatedContent = fs.readFileSync(logFile, 'utf8');
-    const voteMatches = Array.from(
-      updatedContent.matchAll(new RegExp(`VOTE\\|${task.id}\\|S\\d+\\|(\\d+)\\|(\\d+)`, 'g'))
-    );
-    const totalWeight = voteMatches.reduce(
-      (sum: number, match: RegExpMatchArray) => sum + parseInt(match[1], 10),
-      0
-    );
+    const allVotes = readVotesFromLog(task.id);
+    let totalWeight = 0;
+    allVotes.forEach((weight) => {
+      totalWeight += weight;
+    });
 
     // Check if task was completed while we were calculating
+    const updatedContent = fs.readFileSync(logFile, 'utf8');
     if (
       updatedContent.includes(`TASK_COMPLETE|${task.id}`) ||
       updatedContent.includes(`TASK_EXPIRED|${task.id}`)
@@ -102,7 +100,6 @@ export async function voteOnTask(
 
     // Display all votes in console (instance-specific)
     console.log('\nCurrent votes for this task:');
-    const allVotes = readVotesFromLog(task.id);
     allVotes.forEach((percentage, strategyId) => {
       console.log(`Strategy ${strategyId}: ${percentage.toFixed(1)}%`);
     });

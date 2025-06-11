@@ -1,10 +1,9 @@
 import { publicClient } from '../sdk-weights/client';
 import { writeToClient } from '../utils/logger';
-import { DIVIDER } from '../config/constants';
+import { DIVIDER, CONTRACT_ADDRESS } from '../config/constants';
 import { createTaskFromEvent } from '../tasks/taskManager';
 import { voteOnTask } from '../voting/voteManager';
-
-const CONTRACT_ADDRESS = '0xBb00B761d0670f09d80fe176a2b0fB33e91fbCe9';
+import { Address } from 'viem';
 
 const NEW_TASK_CREATED_EVENT = {
   type: 'event',
@@ -33,7 +32,7 @@ export async function startEventListener() {
 
     // use viem to listen for event
     const unwatch = publicClient.watchEvent({
-      address: CONTRACT_ADDRESS,
+      address: CONTRACT_ADDRESS as Address,
       event: NEW_TASK_CREATED_EVENT,
       onLogs: (logs) => {
         logs.forEach((log) => {
