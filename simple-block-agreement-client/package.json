@@ -14,7 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "@ssv-labs/bapps-sdk": "0.0.10",
-    "viem": "2.7.9"
+    "viem": "2.31.0"
   },
   "devDependencies": {
     "@types/node": "^20.19.0",
