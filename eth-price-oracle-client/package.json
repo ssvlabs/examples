@@ -20,7 +20,7 @@
     "viem": "^2.7.9"
   },
   "devDependencies": {
-    "@types/node": "20.19.0",
+    "@types/node": "22.15.31",
     "ts-node": "10.9.2",
     "typescript": "5.8.3"
   }
