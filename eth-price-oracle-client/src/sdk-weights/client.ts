@@ -39,6 +39,7 @@ export function initializeSDK(privateKey: string) {
     transport,
   });
 
+  // Use type assertion to tell TypeScript that we know what we're doing
   sdk = new BasedAppsSDK({
     beaconchainUrl: BEACON_CHAIN_URL,
     publicClient,
@@ -46,7 +47,7 @@ export function initializeSDK(privateKey: string) {
     _: {
       subgraphUrl: SUBGRAPH_URL,
     },
-  });
+  } as any);
 
   return { account, walletClient, sdk };
 }
@@ -60,7 +61,7 @@ export async function calculateParticipantsWeightSDK(
 ): Promise<Map<string, number>> {
   try {
     const strategyTokenWeights = await sdk.api.getParticipantWeights({
-      bAppId: BAPP_ID,
+      bAppId: BAPP_ID as `0x${string}`,
     });
 
     const weightCalculationOptions = {
