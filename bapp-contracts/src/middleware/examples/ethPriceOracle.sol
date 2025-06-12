@@ -55,9 +55,9 @@ contract EthPriceOracle is OwnableBasedApp {
 
         // store hash of task on-chain, emit event, and increase taskNum
         allTaskHashes[nextTaskNumber] = taskHash;
-        emit NewTaskCreated(nextTaskNumber, taskHash);
         latestTaskNum = nextTaskNumber;
         nextTaskNumber = nextTaskNumber + 1;
+        emit NewTaskCreated(latestTaskNum, taskHash);
 
         return taskHash;
     }
