@@ -1,5 +1,7 @@
 {
   "extends": [
     "github>ssvlabs/shared-configs//renovate/renovate.json"
-  ]
+  ],
+  "schedule": ["on Friday at 10:00"],
+  "timezone": "UTC"
 }
