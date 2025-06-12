@@ -1,1 +1,217 @@
-[{"inputs":[{"internalType":"address","name":"_ssvBasedApps","type":"address"},{"internalType":"address","name":"_initOwner","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[],"name":"AlreadyResponded","type":"error"},{"inputs":[],"name":"ECDSAInvalidSignature","type":"error"},{"inputs":[{"internalType":"uint256","name":"length","type":"uint256"}],"name":"ECDSAInvalidSignatureLength","type":"error"},{"inputs":[{"internalType":"bytes32","name":"s","type":"bytes32"}],"name":"ECDSAInvalidSignatureS","type":"error"},{"inputs":[],"name":"InvalidPrice","type":"error"},{"inputs":[],"name":"InvalidSignature","type":"error"},{"inputs":[],"name":"InvalidSigner","type":"error"},{"inputs":[],"name":"NotOptedIn","type":"error"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"OwnableInvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"OwnableUnauthorizedAccount","type":"error"},{"inputs":[],"name":"TaskMismatch","type":"error"},{"inputs":[],"name":"UnauthorizedCaller","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint32","name":"taskIndex","type":"uint32"},{"indexed":false,"internalType":"bytes32","name":"taskHash","type":"bytes32"}],"name":"NewTaskCreated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint32","name":"taskIndex","type":"uint32"},{"indexed":false,"internalType":"bytes32","name":"taskHash","type":"bytes32"},{"indexed":false,"internalType":"address","name":"responder","type":"address"},{"indexed":false,"internalType":"uint256","name":"ethPrice","type":"uint256"}],"name":"TaskResponded","type":"event"},{"inputs":[],"name":"SSV_BASED_APPS_NETWORK","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"","type":"uint32"}],"name":"allTaskHashes","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"uint32","name":"","type":"uint32"}],"name":"allTaskResponses","outputs":[{"internalType":"bytes","name":"","type":"bytes"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"createNewTask","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"latestTaskNum","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"","type":"uint32"},{"internalType":"address[]","name":"","type":"address[]"},{"internalType":"uint32[]","name":"","type":"uint32[]"},{"internalType":"bytes","name":"","type":"bytes"}],"name":"optInToBApp","outputs":[{"internalType":"bool","name":"success","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"tokens","type":"address[]"},{"internalType":"uint32[]","name":"sharedRiskLevels","type":"uint32[]"},{"internalType":"string","name":"metadataURI","type":"string"}],"name":"registerBApp","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes32","name":"taskHash","type":"bytes32"},{"internalType":"uint32","name":"taskNumber","type":"uint32"},{"internalType":"uint256","name":"ethPrice","type":"uint256"},{"internalType":"bytes[]","name":"signatures","type":"bytes[]"},{"internalType":"address[]","name":"signers","type":"address[]"}],"name":"respondToTask","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint32","name":"","type":"uint32"},{"internalType":"address","name":"","type":"address"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"bytes","name":"","type":"bytes"}],"name":"slash","outputs":[{"internalType":"bool","name":"","type":"bool"},{"internalType":"address","name":"","type":"address"},{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"ssvBasedApps","outputs":[{"internalType":"contract ISSVBasedApps","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"isSupported","type":"bool"}],"stateMutability":"pure","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"metadataURI","type":"string"}],"name":"updateBAppMetadataURI","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"withdrawETHSlashingFund","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"withdrawSlashingFund","outputs":[],"stateMutability":"nonpayable","type":"function"},{"stateMutability":"payable","type":"receive"}]
+[
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_ssvBasedApps", "type": "address" },
+      { "internalType": "address", "name": "_initOwner", "type": "address" }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  { "inputs": [], "name": "AlreadyResponded", "type": "error" },
+  { "inputs": [], "name": "ECDSAInvalidSignature", "type": "error" },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "length", "type": "uint256" }],
+    "name": "ECDSAInvalidSignatureLength",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "bytes32", "name": "s", "type": "bytes32" }],
+    "name": "ECDSAInvalidSignatureS",
+    "type": "error"
+  },
+  { "inputs": [], "name": "InvalidPrice", "type": "error" },
+  { "inputs": [], "name": "InvalidSignature", "type": "error" },
+  { "inputs": [], "name": "InvalidSigner", "type": "error" },
+  { "inputs": [], "name": "NotOptedIn", "type": "error" },
+  {
+    "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }],
+    "name": "OwnableInvalidOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "account", "type": "address" }],
+    "name": "OwnableUnauthorizedAccount",
+    "type": "error"
+  },
+  { "inputs": [], "name": "TaskMismatch", "type": "error" },
+  { "inputs": [], "name": "UnauthorizedCaller", "type": "error" },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint32", "name": "taskIndex", "type": "uint32" },
+      { "indexed": false, "internalType": "bytes32", "name": "taskHash", "type": "bytes32" }
+    ],
+    "name": "NewTaskCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint32", "name": "taskIndex", "type": "uint32" },
+      { "indexed": false, "internalType": "bytes32", "name": "taskHash", "type": "bytes32" },
+      { "indexed": false, "internalType": "address", "name": "responder", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "ethPrice", "type": "uint256" }
+    ],
+    "name": "TaskResponded",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "SSV_BASED_APPS_NETWORK",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint32", "name": "", "type": "uint32" }],
+    "name": "allTaskHashes",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "", "type": "address" },
+      { "internalType": "uint32", "name": "", "type": "uint32" }
+    ],
+    "name": "allTaskResponses",
+    "outputs": [{ "internalType": "bytes", "name": "", "type": "bytes" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "createNewTask",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "latestTaskNum",
+    "outputs": [{ "internalType": "uint32", "name": "", "type": "uint32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint32", "name": "", "type": "uint32" },
+      { "internalType": "address[]", "name": "", "type": "address[]" },
+      { "internalType": "uint32[]", "name": "", "type": "uint32[]" },
+      { "internalType": "bytes", "name": "", "type": "bytes" }
+    ],
+    "name": "optInToBApp",
+    "outputs": [{ "internalType": "bool", "name": "success", "type": "bool" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address[]", "name": "tokens", "type": "address[]" },
+      { "internalType": "uint32[]", "name": "sharedRiskLevels", "type": "uint32[]" },
+      { "internalType": "string", "name": "metadataURI", "type": "string" }
+    ],
+    "name": "registerBApp",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "taskHash", "type": "bytes32" },
+      { "internalType": "uint32", "name": "taskNumber", "type": "uint32" },
+      { "internalType": "uint256", "name": "ethPrice", "type": "uint256" },
+      { "internalType": "bytes[]", "name": "signatures", "type": "bytes[]" },
+      { "internalType": "address[]", "name": "signers", "type": "address[]" }
+    ],
+    "name": "respondToTask",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint32", "name": "", "type": "uint32" },
+      { "internalType": "address", "name": "", "type": "address" },
+      { "internalType": "uint256", "name": "", "type": "uint256" },
+      { "internalType": "bytes", "name": "", "type": "bytes" }
+    ],
+    "name": "slash",
+    "outputs": [
+      { "internalType": "bool", "name": "", "type": "bool" },
+      { "internalType": "address", "name": "", "type": "address" },
+      { "internalType": "bool", "name": "", "type": "bool" }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "ssvBasedApps",
+    "outputs": [{ "internalType": "contract ISSVBasedApps", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "bytes4", "name": "interfaceId", "type": "bytes4" }],
+    "name": "supportsInterface",
+    "outputs": [{ "internalType": "bool", "name": "isSupported", "type": "bool" }],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "string", "name": "metadataURI", "type": "string" }],
+    "name": "updateBAppMetadataURI",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }],
+    "name": "withdrawETHSlashingFund",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "token", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+    ],
+    "name": "withdrawSlashingFund",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  { "stateMutability": "payable", "type": "receive" }
+]

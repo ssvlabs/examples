@@ -2,6 +2,8 @@ import * as fs from 'fs';
 import { Task } from '../config/types';
 import { calculateParticipantsWeightSDK, account } from '../sdk-weights/client';
 import { submitTaskResponse } from '../tasks/submitTask';
+import { signTaskResponse } from '../utils/signing';
+import { fetchSlot } from '../utils/slot';
 
 const logFile: string = 'client.log';
 
@@ -11,7 +13,8 @@ async function writeToSharedLog(message: string): Promise<void> {
     message.startsWith('VOTE|') ||
     message.startsWith('TASK_COMPLETE|') ||
     message.startsWith('TASK_SUBMITTED|') ||
-    message.startsWith('TASK_EXPIRED|')
+    message.startsWith('TASK_EXPIRED|') ||
+    message.startsWith('SIGNATURE|')
   ) {
     fs.appendFileSync(logFile, `${message}\n`);
   }
@@ -50,48 +53,60 @@ export async function voteOnTask(
       content.includes(`TASK_COMPLETE|${task.id}`) ||
       content.includes(`TASK_EXPIRED|${task.id}`)
     ) {
-      console.log(`Task [${task.id}] is no longer active`);
+      await writeToSharedLog(`Task [${task.id}] is no longer active`);
       return;
     }
 
+    // Get current slot number
+    const currentSlot = await fetchSlot();
+    await writeToSharedLog(`Current slot number: [${currentSlot}]`);
+
     // Calculate strategy weights from SDK
     const weights = await calculateParticipantsWeightSDK(strategy, calculationType, verboseMode);
-
-    // Get the weight for this strategy
     const strategyWeight = weights.get(strategy) || 0;
+    const currentStrategyWeight = Math.floor(strategyWeight * 100);
 
-    // Calculate total weight of ALL strategies (not just this one)
+    // Sign the task response if we have an ETH price
+    if (task.ethPrice) {
+      const signature = await signTaskResponse(task.taskNumber, task.ethPrice);
+      // Save signature and signer to log file
+      await writeToSharedLog(`SIGNATURE|${task.id}|${strategy}|${signature}|${account.address}`);
+    }
+
+    await writeToSharedLog(`Strategy ${strategy} submitting vote for task [${task.id}]`);
+    await writeToSharedLog(`VOTE|${task.id}|S${strategy}|${currentStrategyWeight}|${currentSlot}`);
+    await writeToSharedLog(
+      `Strategy ${strategy} submitted vote: ${currentStrategyWeight}% for slot [${currentSlot}]`
+    );
+
+    // Wait briefly to allow other votes to be recorded
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // Read all votes from the log file
+    const allVotes = readVotesFromLog(task.id);
     let totalWeight = 0;
-    weights.forEach((weight) => {
+    allVotes.forEach((weight) => {
       totalWeight += weight;
     });
 
-    // Calculate percentage for this strategy based on SDK weights
-    // This will be 33% for S19 and 66% for S25
-    const strategyPercentage = (strategyWeight / totalWeight) * 100;
-    const formattedPercentage = strategyPercentage.toFixed(1);
-
-    // Write vote to shared log file (this will be read by all instances)
-    await writeToSharedLog(`VOTE|${task.id}|S${strategy}|${formattedPercentage}`);
-
-    // Read all votes from log file for this task (including our just-written vote)
-    const allVotes = readVotesFromLog(task.id);
-
-    // Calculate total percentage from all votes
-    let totalPercentage = 0;
-    allVotes.forEach((percentage) => {
-      totalPercentage += percentage;
-    });
+    // Check if task was completed while we were calculating
+    const updatedContent = fs.readFileSync(logFile, 'utf8');
+    if (
+      updatedContent.includes(`TASK_COMPLETE|${task.id}`) ||
+      updatedContent.includes(`TASK_EXPIRED|${task.id}`)
+    ) {
+      return;
+    }
 
     // Display all votes in console (instance-specific)
     console.log('\nCurrent votes for this task:');
     allVotes.forEach((percentage, strategyId) => {
       console.log(`Strategy ${strategyId}: ${percentage.toFixed(1)}%`);
     });
-    console.log(`Total: ${totalPercentage.toFixed(1)}%\n`);
+    console.log(`Total: ${totalWeight.toFixed(1)}%\n`);
 
     // Check if we have a majority (more than 50% of total weight)
-    if (totalPercentage > 50) {
+    if (totalWeight > 50) {
       // Check if this task has already been completed
       if (content.includes(`TASK_COMPLETE|${task.id}`)) {
         console.log(`Task [${task.id}] has already been completed`);
@@ -108,23 +123,41 @@ export async function voteOnTask(
         const strategyId = parseInt(strategy.replace('S', ''));
         console.log(`\nMajority reached! Strategy ${strategyId} will send the transaction.\n`);
 
-        // Get all signatures and signers from votes
+        // Get all signatures and signers from the log file
         const signatures: string[] = [];
         const signers: string[] = [];
+        const strategyIds: number[] = [];
 
-        // Use the account's address derived from the private key
-        if (task.signature) {
-          signatures.push(task.signature);
-          signers.push(account.address);
+        // Read all signature entries from the log file
+        const content = fs.readFileSync(logFile, 'utf8');
+        const lines = content.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('SIGNATURE|')) {
+            const [, taskId, strategyStr, signature, signer] = line.split('|');
+            if (taskId === task.id) {
+              const sigStrategyId = parseInt(strategyStr.replace('S', ''));
+              signatures.push(signature);
+              signers.push(signer);
+              strategyIds.push(sigStrategyId);
+            }
+          }
         }
 
-        // Submit the task response on-chain
+        console.log(`Found ${signatures.length} signatures for task ${task.id}`);
+        signatures.forEach((sig, i) => {
+          console.log(`Signature ${i + 1}: ${sig}`);
+          console.log(`Signer ${i + 1}: ${signers[i]}`);
+          console.log(`Strategy ID ${i + 1}: ${strategyIds[i]}`);
+        });
+
+        // Submit the task response on-chain with all signatures and signers
         const txHash = await submitTaskResponse(
           task,
           task.taskNumber,
           signatures,
           signers,
-          strategyId
+          strategyIds
         );
 
         // Write transaction submission to shared log file
@@ -138,7 +171,7 @@ export async function voteOnTask(
         console.log(`\nMajority reached! Strategy ${lastStrategyId} will send the transaction.\n`);
       }
     } else {
-      console.log(`\nWaiting for more votes... (Current total: ${totalPercentage.toFixed(1)}%)\n`);
+      console.log(`\nWaiting for more votes... (Current total: ${totalWeight.toFixed(1)}%)\n`);
     }
   } catch (error) {
     console.error(`Error voting on task: ${error}`);
