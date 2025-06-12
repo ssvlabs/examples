@@ -42,7 +42,7 @@ const respondToTaskABI = [
       { internalType: 'uint256', name: 'ethPrice', type: 'uint256' },
       { internalType: 'bytes[]', name: 'signatures', type: 'bytes[]' },
       { internalType: 'address[]', name: 'signers', type: 'address[]' },
-      { internalType: 'uint32', name: 'strategyId', type: 'uint32' },
+      { internalType: 'uint32[]', name: 'strategyIds', type: 'uint32[]' },
     ],
     name: 'respondToTask',
     outputs: [],
@@ -56,7 +56,7 @@ export async function submitTaskResponse(
   taskNumber: number,
   signatures: string[],
   signers: string[],
-  strategyId: number
+  strategyIds: number[]
 ): Promise<string> {
   try {
     if (!task.ethPrice) {
@@ -68,18 +68,20 @@ export async function submitTaskResponse(
       throw new Error(`Task number ${taskNumber} is not in valid uint32 range (0 to 4294967295)`);
     }
 
-    // Ensure strategyId is a valid uint32
-    if (strategyId < 0 || strategyId > 4294967295) {
-      throw new Error(`Strategy ID ${strategyId} is not in valid uint32 range (0 to 4294967295)`);
+    // Ensure all strategy IDs are valid uint32
+    for (const id of strategyIds) {
+      if (id < 0 || id > 4294967295) {
+        throw new Error(`Strategy ID ${id} is not in valid uint32 range (0 to 4294967295)`);
+      }
     }
 
     // Write transaction details to log file
     await writeToSharedLog(`${DIVIDER}`);
-    await writeToSharedLog(`TRANSACTION_START|${task.id}|${strategyId}`);
+    await writeToSharedLog(`TRANSACTION_START|${task.id}|${strategyIds[0]}`);
     await writeToSharedLog(`Task Number: ${taskNumber}`);
     await writeToSharedLog(`ETH Price: $${task.ethPrice}`);
     await writeToSharedLog(`Number of Signatures: ${signatures.length}`);
-    await writeToSharedLog(`Strategy ID: ${strategyId}`);
+    await writeToSharedLog(`Strategy IDs: ${strategyIds.join(', ')}`);
 
     // Prepare the transaction
     const { request } = await publicClient.simulateContract({
@@ -92,7 +94,7 @@ export async function submitTaskResponse(
         BigInt(task.ethPrice),
         signatures as `0x${string}`[],
         signers as `0x${string}`[],
-        strategyId,
+        strategyIds,
       ],
       account: walletClient.account,
     });

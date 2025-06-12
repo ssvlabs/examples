@@ -45,44 +45,49 @@ cd eth-price-oracle-client
 npm install
 ```
 
-4. Create a `.env` file in the root directory with your private key:
+4. Create a `.env` file in the root directory with your configuration:
 ```
-PRIVATE_KEY=your_private_key_here
+BAPP_ADDRESS="0xBb00B761d0670f09d80fe176a2b0fB33e91fbCe9"
+PRIVATE_KEY_1="0x00000000000000000000000000000000000000"
 ```
 
 ## Usage
 
-Run the client with default settings:
+Run the client with your private key and strategy. You can pass the private key in two ways:
+
+1. Directly in the command:
 ```bash
-npm run dev
+PRIVATE_KEY=your_private_key_here npm run dev -- --strategy 19 --calculation_type arithmetic
+```
+
+2. Using a variable from your .env file for each strategy(recommended):
+```bash
+PRIVATE_KEY=$PRIVATE_KEY_1 npm run dev -- --strategy 19 --calculation_type arithmetic
 ```
 
 Run with specific strategy and calculation type:
 ```bash
-npm run dev -- --strategy 19 --calculation_type arithmetic
+PRIVATE_KEY=$PRIVATE_KEY_1 npm run dev -- --strategy 19 --calculation_type geometric
 ```
 
 Enable verbose mode:
 ```bash
-npm run dev -- --verbose
+PRIVATE_KEY=$PRIVATE_KEY_1 npm run dev -- --strategy 19 --verbose
 ```
 
 ## Configuration
 
 The client supports the following command-line arguments:
 
-- `--strategy`: Specify the strategy number (default: "19")
+- `--strategy`: Specify the strategy number (required)
 - `--calculation_type`: Set the weight calculation type (arithmetic, geometric, or harmonic)
 - `--verbose`: Enable verbose logging
 
 ## Contract Address
 
-The client interacts with the ETH Price Oracle contract at:
-```
-0x2224E61A609E850E67bC73997c2d7633FC18238B
-```
+The client interacts with the ETH Price Oracle contract at the address specified in your `.env` file as `BAPP_ADDRESS`.
 
-When the client is running, a transaction must be signed on-chain to trigger the task being created, the client will listen for this, and process it, signing the response and sending it back to the bapp with the private key provided in the .env file.
+When the client is running, a transaction must be signed on-chain to trigger the task being created, the client will listen for this, and process it, signing the response and sending it back to the bapp with the private key provided in the environment variable.
 
 **Important**: The private key provided must be from the wallet that owns the strategy being used. The BApp contract will only accept signatures from strategy owners who have opted in to the system. If you're not the strategy owner or haven't opted in, the transactions will be rejected.
 
