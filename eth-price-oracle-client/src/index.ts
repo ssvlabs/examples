@@ -1,6 +1,10 @@
 console.log('ENTRY POINT REACHED: index.ts');
 import { run } from './core/client';
 import { initializeSDK } from './sdk-weights/client';
+import * as dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 async function main() {
   try {
@@ -11,21 +15,21 @@ async function main() {
     const strategyIndex = args.findIndex((arg) => arg === '--strategy');
     const calculationTypeIndex = args.findIndex((arg) => arg === '--calculation_type');
     const verboseIndex = args.findIndex((arg) => arg === '--verbose');
-    const privateKeyIndex = args.findIndex((arg) => arg === '--private_key');
 
     if (strategyIndex === -1) {
       throw new Error('--strategy argument is required');
-    }
-
-    if (privateKeyIndex === -1) {
-      throw new Error('--private_key argument is required');
     }
 
     const strategy = args[strategyIndex + 1];
     const calculationType =
       calculationTypeIndex !== -1 ? args[calculationTypeIndex + 1] : 'arithmetic';
     const verboseMode = verboseIndex !== -1;
-    const privateKey = args[privateKeyIndex + 1];
+
+    // Get private key from environment variable
+    const privateKey = process.env.PRIVATE_KEY;
+    if (!privateKey) {
+      throw new Error('PRIVATE_KEY environment variable is not set');
+    }
 
     console.log('Configuration:');
     console.log(`- Strategy: ${strategy}`);
@@ -42,4 +46,4 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+main();
