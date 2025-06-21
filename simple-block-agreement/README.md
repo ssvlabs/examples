@@ -18,10 +18,6 @@ This repository contains the core Based Applications Contracts, including UUPS u
 
 ## :page_with_curl: _Instructions for Operator_
 
-**0)** Install a command line tool to load your env automatically, like:
-
-__`❍ brew install autoenv`__
-
 **1)** Fire up your favorite console & clone this repo somewhere:
 
 __`❍ git clone https://github.com/ssvlabs/examples.git`__
@@ -38,9 +34,9 @@ __`❍ npm install`__
 
 __`❍ cp .env.example .env`__
 
-**5)** Load the env:
+**5)** Load the env in your favorite way:
 
-__`❍ cd .`__
+__`❍ source .env`__
 
 **6)** Make sure env is loaded correctly:
 
